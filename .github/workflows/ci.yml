@@ -1,0 +1,377 @@
+name: CI Build
+
+permissions:
+  contents: write
+  actions: read
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'Makefile'
+      - 'ci/**'
+      - '!ci/docker/**'
+      - 'firmware/**'
+      - 'plugins/**'
+      - 'rust/**'
+      - 'old-config/**'
+      - 'onerom-config/**'
+      - '.github/**'
+      - '!.github/workflows/release.yml'
+      - '!**.md'
+      - '!docs/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'Makefile'
+      - 'ci/**'
+      - '!ci/docker/**'
+      - 'firmware/**'
+      - 'plugins/**'
+      - 'rust/**'
+      - 'old-config/**'
+      - 'onerom-config/**'
+      - '.github/**'
+      - '!.github/workflows/release.yml'
+      - '!**.md'
+      - '!docs/**'
+
+# The work is split across jobs rather than run as one sequence.  Each job gets
+# its own runner and, more to the point, its own 6 hour timeout: as one job the
+# suite reached 5h49m and was being cancelled outright.
+#
+# Every job installs the Arm GNU toolchain pinned in ci/arm-toolchain-version -
+# the same one the build container and a developer's machine install - so the
+# firmware is always compiled by the same compiler wherever it is built.  It is
+# installed everywhere rather than only where it looks needed: the CLI's
+# integration tests build real firmware, which is not obvious from the job name.
+#
+# libclang-dev is installed everywhere for the same reason: onerom-fw-emulator's
+# build script runs bindgen over the firmware headers, and three crates depend on
+# it (onerom-fw-tester, onerom-plugin-tester, onerom-lens), so which jobs pull it
+# in is not apparent from the job names either.  It is named explicitly rather
+# than relied on: the GitHub runner image happens to ship libclang, leaner
+# self-hosted runners do not, and there the bindgen build script panics.
+#
+# xz-utils and python3 are named for that same reason - both are present on the
+# GitHub image and may not be on a self-hosted one.  ci/install-arm-toolchain.sh
+# unpacks a .tar.xz, so every job needs xz-utils; only the two jobs that install
+# the Emscripten SDK need python3, which emsdk itself runs on.
+
+jobs:
+  lint:
+    name: Lint (rustfmt + clippy)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libclang-dev libcurl4-openssl-dev libjson-c-dev \
+                                libzip-dev make xz-utils python3 \
+                                libudev-dev libusb-1.0-0-dev
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+
+    - name: Cache Arm GNU toolchain
+      uses: actions/cache@v4
+      with:
+        path: ~/arm-gnu-toolchain
+        key: arm-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/arm-toolchain-version') }}
+
+    - name: Install Arm GNU toolchain
+      run: echo "TOOLCHAIN=$(ci/install-arm-toolchain.sh)" >> "$GITHUB_ENV"
+
+    - name: Cache Emscripten SDK
+      uses: actions/cache@v4
+      with:
+        path: ~/emsdk
+        key: emsdk-${{ runner.os }}-${{ hashFiles('ci/install-emscripten.sh', 'ci/emscripten-version') }}
+
+    - name: Install Emscripten (for One ROM Lens)
+      run: |
+        ci/install-emscripten.sh "$HOME/emsdk"
+        source "$HOME/emsdk/emsdk_env.sh"
+        # Record the version in the log.  An emscripten release has broken this
+        # build before (6.0.6), and working out which version a past run used
+        # meant inferring it from release timestamps.
+        emcc --version | head -1
+        # Persist emcc/emar (and EMSDK) for subsequent steps.
+        echo "PATH=$PATH" >> "$GITHUB_ENV"
+        echo "EMSDK=$EMSDK" >> "$GITHUB_ENV"
+
+    - name: Install wasm target
+      run: rustup target add wasm32-unknown-emscripten
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: rust
+
+    - name: Run Rust lint (rustfmt + clippy)
+      run: ci/rust-lint.sh
+
+  rust-tests:
+    name: Rust tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libclang-dev libcurl4-openssl-dev libjson-c-dev \
+                                libzip-dev make xz-utils
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Arm GNU toolchain
+      uses: actions/cache@v4
+      with:
+        path: ~/arm-gnu-toolchain
+        key: arm-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/arm-toolchain-version') }}
+
+    - name: Install Arm GNU toolchain
+      run: echo "TOOLCHAIN=$(ci/install-arm-toolchain.sh)" >> "$GITHUB_ENV"
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: rust
+
+    - name: Run various Rust tests
+      run: ci/rust-tests.sh
+
+  rust-docs:
+    name: Rust docs
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libclang-dev libcurl4-openssl-dev libjson-c-dev \
+                                libzip-dev make xz-utils
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Arm GNU toolchain
+      uses: actions/cache@v4
+      with:
+        path: ~/arm-gnu-toolchain
+        key: arm-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/arm-toolchain-version') }}
+
+    - name: Install Arm GNU toolchain
+      run: echo "TOOLCHAIN=$(ci/install-arm-toolchain.sh)" >> "$GITHUB_ENV"
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: rust
+
+    - name: Build Rust docs
+      run: ci/rust-docs.sh
+
+  emulator-tests:
+    # One job per socket size.  The four are independent - every test in a group
+    # targets boards of that one size - and the 24 pin group is much the largest,
+    # so splitting this way puts the long pole on its own runner.
+    name: Emulator tests (${{ matrix.socket }} pin)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        socket: [24, 28, 32, 40]
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libclang-dev libcurl4-openssl-dev libjson-c-dev \
+                                libzip-dev make xz-utils
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Arm GNU toolchain
+      uses: actions/cache@v4
+      with:
+        path: ~/arm-gnu-toolchain
+        key: arm-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/arm-toolchain-version') }}
+
+    - name: Install Arm GNU toolchain
+      run: echo "TOOLCHAIN=$(ci/install-arm-toolchain.sh)" >> "$GITHUB_ENV"
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: rust
+        # All four sockets build the same dependency graph, so they share one
+        # cache entry rather than populating four near-identical ones.
+        shared-key: emulator-tests
+
+    - name: Run One ROM emulator tests
+      run: ci/test-emu.sh ${{ matrix.socket }}
+
+  firmware:
+    name: Firmware and plugins
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libclang-dev libcurl4-openssl-dev libjson-c-dev \
+                                libzip-dev make xz-utils
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Arm GNU toolchain
+      uses: actions/cache@v4
+      with:
+        path: ~/arm-gnu-toolchain
+        key: arm-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/arm-toolchain-version') }}
+
+    - name: Install Arm GNU toolchain
+      run: echo "TOOLCHAIN=$(ci/install-arm-toolchain.sh)" >> "$GITHUB_ENV"
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: rust
+
+    - name: Build firmware
+      run: ci/build.sh ci
+
+    - name: Build plugins
+      run: |
+        make clean
+        make
+        make -C plugins/system/usb
+        make -C plugins/user/activity
+        make -C plugins/user/blink
+        make -C plugins/user/host-control
+        make -C plugins/user/rgb
+        make -C firmware/ora/examples
+
+  tools:
+    name: Tools (One ROM Lab)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libclang-dev libcurl4-openssl-dev libjson-c-dev \
+                                libzip-dev make xz-utils
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Arm GNU toolchain
+      uses: actions/cache@v4
+      with:
+        path: ~/arm-gnu-toolchain
+        key: arm-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/arm-toolchain-version') }}
+
+    - name: Install Arm GNU toolchain
+      run: echo "TOOLCHAIN=$(ci/install-arm-toolchain.sh)" >> "$GITHUB_ENV"
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: rust
+
+    - name: Build tools
+      run: ci/rust-tools.sh
+
+  binaries:
+    # The CLI and Studio binaries, built for the host.  Studio also needs
+    # libudev/libusb; its file dialogs use the XDG portal, so no GTK.
+    name: Binaries (CLI and Studio)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libclang-dev libcurl4-openssl-dev libjson-c-dev \
+                                libzip-dev make xz-utils \
+                                libudev-dev libusb-1.0-0-dev
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Arm GNU toolchain
+      uses: actions/cache@v4
+      with:
+        path: ~/arm-gnu-toolchain
+        key: arm-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/arm-toolchain-version') }}
+
+    - name: Install Arm GNU toolchain
+      run: echo "TOOLCHAIN=$(ci/install-arm-toolchain.sh)" >> "$GITHUB_ENV"
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: rust
+
+    - name: Build CLI and Studio
+      run: ci/rust-binaries.sh
+
+  lens:
+    name: One ROM Lens (wasm)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libclang-dev libcurl4-openssl-dev libjson-c-dev \
+                                libzip-dev make xz-utils python3
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Arm GNU toolchain
+      uses: actions/cache@v4
+      with:
+        path: ~/arm-gnu-toolchain
+        key: arm-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/arm-toolchain-version') }}
+
+    - name: Install Arm GNU toolchain
+      run: echo "TOOLCHAIN=$(ci/install-arm-toolchain.sh)" >> "$GITHUB_ENV"
+
+    - name: Cache Emscripten SDK
+      uses: actions/cache@v4
+      with:
+        path: ~/emsdk
+        key: emsdk-${{ runner.os }}-${{ hashFiles('ci/install-emscripten.sh', 'ci/emscripten-version') }}
+
+    - name: Install Emscripten (for One ROM Lens)
+      run: |
+        ci/install-emscripten.sh "$HOME/emsdk"
+        source "$HOME/emsdk/emsdk_env.sh"
+        # Record the version in the log.  An emscripten release has broken this
+        # build before (6.0.6), and working out which version a past run used
+        # meant inferring it from release timestamps.
+        emcc --version | head -1
+        # Persist emcc/emar (and EMSDK) for subsequent steps.
+        echo "PATH=$PATH" >> "$GITHUB_ENV"
+        echo "EMSDK=$EMSDK" >> "$GITHUB_ENV"
+
+    - name: Install wasm target
+      run: rustup target add wasm32-unknown-emscripten
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: rust
+
+    - name: Build One ROM Lens (wasm)
+      run: ci/build-lens.sh

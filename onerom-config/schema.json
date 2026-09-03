@@ -1,0 +1,906 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "One ROM Configuration",
+    "description": "One ROM chip configuration format.\n\nUsed to indicate:\n- What ROM chips, RAM chips and any other devices to emulate\n- What ROM images to include\n- Any overrides for the firmware build-time setting",
+    "type": "object",
+    "properties": {
+        "boot_logging": {
+            "description": "Whether to enable boot logging.  Logging is emitted over RTT, so a\ndebug probe must be attached to see it.  Compatible with\nswd_enabled = false, as SWD stays up for the whole of boot.",
+            "type": "boolean",
+            "default": false
+        },
+        "categories": {
+            "description": "Optional categories for this configuration, to aid in grouping,\nsorting, and searching of configurations.",
+            "type": [
+                "array",
+                "null"
+            ],
+            "items": {
+                "type": "string"
+            }
+        },
+        "chip_sets": {
+            "description": "Array of chip set configurations.  Note that even if not using complex\nfeatures like dynamic banking and multi-ROM sets, each ROM image, or\nother chip types is in its own set.\n\nThe builder description output lists either \"Images\" or \"Sets\"\ndepending on whether there are any multi-set or banked sets in use.",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/ChipSetConfig"
+            }
+        },
+        "description": {
+            "description": "Mandatory description for this configuration.  This is included in the\ndescription output by the builder, following the name.",
+            "type": "string"
+        },
+        "detail": {
+            "description": "Optional detailed description for this configuration.  This is included\nin the description output by the builder, following name and\ndescription.",
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "instance_name": {
+            "description": "Optional name for this One ROM instance",
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "name": {
+            "description": "Optional name for this configuration.  Is included in the description\noutput by the builder.",
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "notes": {
+            "description": "Optional notes for this configuration.  This is included in the\ndescription output by the builder, following the list of images/sets.",
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "serial_override": {
+            "description": "Optional serial number override for this One ROM, overriding the stock\nUSB serial number (which is the MCU's unique chip ID).",
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "swd_enabled": {
+            "description": "Whether to leave SWD enabled once the One ROM starts serving.\n\nWhen false, SWD is available for the whole of boot and is shut off\nimmediately before serving starts, staying off until the next reset.\nThis stops debug port accesses to SRAM stealing cycles from the\nserving DMAs.  Nothing is logged past that point, and plugins get no\nlogging.\n\nThis is not a debug lockout - the boot ROM runs before the One ROM\nfirmware does, and BOOTSEL/PICOBOOT are unaffected.",
+            "type": "boolean",
+            "default": true
+        },
+        "turbo_boot": {
+            "description": "Whether to boot fast.  Disables reading the image select jumpers.\nThe first non-plugin image is served.",
+            "type": "boolean",
+            "default": false
+        },
+        "version": {
+            "description": "Configuration format version.",
+            "const": 1
+        }
+    },
+    "required": [
+        "version",
+        "description",
+        "chip_sets"
+    ],
+    "$defs": {
+        "ChipConfig": {
+            "description": "Chip configuration structure",
+            "type": "object",
+            "properties": {
+                "allow_cs_ignore": {
+                    "description": "Explicitly permit CS/CE/OE lines to be set to Ignore outside the\ncontexts where this is implicitly allowed:\n  - V2 multi-ROM set chips[1+] (secondary sockets — free pass)\n  - Lines with allow_ignore in chip_types.json (datasheet-defined)\n\nRequired for chip0 in multi-ROM sets and for single-chip sets\nwhere a line needs ignoring for custom circuit reasons.\nMisuse can cause bus contention — only set when intentional.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "ce": {
+                    "description": "Optional Chip Enable logic override - only valid for chip types that\nhave a /CE control line.  In V2 multi-ROM sets, may be set to Ignore\nwhen /CE is tied active and /OE is the fly-leaded chip select, or vice\nversa.  Not valid for V1 configurations.",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/CsLogic"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "cs1": {
+                    "description": "Optional Chip Select 1 logic - only valid for Chip Types that have CS1",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/CsLogic"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "cs2": {
+                    "description": "Optional Chip Select 2 logic - only valid for Chip Types that have CS2",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/CsLogic"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "cs3": {
+                    "description": "Optional Chip Select 3 logic - only valid for Chip Types that have CS3",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/CsLogic"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "cs4": {
+                    "description": "Optional Chip Select 4 logic - only valid for Chip Types that have CS4",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/CsLogic"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "description": {
+                    "description": "Optional description for this configuration.  This is included in the\ndescription output by the builder.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "extract": {
+                    "description": "Optional extract path within an archive (zip/tar) if the file pointed\nto is an archive.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "file": {
+                    "description": "Filename or URL of any ROM image - filename is only valid if using a\ngenerator tool with local file access.  This is passed to the generator\ntool to retrieve the ROM image.",
+                    "type": "string",
+                    "default": ""
+                },
+                "format": {
+                    "description": "Format of the supplied ROM image.  Defaults to raw binary.  Set to\n`ihex` to have the generator decode an Intel HEX file into a binary\nimage before use.",
+                    "$ref": "#/$defs/FileFormat"
+                },
+                "label": {
+                    "description": "Optional label for this ROM image.  If specified, this is used in\nmetadata instead of the filename (which itself can be complex if\nextracting a file from an image and providing location information)",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "license": {
+                    "description": "Optional license URL/identifier for the ROM.  This is passed to the\ngenerator tool to retrieve and ask the user to accept before building.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "load_address": {
+                    "description": "For Intel HEX images ([`FileFormat::IntelHex`]), the absolute address\nthat maps to byte 0 of the ROM.  Record addresses below it are an\nerror; the highest address defines the image extent.  Accepts a decimal\nor a `0x`/`$`-prefixed hex value.  Must be 0 (unset) for binary images.\nDefaults to 0.",
+                    "$ref": "#/$defs/LoadAddress"
+                },
+                "location": {
+                    "description": "Optional location within a larger image file.  Used to specify start\noffset and length within the file.  Useful when multiple ROM images\nare concatenated into a single file and one needs to be extracted.",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/Location"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "oe": {
+                    "description": "Optional Output Enable logic override - only valid for chip types that\nhave an /OE control line.  Not valid for V1 configurations.",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/CsLogic"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "size_handling": {
+                    "description": "Optional size handling configuration for this Chip.  Used to specify\nhandling when the image supplied isn't the correct size for this Chip\ntype.",
+                    "$ref": "#/$defs/SizeHandling"
+                },
+                "transform": {
+                    "description": "Byte-level transformations to apply to the supplied image, in order.\n\nApplied after any [`Location`] slice and before the image is reconciled\nagainst the chip size by [`SizeHandling`], and after an Intel HEX image\nhas been decoded — so transforms behave the same whichever format the\nimage arrived in.  Order is significant; see the\n[`transform`] module.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/Transform"
+                    }
+                },
+                "type": {
+                    "description": "Type of ROM",
+                    "$ref": "#/$defs/ChipType"
+                }
+            },
+            "required": [
+                "type"
+            ]
+        },
+        "ChipSetConfig": {
+            "description": "Chip Set configuration structure",
+            "type": "object",
+            "properties": {
+                "chips": {
+                    "description": "Array of chip configurations in this set.  Contains 1 member for single\nchip sets, and multiple members for multi-ROM and banked ROM sets.\n\nFor multi-ROM sets, the array order determines X pin assignment:\n  chip0 — primary socket (One ROM physically installed here)\n  chip1 — X1 pin monitors this socket's chip select via fly-lead\n  chip2 — X2 pin monitors this socket's chip select via fly-lead\nMaximum 3 chips per multi-ROM set (primary + 2 X pins).",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/ChipConfig"
+                    }
+                },
+                "description": {
+                    "description": "Optional description for this chip set.  This is included in the\ndescription output by the builder.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "firmware_overrides": {
+                    "description": "Optional firmware overrides when serving this chip set.  Takes\nprecedence over any global configuration firmware overrides.",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/FirmwareConfig"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "serve_alg": {
+                    "description": "Optional serving algorithm override for this chip set.  Only valid\nwhen using CPU serving - Ice boards and Fire 24 A/B by default.",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/ServeAlg"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "type": {
+                    "description": "Type of ROM set",
+                    "$ref": "#/$defs/ChipSetType",
+                    "default": "single"
+                }
+            },
+            "required": [
+                "chips"
+            ]
+        },
+        "ChipSetType": {
+            "description": "Type of Chip set",
+            "oneOf": [
+                {
+                    "description": "Single Chip - the default",
+                    "type": "string",
+                    "const": "single"
+                },
+                {
+                    "description": "Set of dynamically banked Chips. Used to switch between active Chip at\nruntime using jumpers",
+                    "type": "string",
+                    "const": "banked"
+                },
+                {
+                    "description": "Set of multiple Chips selected by CS lines.  This allows a single One\nChip to serve up to 3 Chip sockets simultaneously.",
+                    "type": "string",
+                    "const": "multi"
+                }
+            ]
+        },
+        "ChipType": {
+            "description": "Chip type\n\nSupported retrochip types with their pinouts and characteristics.\nIncludes mask ROMs (23xx series), EPROMs (27xx series) and RAM chips.\n\n# Examples\n\n```\nuse onerom_config::chip::ChipType;\n\nlet chip = ChipType::Chip2364;\nassert_eq!(chip.size_bytes(), 8192);\nassert_eq!(chip.chip_pins(), 24);\nassert_eq!(chip.num_addr_lines(), 13);\n```",
+            "oneOf": [
+                {
+                    "description": "One ROM PIO Plugin - 65536 bytes, 0-pin package",
+                    "type": "string",
+                    "const": "pio_plugin"
+                },
+                {
+                    "description": "One ROM System Plugin - 65536 bytes, 0-pin package",
+                    "type": "string",
+                    "const": "system_plugin"
+                },
+                {
+                    "description": "One ROM User Plugin - 65536 bytes, 0-pin package",
+                    "type": "string",
+                    "const": "user_plugin"
+                },
+                {
+                    "description": "512B EPROM with multiple supply voltages - 512 bytes, 24-pin package",
+                    "type": "string",
+                    "const": "2704"
+                },
+                {
+                    "description": "512B bipolar PROM with three-state outputs and four fixed-polarity chip selects - 512 bytes, 24-pin package",
+                    "type": "string",
+                    "const": "HM7641"
+                },
+                {
+                    "description": "1KB EPROM with multiple supply voltages - 1024 bytes, 24-pin package",
+                    "type": "string",
+                    "const": "2708"
+                },
+                {
+                    "description": "2KB mask ROM with 3 configurable CS lines - 2048 bytes, 24-pin package",
+                    "type": "string",
+                    "const": "2316"
+                },
+                {
+                    "description": "2KB EPROM with fixed active-low CE/OE - 2048 bytes, 24-pin package",
+                    "type": "string",
+                    "const": "2716"
+                },
+                {
+                    "description": "2KB EEPROM with fixed active-low CE/OE - 2048 bytes, 24-pin package",
+                    "type": "string",
+                    "const": "28C16"
+                },
+                {
+                    "description": "2KB (2048 x 8-bit) Static RAM with fixed active-low CE/OE/WE - 2048 bytes, 24-pin package",
+                    "type": "string",
+                    "const": "6116"
+                },
+                {
+                    "description": "4KB mask ROM with 2 configurable CS lines - 4096 bytes, 24-pin package",
+                    "type": "string",
+                    "const": "2332"
+                },
+                {
+                    "description": "4KB EPROM with fixed active-low CE and shared OE/VPP - 4096 bytes, 24-pin package",
+                    "type": "string",
+                    "const": "2732"
+                },
+                {
+                    "description": "8KB mask ROM with 1 configurable CS line - 8192 bytes, 24-pin package",
+                    "type": "string",
+                    "const": "2364"
+                },
+                {
+                    "description": "8KB EPROM with fixed active-low CE/OE - 8192 bytes, 28-pin package",
+                    "type": "string",
+                    "const": "2764"
+                },
+                {
+                    "description": "8KB EEPROM with fixed active-low CE/OE - 8192 bytes, 28-pin package",
+                    "type": "string",
+                    "const": "28C64"
+                },
+                {
+                    "description": "16KB mask ROM with 3 configurable CS lines - 16384 bytes, 28-pin package",
+                    "type": "string",
+                    "const": "23128"
+                },
+                {
+                    "description": "16KB EPROM with fixed active-low CE/OE - 16384 bytes, 28-pin package",
+                    "type": "string",
+                    "const": "27128"
+                },
+                {
+                    "description": "32KB mask ROM with 2 configurable CS lines - 32768 bytes, 28-pin package",
+                    "type": "string",
+                    "const": "23256"
+                },
+                {
+                    "description": "32KB EPROM with fixed active-low CE/OE - 32768 bytes, 28-pin package",
+                    "type": "string",
+                    "const": "27256"
+                },
+                {
+                    "description": "32KB EEPROM with fixed active-low CE/OE - 32768 bytes, 28-pin package",
+                    "type": "string",
+                    "const": "28C256"
+                },
+                {
+                    "description": "32KB (32768 x 8-bit) Static RAM with fixed active-low CE/OE/WE - 32768 bytes, 28-pin package",
+                    "type": "string",
+                    "const": "62256"
+                },
+                {
+                    "description": "A composite ROM type, serving a combined 23256 and 23128 for the Sinclair QL, with a single configured CS line and is de-selected when A14 & A15 are both high - 49152 bytes, 28-pin package",
+                    "type": "string",
+                    "const": "23QL384"
+                },
+                {
+                    "description": "64KB mask ROM with 2 configurable CS lines - 65536 bytes, 28-pin package",
+                    "type": "string",
+                    "const": "23512"
+                },
+                {
+                    "description": "A composite ROM type, serving two combined 23256s for the Sinclair QL, with a single configured CS line at pin 22, and A15 at pin 20 instead of pin 1 - 65536 bytes, 28-pin package",
+                    "type": "string",
+                    "const": "23QL512"
+                },
+                {
+                    "description": "64KB EPROM with fixed active-low CE/OE - 65536 bytes, 28-pin package",
+                    "type": "string",
+                    "const": "27512"
+                },
+                {
+                    "description": "128KB mask ROM with 1 configurable CS line - 131072 bytes, 28-pin package",
+                    "type": "string",
+                    "const": "231024"
+                },
+                {
+                    "description": "64KB EEPROM with fixed active-low CE/OE - 65536 bytes, 32-pin package",
+                    "type": "string",
+                    "const": "28C512"
+                },
+                {
+                    "description": "128KB mask programmed ROM with fixed active-low CE/OE, plus 2 programmable CS lines - 131072 bytes, 32-pin package",
+                    "type": "string",
+                    "const": "23C1001"
+                },
+                {
+                    "description": "128KB mask ROM with fixed active-low CE/OE - 131072 bytes, 32-pin package",
+                    "type": "string",
+                    "const": "23C1010"
+                },
+                {
+                    "description": "128KB EPROM with fixed active-low CE/OE - 131072 bytes, 32-pin package",
+                    "type": "string",
+                    "const": "27C010"
+                },
+                {
+                    "description": "128KB EPROM with fixed active-low CE/OE - 131072 bytes, 32-pin package",
+                    "type": "string",
+                    "const": "27C301"
+                },
+                {
+                    "description": "256KB EPROM with fixed active-low CE/OE - 262144 bytes, 32-pin package",
+                    "type": "string",
+                    "const": "27C020"
+                },
+                {
+                    "description": "512KB EPROM with fixed active-low CE/OE - 524288 bytes, 32-pin package",
+                    "type": "string",
+                    "const": "27C040"
+                },
+                {
+                    "description": "512KB flash with fixed active-low CE/OE and different pinout to 27C040 - 524288 bytes, 32-pin package",
+                    "type": "string",
+                    "const": "SST39SF040"
+                },
+                {
+                    "description": "1MB EPROM with fixed active-low CE/OE - 1048576 bytes, 32-pin package",
+                    "type": "string",
+                    "const": "27C080"
+                },
+                {
+                    "description": "0.25MB mask programmed EPROM with fixed active-low CE/OE - 262144 bytes, 40-pin package",
+                    "type": "string",
+                    "const": "27C200"
+                },
+                {
+                    "description": "0.5MB EPROM with fixed active-low CE/OE - 524288 bytes, 40-pin package",
+                    "type": "string",
+                    "const": "27C400"
+                }
+            ]
+        },
+        "CsLogic": {
+            "description": "Possible Chip Select line logic options",
+            "oneOf": [
+                {
+                    "description": "Chip Select line is active low",
+                    "type": "string",
+                    "const": "active_low"
+                },
+                {
+                    "description": "Chip Select line is active high",
+                    "type": "string",
+                    "const": "active_high"
+                },
+                {
+                    "description": "Used for 2332/2316 ROMs, when a CS line isn't used because it's always\ntied active.",
+                    "type": "string",
+                    "const": "ignore"
+                }
+            ]
+        },
+        "DebugConfig": {
+            "description": "Debug configuration structure",
+            "type": "object",
+            "properties": {
+                "swd_enabled": {
+                    "description": "Whether SWD debug interface is enabled",
+                    "type": "boolean",
+                    "default": true
+                }
+            }
+        },
+        "FileFormat": {
+            "description": "Format of a supplied ROM image file.\n\nThe default, [`FileFormat::Binary`], treats the supplied file as a raw\nbinary image.  [`FileFormat::IntelHex`] decodes an Intel HEX file into a\nbinary image before it is placed into the firmware; see the\n[`ihex`](crate::ihex) module for the supported record types and the\ndecoding rules.",
+            "oneOf": [
+                {
+                    "description": "Raw binary image (default).",
+                    "type": "string",
+                    "const": "binary"
+                },
+                {
+                    "description": "Intel HEX image, decoded to a binary image before use.",
+                    "type": "string",
+                    "const": "ihex"
+                }
+            ]
+        },
+        "FireConfig": {
+            "description": "Fire configuration structure",
+            "type": "object",
+            "properties": {
+                "cpu_freq": {
+                    "description": "CPU frequency.  Only specific frequencies are supported",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/FireCpuFreq"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "force_16_bit": {
+                    "description": "Optional Force 16 bit mode.  Only supported on One ROM 40, and if set\nthis _disables_ of the /BYTE pin to indicate 8-bit mode, forcing the\nROM to always operate in 16-bit mode.  This is a higher performance\nmode, as the algorithm can read the address lines 33% more frequently,\nbut obviously disables the used of 8-bit mode.",
+                    "type": "boolean"
+                },
+                "overclock": {
+                    "description": "Whether overclocking is enabled",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "rom_dma_preload": {
+                    "description": "Optional DMA ROM preload enable/disable",
+                    "type": "boolean"
+                },
+                "serve_mode": {
+                    "description": "Optional PIO/CPU override",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/FireServeMode"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "vreg": {
+                    "description": "Optional Vreg output voltage setting for RP2350 MCUs.",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/FireVreg"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                }
+            }
+        },
+        "FireCpuFreq": {
+            "description": "CPU frequency: 'None', 'Stock', or '{n}MHz' where n is 16-800",
+            "type": "string"
+        },
+        "FireServeMode": {
+            "description": "Fire serve mode",
+            "oneOf": [
+                {
+                    "description": "PIO mode",
+                    "type": "string",
+                    "const": "Pio"
+                },
+                {
+                    "description": "CPU mode",
+                    "type": "string",
+                    "const": "Cpu"
+                }
+            ]
+        },
+        "FireVreg": {
+            "description": "Voltage regulator setting for RP2350 MCUs",
+            "type": "string",
+            "enum": [
+                "0.55V",
+                "0.60V",
+                "0.65V",
+                "0.70V",
+                "0.75V",
+                "0.80V",
+                "0.85V",
+                "0.90V",
+                "0.95V",
+                "1.00V",
+                "1.05V",
+                "1.10V",
+                "1.15V",
+                "1.20V",
+                "1.25V",
+                "1.30V",
+                "1.35V",
+                "1.40V",
+                "1.50V",
+                "1.60V",
+                "1.65V",
+                "1.70V",
+                "1.80V",
+                "1.90V",
+                "2.00V",
+                "2.35V",
+                "2.50V",
+                "2.65V",
+                "2.80V",
+                "3.00V",
+                "3.15V",
+                "3.30V",
+                "Stock"
+            ]
+        },
+        "FirmwareConfig": {
+            "description": "Top level configuration structure",
+            "type": "object",
+            "properties": {
+                "fire": {
+                    "description": "Optional Fire specific configuration",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/FireConfig"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "ice": {
+                    "description": "Optional Ice specific configuration",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/IceConfig"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "led": {
+                    "description": "Optional LED configuration",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/LedConfig"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "serve_alg_params": {
+                    "description": "Optional serving algorithm parameters",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/ServeAlgParams"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "swd": {
+                    "description": "Optional Debug configuration",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/DebugConfig"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                }
+            }
+        },
+        "IceConfig": {
+            "description": "Ice configuration structure",
+            "type": "object",
+            "properties": {
+                "cpu_freq": {
+                    "description": "CPU frequency.  Only specific frequencies are supported",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/IceCpuFreq"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "overclock": {
+                    "description": "Whether overclocking is enabled",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                }
+            }
+        },
+        "IceCpuFreq": {
+            "description": "CPU frequency: 'None', 'Stock', or '{n}MHz' where n is 1-450",
+            "type": "string"
+        },
+        "LedConfig": {
+            "description": "LED configuration structure",
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "description": "Whether the status LED is enabled",
+                    "type": "boolean",
+                    "default": true
+                }
+            }
+        },
+        "LoadAddress": {
+            "description": "Intel HEX load address: a non-negative integer, or a string in decimal or 0x-/$-prefixed hexadecimal.",
+            "oneOf": [
+                {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                {
+                    "type": "string",
+                    "pattern": "^(0[xX]|\\$)?[0-9a-fA-F]+$"
+                }
+            ]
+        },
+        "Location": {
+            "description": "Location within a larger Chip image that the specific image to use resides",
+            "type": "object",
+            "properties": {
+                "length": {
+                    "description": "Length of the image within the larger Chip image.  Must match the\nselected Chip type, or SizeHandling will be applied.",
+                    "type": "integer",
+                    "format": "uint",
+                    "minimum": 0
+                },
+                "start": {
+                    "description": "Start of the image within the larger Chip image",
+                    "type": "integer",
+                    "format": "uint",
+                    "minimum": 0
+                }
+            },
+            "required": [
+                "start",
+                "length"
+            ]
+        },
+        "ServeAlg": {
+            "description": "Chip serving algorithm.  Only valid for firmwares serving via CPU.  By\ndefault this is Ice boards and Fire 24 A/B boards.",
+            "oneOf": [
+                {
+                    "description": "default",
+                    "type": "string",
+                    "const": "default"
+                },
+                {
+                    "description": "a",
+                    "type": "string",
+                    "const": "two_cs_one_addr"
+                },
+                {
+                    "description": "b",
+                    "type": "string",
+                    "const": "addr_on_cs"
+                },
+                {
+                    "description": "Multi-ROM set only",
+                    "type": "string",
+                    "const": "addr_on_any_cs"
+                }
+            ]
+        },
+        "ServeAlgParams": {
+            "description": "Custom serving algorithm parameters\n\nThis is stored as unstructured parameters to allow for easy future\nextension without breaking compatibility.",
+            "type": "object",
+            "properties": {
+                "params": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer",
+                        "format": "uint8",
+                        "maximum": 255,
+                        "minimum": 0
+                    }
+                }
+            },
+            "required": [
+                "params"
+            ]
+        },
+        "SizeHandling": {
+            "description": "How to handle Chip images that are too small for the Chip type",
+            "oneOf": [
+                {
+                    "description": "No special handling.  Errors if the image size does not exactly match\nthe Chip size.",
+                    "type": "string",
+                    "const": "none"
+                },
+                {
+                    "description": "Duplicates the image as many times as needed to fill the Chip.  Errors\nif the image size is not an exact divisor of the Chip size.",
+                    "type": "string",
+                    "const": "duplicate"
+                },
+                {
+                    "description": "Truncates the image to fit the Chip size.  Errors if the image is an\nexact match size-wise.",
+                    "type": "string",
+                    "const": "truncate"
+                },
+                {
+                    "description": "Pads the image out with [`PAD_BLANK_BYTE`].",
+                    "type": "string",
+                    "const": "pad"
+                }
+            ]
+        },
+        "Transform": {
+            "description": "A single byte-level transformation of a supplied ROM image.\n\nSee the [module documentation](self) for where transforms run in the image\npipeline, why order matters, and the text encoding used by the CLI and by\nfirmware metadata.\n\nThis enum is `#[non_exhaustive]`: it is expected to grow (bit-order\nreversal and inversion are the obvious candidates), and adding a variant\nshould not be a breaking change for downstream crates.",
+            "oneOf": [
+                {
+                    "description": "Reverse the byte order within each 16-bit word throughout the image.\n\nRequired for 16-bit wide parts (e.g. 27C400) when the source image was\nproduced with the opposite byte order to the one One ROM serves.\n\nThe image must have an even length.  If it does not, the chip's\n[`SizeHandling`] decides: `pad` appends one blank byte, `truncate`\ndrops the trailing byte, and `none`/`duplicate` report\n[`TransformError::OddLength`].",
+                    "type": "string",
+                    "const": "swap_bytes"
+                },
+                {
+                    "description": "Extract one lane from an interleaved image.\n\nThe image contains `stride` interleaved lanes of `bytes` bytes each;\nlane `offset` is kept and the rest discarded.  The result is `1/stride`\nof the input length.\n\n| Source             | Wanted            | `offset` | `stride` | `bytes` |\n|--------------------|-------------------|----------|----------|---------|\n| 16-bit interleaved | even / odd bytes  | 0 / 1    | 2        | 1       |\n| 32-bit interleaved | byte *n* of 4     | 0–3      | 4        | 1       |\n| 32-bit interleaved | one 16-bit half   | 0 / 1    | 2        | 2       |\n\nThe image length must be a multiple of `bytes * stride` (one full set\nof lanes); a ragged tail means the image is not the interleaved set it\nwas taken for, so it is reported rather than silently dropped.",
+                    "type": "object",
+                    "properties": {
+                        "deinterleave": {
+                            "type": "object",
+                            "properties": {
+                                "bytes": {
+                                    "description": "Width of one lane, in bytes.  Defaults to 1.\n\nThis is the width of the device the lane feeds: 1 for an 8-bit\npart, 2 to keep 16-bit words intact.",
+                                    "type": "integer",
+                                    "format": "uint",
+                                    "default": 1,
+                                    "minimum": 0
+                                },
+                                "offset": {
+                                    "description": "Which lane to keep.  Must be less than `stride`.",
+                                    "type": "integer",
+                                    "format": "uint",
+                                    "minimum": 0
+                                },
+                                "stride": {
+                                    "description": "How many lanes the image interleaves.  Must be at least 2.",
+                                    "type": "integer",
+                                    "format": "uint",
+                                    "minimum": 0
+                                }
+                            },
+                            "required": [
+                                "offset",
+                                "stride"
+                            ]
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                        "deinterleave"
+                    ]
+                }
+            ]
+        }
+    }
+}

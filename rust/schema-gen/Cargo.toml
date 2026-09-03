@@ -1,0 +1,22 @@
+[package]
+name = "schema-gen"
+version = "0.1.10"
+edition = "2024"
+# Workspace-internal build tool.
+publish = false
+authors = ["Piers Finlayson <piers@piers.rocks>"]
+license = "MIT"
+description = "One ROM Schema Generator - Generate One ROM schema files from JSON definitions"
+repository = "https://github.com/piersfinlayson/one-rom"
+homepage = "https://onerom.org"
+keywords = ["retro", "rom", "commodore", "embedded"]
+categories = ["embedded", "hardware-support"]
+
+[dependencies]
+onerom-gen = { workspace = true, features = ["schemars"] }
+
+schemars = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+[lints]
+workspace = true

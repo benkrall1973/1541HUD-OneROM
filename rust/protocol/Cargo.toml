@@ -1,0 +1,23 @@
+[package]
+name = "onerom-protocol"
+version = "0.1.1"
+edition = "2024"
+authors = ["Piers Finlayson <piers@piers.rocks>"]
+description = "One ROM Protocol support"
+repository = "https://github.com/piersfinlayson/one-rom"
+readme = "README.md"
+license = "MIT"
+keywords = ["embedded", "rom", "eeprom", "eprom", "flash"]
+
+[lib]
+name = "onerom_protocol"
+path = "src/lib.rs"
+
+[dependencies]
+onerom-database = { workspace = true }
+
+serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
+log = { version = "0.4" }
+
+[lints]
+workspace = true
