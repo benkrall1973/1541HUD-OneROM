@@ -9,7 +9,6 @@
 #include "tusb.h"
 #include "usb_descriptors.h"
 #include "usb_picobootx.h"
-#include "drivehud_mailbox.h"
 
 // Optimisations:
 // - Move timer handler to library and see if it can be better optimised
@@ -42,9 +41,6 @@ const ora_plugin_header_t ora_plugin_header = {
 
 // Plugin context, stored in .bss
 usb_plugin_context_t context;
-
-// DriveHUD V0.0.17 CDC event bridge; implementation is below.
-static void drivehud_serial_task(void);
 
 void init_data_bss(void) {
     extern uint32_t __ramfunc_start;
@@ -133,97 +129,6 @@ void usb_plugin_task(void) {
     // release of a bounded hold is deferred to here, where the millisecond
     // timer can be checked.
     gpio_handle_pending_releases();
-
-    drivehud_serial_task();
-}
-
-
-
-// ---------------------------------------------------------------------------
-// DriveHUD V0.0.17 V0.5.16-compatible CDC event bridge
-// ---------------------------------------------------------------------------
-static uint32_t drivehud_next_status_ms;
-static char *drivehud_append_str(char *p,char *e,const char*s){while(*s&&p<e)*p++=*s++;return p;}
-static char *drivehud_append_u32(char*p,char*e,uint32_t v){char t[10];uint32_t n=0;do{t[n++]=(char)('0'+v%10u);v/=10u;}while(v&&n<10);while(n&&p<e)*p++=t[--n];return p;}
-static char *drivehud_append_hex8(char*p,char*e,uint8_t v){static const char h[]="0123456789ABCDEF";if(p<e)*p++=h[v>>4];if(p<e)*p++=h[v&15];return p;}
-
-/* Never consume an event until the complete text record fits in TinyUSB's
- * current CDC FIFO.  This is the opposite of the old sampler printf problem:
- * capture has already happened, and back-pressure only delays telemetry. */
-static bool drivehud_cdc_try_send(const char*b,uint32_t l){
-    if(!tud_cdc_connected())return false;
-    if(tud_cdc_write_available()<l)return false;
-    if(tud_cdc_write(b,l)!=l)return false;
-    tud_cdc_write_flush();
-    return true;
-}
-
-static void drivehud_serial_task(void){
-    volatile drivehud_mailbox_t*m=DRIVEHUD_MAILBOX;
-    char line[128],*p,*e=line+sizeof(line);
-
-    if(m->magic!=DRIVEHUD_MAILBOX_MAGIC||m->version!=DRIVEHUD_MAILBOX_VERSION){
-        static const char w[]="STATUS V0.0.17 WAITING\r\n";
-        uint32_t now=board_millis();
-        if((int32_t)(now-drivehud_next_status_ms)>=0){
-            if(drivehud_cdc_try_send(w,sizeof(w)-1u))drivehud_next_status_ms=now+1000u;
-        }
-        return;
-    }
-
-    /* Drain queued mechanism/DOS events first. */
-    while(m->event_tail!=m->event_head){
-        uint32_t tail=m->event_tail;
-        uint32_t w=m->events[tail];
-        uint32_t type=(w>>28)&0xFu;
-        p=line;
-
-        if(type==DRIVEHUD_EVENT_MOTOR){
-            p=drivehud_append_str(p,e,"MOTOR state=");
-            p=drivehud_append_u32(p,e,w&1u);
-            p=drivehud_append_str(p,e,"\r\n");
-        }else if(type==DRIVEHUD_EVENT_PHASE){
-            uint32_t oldp=(w>>0)&3u,newp=(w>>2)&3u,delta=(w>>4)&3u,motor=(w>>6)&1u;
-            p=drivehud_append_str(p,e,"PHASE old=");p=drivehud_append_u32(p,e,oldp);
-            p=drivehud_append_str(p,e," new=");p=drivehud_append_u32(p,e,newp);
-            p=drivehud_append_str(p,e," delta=");p=drivehud_append_u32(p,e,delta);
-            p=drivehud_append_str(p,e," motor=");p=drivehud_append_u32(p,e,motor);
-            p=drivehud_append_str(p,e,"\r\n");
-        }else if(type==DRIVEHUD_EVENT_TRACK_WRITE){
-            uint8_t data=(uint8_t)(w&0xFFu);
-            p=drivehud_append_str(p,e,"TRACK_WRITE addr=$0022 data=$");p=drivehud_append_hex8(p,e,data);
-            p=drivehud_append_str(p,e," (");p=drivehud_append_u32(p,e,data);p=drivehud_append_str(p,e,")\r\n");
-        }else{
-            /* Unknown queue entry: discard it rather than wedging the bridge. */
-            m->event_tail=(tail+1u)%DRIVEHUD_EVENT_WORDS;
-            continue;
-        }
-
-        if(!drivehud_cdc_try_send(line,(uint32_t)(p-line)))break;
-        __asm volatile("dmb sy" ::: "memory");
-        m->event_tail=(tail+1u)%DRIVEHUD_EVENT_WORDS;
-    }
-
-    /* One low-rate health/status record.  V0.5.16 only needs the version token. */
-    {
-        uint32_t now=board_millis();
-        if((int32_t)(now-drivehud_next_status_ms)>=0){
-            p=line;
-            p=drivehud_append_str(p,e,"STATUS V0.0.17 CAP=");p=drivehud_append_u32(p,e,m->capture_count);
-            p=drivehud_append_str(p,e," QOV=");p=drivehud_append_u32(p,e,m->event_overflow);
-            p=drivehud_append_str(p,e," RING=");p=drivehud_append_u32(p,e,m->ring_pressure);
-            p=drivehud_append_str(p,e," BUSY=");p=drivehud_append_u32(p,e,m->dma_busy);
-            p=drivehud_append_str(p,e," PC=");p=drivehud_append_u32(p,e,m->pio_pc);
-            p=drivehud_append_str(p,e," RX=");p=drivehud_append_u32(p,e,m->rx_level);
-            p=drivehud_append_str(p,e," PROD=");p=drivehud_append_u32(p,e,m->produced_total);
-            p=drivehud_append_str(p,e," CONS=");p=drivehud_append_u32(p,e,m->consumer_total);
-            p=drivehud_append_str(p,e," ROV=");p=drivehud_append_u32(p,e,m->ring_overrun);
-            p=drivehud_append_str(p,e," PE=");p=drivehud_append_u32(p,e,m->phase_event_count);
-            p=drivehud_append_str(p,e," F=");p=drivehud_append_u32(p,e,m->flags);
-            p=drivehud_append_str(p,e,"\r\n");
-            if(drivehud_cdc_try_send(line,(uint32_t)(p-line)))drivehud_next_status_ms=now+1000u;
-        }
-    }
 }
 
 // Resolve the USB serial override from device metadata and widen it into the
@@ -353,7 +258,6 @@ void tud_resume_cb(void) {
 void tud_cdc_rx_cb(uint8_t itf) {
     uint8_t buf[64];
     uint32_t count = tud_cdc_n_read(itf, buf, sizeof(buf));
-
     LOG("CDC received %u bytes on interface %u", count, itf);
 }
 
