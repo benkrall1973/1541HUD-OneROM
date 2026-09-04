@@ -17,6 +17,16 @@
 int pio(void) {
     int rc;
 
+#if defined(DRIVEHUD_PASSIVE_UB4)
+    // DriveHUD UB4 is a passive monitor. setup_initial_gpios() has already
+    // placed every GPIO in input-only mode (except board system LED pins).
+    // Do NOT call piorom2(): that would configure and enable the normal ROM
+    // serving state machines and could drive the 1541 data bus.
+    // Returning here lets vector.c launch the configured plugins while all
+    // ROM-socket/address/select/X GPIOs remain inputs.
+    return 0;
+#endif
+
     if (0) {
         DEBUG("PIO RAM Mode");
         uint32_t rom_table_addr = (uint32_t)(uintptr_t)RUNTIME->rom_table;

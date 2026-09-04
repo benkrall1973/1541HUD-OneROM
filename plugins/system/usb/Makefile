@@ -59,7 +59,6 @@ LDFLAGS := -nostdlib \
            -T ../../../firmware/ora/plugin.ld \
            -Wl,--defsym,PLUGIN_TYPE=0 \
            -Wl,--fatal-warnings \
-		   -Wl,--no-warn-rwx-segments \
            -Wl,-Map=$(BUILD_DIR)/$(PLUGIN_PREFIX).map
 
 PLUGIN_OBJ := $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
