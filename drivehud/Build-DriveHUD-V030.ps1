@@ -80,6 +80,10 @@ if ([string]::IsNullOrWhiteSpace($OneRomCli)) {
     throw "Could not locate onerom.exe. Use -OneRomCli or ONEROM_CLI."
 }
 
+# Resolve-Path on a WSL UNC path may include the PowerShell provider prefix.
+# Strip it once so .NET file APIs and child paths receive a normal filesystem path.
+$Repo = $Repo -replace '^Microsoft\.PowerShell\.Core\\FileSystem::',''
+
 $RepoWsl = Get-WslPath $Repo
 $RepoQ = Quote-Bash $RepoWsl
 $ToolchainQ = Quote-Bash $Toolchain
