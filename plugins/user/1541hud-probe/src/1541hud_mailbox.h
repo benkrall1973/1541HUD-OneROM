@@ -1,33 +1,32 @@
-#ifndef DRIVEHUD_MAILBOX_H
-#define DRIVEHUD_MAILBOX_H
+#ifndef HUD1541_MAILBOX_H
+#define HUD1541_MAILBOX_H
 
 #include <stdint.h>
 #include <stddef.h>
 
-#define DRIVEHUD_MAILBOX_ADDR 0x20081C00u
-#define DRIVEHUD_MAILBOX_MAGIC 0x33414844u
-#define DRIVEHUD_MAILBOX_VERSION 30u
+#define HUD1541_MAILBOX_ADDR 0x20081C00u
+#define HUD1541_MAILBOX_MAGIC 0x33414844u
+#define HUD1541_MAILBOX_VERSION 31u
 
-#define DRIVEHUD_FLAG_INPUTS_SAFE (1u << 0)
-#define DRIVEHUD_FLAG_PIO_RUNNING (1u << 1)
-#define DRIVEHUD_FLAG_DMA_RUNNING (1u << 2)
-#define DRIVEHUD_FLAG_CAPTURE_VALID (1u << 3)
-#define DRIVEHUD_FLAG_EVENT_OVERFLOW (1u << 4)
-#define DRIVEHUD_FLAG_RING_PRESSURE (1u << 5)
-#define DRIVEHUD_FLAG_RING_OVERRUN (1u << 6)
-#define DRIVEHUD_FLAG_UNSAFE_OUTPUT (1u << 31)
+#define HUD1541_FLAG_INPUTS_SAFE (1u << 0)
+#define HUD1541_FLAG_PIO_RUNNING (1u << 1)
+#define HUD1541_FLAG_DMA_RUNNING (1u << 2)
+#define HUD1541_FLAG_CAPTURE_VALID (1u << 3)
+#define HUD1541_FLAG_EVENT_OVERFLOW (1u << 4)
+#define HUD1541_FLAG_RING_PRESSURE (1u << 5)
+#define HUD1541_FLAG_RING_OVERRUN (1u << 6)
+#define HUD1541_FLAG_UNSAFE_OUTPUT (1u << 31)
 
-#define DRIVEHUD_RING_WORDS 64u
-#define DRIVEHUD_EVENT_WORDS 32u
+#define HUD1541_RING_WORDS 64u
+#define HUD1541_EVENT_WORDS 32u
 
-#define DRIVEHUD_EVENT_MOTOR 1u
-#define DRIVEHUD_EVENT_PHASE 2u
-#define DRIVEHUD_EVENT_TRACK_WRITE 3u
-#define DRIVEHUD_EVENT_WRITE_PROTECT 4u
-#define DRIVEHUD_EVENT_DENSITY 5u
+#define HUD1541_EVENT_MOTOR 1u
+#define HUD1541_EVENT_PHASE 2u
+#define HUD1541_EVENT_TRACK_WRITE 3u
+#define HUD1541_EVENT_WRITE_PROTECT 4u
+#define HUD1541_EVENT_DENSITY 5u
 
 typedef struct {
- /* 30 metadata words. */
  volatile uint32_t magic;
  volatile uint32_t version;
  volatile uint32_t flags;
@@ -59,37 +58,26 @@ typedef struct {
  volatile uint32_t density_event_count;
  volatile uint32_t density_valid;
 
- volatile uint32_t events[DRIVEHUD_EVENT_WORDS];
+ volatile uint32_t events[HUD1541_EVENT_WORDS];
 
- /* RP2350 current-state cache.
-  *
-  * track_state:
-  *   bits  0..7   last DOS $0022 write
-  *   bit      8   last DOS $0022 valid
-  *   bits 16..23  current physical position in half-track units (pos2)
-  *   bit     24   current physical position valid
-  *   bit     25   DOS DRVST says head stepping
-  *
-  * last_drvst holds the latest DOS $0020 value.
-  *
-  * These reuse V28's two words, so the DMA ring remains at +0x100.
+ /* RP2350 current-state cache. Layout remains identical to the hardware-proven
+  * V0.0.30 mailbox so the acquisition and USB transport semantics do not move.
   */
  volatile uint32_t track_state;
  volatile uint32_t last_drvst;
 
- /* 64 words = 256-byte DMA ring. */
- volatile uint32_t ring[DRIVEHUD_RING_WORDS];
-} drivehud_mailbox_t;
+ volatile uint32_t ring[HUD1541_RING_WORDS];
+} hud1541_mailbox_t;
 
-#define DRIVEHUD_MAILBOX \
- ((volatile drivehud_mailbox_t *)(uintptr_t)DRIVEHUD_MAILBOX_ADDR)
+#define HUD1541_MAILBOX \
+ ((volatile hud1541_mailbox_t *)(uintptr_t)HUD1541_MAILBOX_ADDR)
 
-typedef char drivehud_mailbox_size_must_be_512[
- (sizeof(drivehud_mailbox_t) == 512u) ? 1 : -1
+typedef char hud1541_mailbox_size_must_be_512[
+ (sizeof(hud1541_mailbox_t) == 512u) ? 1 : -1
 ];
 
-typedef char drivehud_ring_offset_must_be_0x100[
- (offsetof(drivehud_mailbox_t, ring) == 0x100u) ? 1 : -1
+typedef char hud1541_ring_offset_must_be_0x100[
+ (offsetof(hud1541_mailbox_t, ring) == 0x100u) ? 1 : -1
 ];
 
 #endif
