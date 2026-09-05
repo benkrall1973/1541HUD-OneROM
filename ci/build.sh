@@ -49,7 +49,7 @@ build_firmware() {
 
     while [[ $attempt -le $max_attempts ]]; do
         echo "  - Attempt ${attempt}: make firmware"
-        if make firmware > /dev/null; then
+        if make firmware EXTRA_C_FLAGS=-DDRIVEHUD_PASSIVE_UB4 > /dev/null; then
             break
         fi
         attempt=$((attempt + 1))

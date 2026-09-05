@@ -27,7 +27,7 @@ BUILD_DIR := build
 $(shell [ -d $(TINYUSB_DIR) ] || git clone https://github.com/piersfinlayson/tinyusb.git $(TINYUSB_DIR))
 include tinyusb.mk
 
-$(shell [ -d $(PICOBOOTX_DIR) ] || git clone https://github.com/piersfinlayson/picobootx.git $(PICOBOOTX_DIR))
+$(shell [ -d $(PICOBOOTX_DIR) ] || git clone --branch picobootx-rp2350-v0.1.0 --depth 1 https://github.com/piersfinlayson/picobootx.git $(PICOBOOTX_DIR))
 include picobootx/picobootx.mk
 
 $(shell [ -d $(PICO_SDKLESS_DIR) ] || git clone https://github.com/piersfinlayson/pico-sdkless.git $(PICO_SDKLESS_DIR))
