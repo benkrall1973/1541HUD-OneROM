@@ -31,7 +31,7 @@ wp_re = re.compile(r"WRITE_PROTECT\s+state=(\d+)")
 class DriveHUD:
     def __init__(self, root):
         self.root = root
-        self.root.title("DriveHUD V0.5.30")
+        self.root.title("DriveHUD V0.0.30")
         self.root.geometry("560x455")
         self.root.resizable(False, False)
 
@@ -118,7 +118,7 @@ class DriveHUD:
             return
         self.disconnect()
         try:
-            # V0.5.30 late-connect fix:
+            # V0.0.30 late-connect fix:
             # TinyUSB's tud_cdc_connected() follows the host CDC/DTR state.
             # Open with DTR explicitly LOW, then raise it after the port is open.
             # This guarantees the RP2350 sees a fresh disconnect->connect edge
