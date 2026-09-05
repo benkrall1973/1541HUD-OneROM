@@ -41,7 +41,7 @@ cargo clippy \
     -p onerom-protocol \
     -p onerom-studio \
     -p schema-gen \
-    --all-targets -- -D warnings
+    --all-targets -- -D warnings -A clippy::chunks_exact_to_as_chunks
 
 # onerom-fw-tester embeds the firmware emulator, so it needs CONFIG/BOARD, and
 # onerom-plugin-tester links against onerom-fw-tester's library.
