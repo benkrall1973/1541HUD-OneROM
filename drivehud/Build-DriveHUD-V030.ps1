@@ -10,12 +10,14 @@ $ErrorActionPreference = "Stop"
 function Get-WslPath {
     param([Parameter(Mandatory=$true)][string]$WindowsPath)
 
-    if ($WindowsPath -match '^\\\\wsl(?:\$|\.localhost)\\[^\\]+\\(.*)$') {
+    $path = $WindowsPath -replace '^Microsoft\.PowerShell\.Core\\FileSystem::',''
+
+    if ($path -match '^\\\\wsl(?:\$|\.localhost)\\[^\\]+\\(.*)$') {
         $rest = $Matches[1] -replace '\\','/'
         return "/" + $rest.TrimStart("/")
     }
 
-    $full = [System.IO.Path]::GetFullPath($WindowsPath)
+    $full = [System.IO.Path]::GetFullPath($path)
 
     if ($full -match '^([A-Za-z]):[\\/](.*)$') {
         $drive = $Matches[1].ToLowerInvariant()
