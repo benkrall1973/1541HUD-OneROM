@@ -1,56 +1,58 @@
-name: DriveHUD Sanity
+name: 1541HUD Sanity
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - 'drivehud/**'
-      - 'plugins/user/drivehud-probe/**'
+      - '1541hud/**'
+      - 'plugins/user/1541hud-probe/**'
       - 'plugins/system/usb/**'
       - 'firmware/src/piodma/pio.c'
-      - '.github/workflows/drivehud-sanity.yml'
+      - 'ci/build.sh'
+      - '.github/workflows/1541hud-sanity.yml'
   pull_request:
     paths:
-      - 'drivehud/**'
-      - 'plugins/user/drivehud-probe/**'
+      - '1541hud/**'
+      - 'plugins/user/1541hud-probe/**'
       - 'plugins/system/usb/**'
       - 'firmware/src/piodma/pio.c'
-      - '.github/workflows/drivehud-sanity.yml'
+      - 'ci/build.sh'
+      - '.github/workflows/1541hud-sanity.yml'
 
 permissions:
   contents: read
 
 jobs:
   source-sanity:
-    name: DriveHUD source sanity
+    name: 1541HUD source sanity
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate canonical DriveHUD sources
+      - name: Validate canonical 1541HUD sources
         shell: bash
         run: |
           set -euo pipefail
 
-          test -f drivehud/Build-DriveHUD-V030.ps1
-          test -f drivehud/gui/DriveHUD_V0.0.30_PIO_DMA.py
-          test -f drivehud/README.md
-          test -f plugins/user/drivehud-probe/src/drivehud_probe_v030.c
-          test -f plugins/user/drivehud-probe/src/drivehud_mailbox.h
-          test -f plugins/system/usb/include/drivehud_mailbox.h
+          test -f 1541hud/Build-1541HUD-V031.ps1
+          test -f 1541hud/gui/1541HUD_V0.0.31_PIO_DMA.py
+          test -f 1541hud/README.md
+          test -f plugins/user/1541hud-probe/src/1541hud_probe_v031.c
+          test -f plugins/user/1541hud-probe/src/1541hud_mailbox.h
+          test -f plugins/system/usb/include/1541hud_mailbox.h
 
-          cmp plugins/user/drivehud-probe/src/drivehud_mailbox.h \
-              plugins/system/usb/include/drivehud_mailbox.h
+          cmp plugins/user/1541hud-probe/src/1541hud_mailbox.h \
+              plugins/system/usb/include/1541hud_mailbox.h
 
-          grep -q 'DRIVEHUD_PASSIVE_UB4' firmware/src/piodma/pio.c
-          grep -q 'DRIVEHUD_PASSIVE_UB4' ci/build.sh
-          grep -q 'DriveHUD_V0.0.30_PIO_DMA.py' drivehud/README.md
+          grep -q 'HUD1541_PASSIVE_UB4' firmware/src/piodma/pio.c
+          grep -q 'HUD1541_PASSIVE_UB4' ci/build.sh
+          grep -q '1541HUD' 1541hud/README.md
 
-          python3 -m py_compile drivehud/gui/DriveHUD_V0.0.30_PIO_DMA.py
+          python3 -m py_compile 1541hud/gui/1541HUD_V0.0.31_PIO_DMA.py
 
-          if git ls-files | grep -Ei '(^|/)(build-drivehud|__pycache__)(/|$)|(\.bin$|\.uf2$|\.elf$|\.o$|\.pyc$)|pre_drivehud'; then
+          if git ls-files | grep -Ei '(^|/)(build-1541hud|build-drivehud|__pycache__)(/|$)|(\.bin$|\.uf2$|\.elf$|\.o$|\.pyc$)|pre_drivehud'; then
             echo 'Tracked generated artifact or obsolete backup found.' >&2
             exit 1
           fi
 
-          echo 'DriveHUD source sanity checks passed.'
+          echo '1541HUD source sanity checks passed.'
