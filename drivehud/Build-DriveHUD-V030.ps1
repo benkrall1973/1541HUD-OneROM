@@ -10,6 +10,11 @@ $ErrorActionPreference = "Stop"
 function Get-WslPath {
     param([Parameter(Mandatory=$true)][string]$WindowsPath)
 
+    if ($WindowsPath -match '^\\\\wsl(?:\$|\.localhost)\\[^\\]+\\(.*)$') {
+        $rest = $Matches[1] -replace '\\','/'
+        return "/" + $rest.TrimStart("/")
+    }
+
     $full = [System.IO.Path]::GetFullPath($WindowsPath)
 
     if ($full -match '^([A-Za-z]):[\\/](.*)$') {
@@ -18,7 +23,7 @@ function Get-WslPath {
         return "/mnt/$drive/$rest"
     }
 
-    throw "Could not convert Windows path to WSL path: $WindowsPath"
+    throw "Could not convert Windows or WSL path to WSL path: $WindowsPath"
 }
 
 function Quote-Bash {
