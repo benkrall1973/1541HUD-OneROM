@@ -6,6 +6,8 @@ DriveHUD V0.0.30 is the hardware-proven passive UB4 monitor baseline for OneROM 
 
 DriveHUD observes 1541 mechanism and DOS activity using RP2350 PIO/DMA capture and reports state to a Python GUI over USB CDC. The monitor is passive and never drives the 1541 bus.
 
+The hardware-proven runtime is preserved by tag `v0.0.30` at commit `73769e1`. Later commits on the DriveHUD source branch contain release, CI, documentation, build, and WSL portability hardening without redefining the runtime as V0.0.31.
+
 ## Proven Behavior
 
 Hardware testing confirmed:
@@ -71,6 +73,8 @@ The script:
 
 Outputs are written to `build-drivehud/`.
 
+The build script supports both normal Windows-mounted WSL paths such as `/mnt/c/...` and WSL UNC paths such as `\\wsl$\Ubuntu2204\...`, including PowerShell provider-prefixed paths returned by `Resolve-Path`.
+
 ## Proven Build Environment
 
 - OneROM: v0.7.1
@@ -82,7 +86,7 @@ Outputs are written to `build-drivehud/`.
 
 ## Reproducibility
 
-Two consecutive complete canonical builds in the proven environment produced identical artifacts:
+Two consecutive complete canonical builds in the original proven Desktop environment produced identical artifacts:
 
 ### DriveHUD_OneROM_V0.0.30.bin
 - Size: 204800 bytes
@@ -92,13 +96,22 @@ Two consecutive complete canonical builds in the proven environment produced ide
 - Size: 409600 bytes
 - SHA256: `42e56bb6196ac75b491d1cd04fcc7a33862cb162d35c08762d6e40855f6b7bd0`
 
-The OneROM composer embeds source paths in firmware metadata. Builds from different filesystem paths may therefore have different whole-file hashes even when the executable components are otherwise identical.
+A completely fresh GitHub clone was also built twice from `/tmp/DriveHUD-OneROM-fresh`. Both builds completed successfully, produced identical same-path outputs, and left the tracked working tree clean.
+
+Fresh-clone hashes were:
+
+- BIN SHA256: `6d9e59e3436f85899b68e42a3b2c1623a23a0494519f90a6223a3968cab67a25`
+- UF2 SHA256: `d50b21e8bdad7acd654bd9e70e41d029a4ff7bf23e8fb084e8dd79dcbe710c35`
+
+The OneROM composer embeds source paths in firmware metadata. Builds from different filesystem paths may therefore have different whole-file hashes even when built from the same source. Same-path deterministic rebuilding is proven; cross-path whole-image hash equality is not expected.
 
 ## External Dependencies
 
 `picobootx` is pinned to `picobootx-rp2350-v0.1.0`.
 
-TinyUSB and pico-sdkless are currently obtained without explicit commit pinning. The hashes above therefore demonstrate repeatability in the proven environment, not guaranteed bit-for-bit reproduction across future dependency revisions or arbitrary machines.
+TinyUSB and pico-sdkless are currently obtained without explicit commit pinning. Their exact hardware-proven revisions are not known, so they are intentionally not pinned to guessed commits.
+
+The verified state therefore demonstrates functional source-build reproducibility and same-path deterministic rebuilding in the tested environment, not guaranteed bit-for-bit reproduction across arbitrary future dependency revisions, machines, or filesystem paths.
 
 ## GUI
 
