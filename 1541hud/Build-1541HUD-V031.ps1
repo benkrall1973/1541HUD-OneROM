@@ -34,7 +34,7 @@ function Quote-Bash {
 }
 
 Write-Host ""
-Write-Host "DriveHUD V0.0.30 - canonical source build"
+Write-Host "1541HUD V0.0.31 candidate - canonical source build"
 Write-Host ""
 
 if ([string]::IsNullOrWhiteSpace($Repo)) {
@@ -88,9 +88,9 @@ $RepoWsl = Get-WslPath $Repo
 $RepoQ = Quote-Bash $RepoWsl
 $ToolchainQ = Quote-Bash $Toolchain
 
-$BuildDir = Join-Path $Repo "build-drivehud"
-$OutBase = Join-Path $BuildDir "DriveHUD_OneROM_V0.0.30"
-$Companion = Join-Path $BuildDir "drivehud_companion_8k.bin"
+$BuildDir = Join-Path $Repo "build-1541hud"
+$OutBase = Join-Path $BuildDir "1541HUD_OneROM_V0.0.31"
+$Companion = Join-Path $BuildDir "1541hud_companion_8k.bin"
 
 New-Item -ItemType Directory -Path $BuildDir -Force | Out-Null
 
@@ -102,17 +102,17 @@ for ($i = 0; $i -lt $bytes.Length; $i++) {
 [System.IO.File]::WriteAllBytes($Companion, $bytes)
 
 Write-Host "Building passive OneROM base firmware..."
-$baseBuild = "cd $RepoQ && make firmware TOOLCHAIN=$ToolchainQ EXTRA_C_FLAGS=-DDRIVEHUD_PASSIVE_UB4"
+$baseBuild = "cd $RepoQ && make firmware TOOLCHAIN=$ToolchainQ EXTRA_C_FLAGS=-DHUD1541_PASSIVE_UB4"
 & wsl bash -lc $baseBuild
 if ($LASTEXITCODE -ne 0) {
     throw "Passive OneROM base firmware build failed"
 }
 
-Write-Host "Building DriveHUD USER plugin..."
-$userBuild = "cd $RepoQ && make -C plugins/user/drivehud-probe clean && make -C plugins/user/drivehud-probe TOOLCHAIN=$ToolchainQ"
+Write-Host "Building 1541HUD USER plugin..."
+$userBuild = "cd $RepoQ && make -C plugins/user/1541hud-probe clean && make -C plugins/user/1541hud-probe TOOLCHAIN=$ToolchainQ"
 & wsl bash -lc $userBuild
 if ($LASTEXITCODE -ne 0) {
-    throw "DriveHUD USER plugin build failed"
+    throw "1541HUD USER plugin build failed"
 }
 
 Write-Host "Building USB SYSTEM plugin..."
@@ -123,7 +123,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $baseFirmware = Join-Path $Repo "firmware\build\onerom-rp235x.bin"
-$userPlugin = Join-Path $Repo "plugins\user\drivehud-probe\build\plugin_user.bin"
+$userPlugin = Join-Path $Repo "plugins\user\1541hud-probe\build\plugin_user.bin"
 $systemPlugin = Join-Path $Repo "plugins\system\usb\build\usb_system_plugin.bin"
 
 foreach ($artifact in @($baseFirmware, $userPlugin, $systemPlugin)) {
