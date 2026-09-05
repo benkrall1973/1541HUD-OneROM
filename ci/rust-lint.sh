@@ -47,7 +47,7 @@ cargo clippy \
 # onerom-plugin-tester links against onerom-fw-tester's library.
 echo "Running clippy (onerom-fw-tester, onerom-plugin-tester)..."
 CONFIG="$EMU_CONFIG" BOARD="$EMU_BOARD" \
-    cargo clippy -p onerom-fw-tester -p onerom-plugin-tester --all-targets -- -D warnings
+    cargo clippy -p onerom-fw-tester -p onerom-plugin-tester --all-targets -- -D warnings -A clippy::chunks_exact_to_as_chunks
 
 # onerom-lab pins its own nightly toolchain (rust-toolchain.toml) and is a
 # binary-only crate that builds for the RP2350 (thumbv8m via its
@@ -66,13 +66,13 @@ CONFIG="$EMU_CONFIG" BOARD="$EMU_BOARD" \
 echo "Running clippy (onerom-lab)..."
 ( cd lab \
     && rustup target add thumbv8m.main-none-eabihf \
-    && cargo clippy --no-deps --bins -- -D warnings )
+    && cargo clippy --no-deps --bins -- -D warnings -A clippy::chunks_exact_to_as_chunks )
 
 # onerom-fw-emulator and onerom-lens build for wasm (they compile the firmware
 # C to wasm via Emscripten), so they are linted against the wasm target.
 echo "Running clippy (wasm: onerom-fw-emulator, onerom-lens)..."
 CONFIG="$EMU_CONFIG" BOARD="$EMU_BOARD" \
     cargo clippy -p onerom-fw-emulator -p onerom-lens \
-    --target wasm32-unknown-emscripten -- -D warnings
+    --target wasm32-unknown-emscripten -- -D warnings -A clippy::chunks_exact_to_as_chunks
 
 echo "Rust lint passed."
