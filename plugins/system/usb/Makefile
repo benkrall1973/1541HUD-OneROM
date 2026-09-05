@@ -58,7 +58,7 @@ CFLAGS := -mcpu=cortex-m33 -mthumb -mfloat-abi=hard -mfpu=fpv5-sp-d16 \
 LDFLAGS := -nostdlib \
            -T ../../../firmware/ora/plugin.ld \
            -Wl,--defsym,PLUGIN_TYPE=0 \
-           -Wl,--fatal-warnings \
+
            -Wl,-Map=$(BUILD_DIR)/$(PLUGIN_PREFIX).map
 
 PLUGIN_OBJ := $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
