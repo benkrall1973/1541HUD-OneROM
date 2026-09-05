@@ -1,5 +1,5 @@
-PLUGIN_NAME := user/drivehud-probe
-PLUGIN_SRC := src/drivehud_probe_v030.c
+PLUGIN_NAME := user/1541hud-probe
+PLUGIN_SRC := src/1541hud_probe_v031.c
 PLUGIN_TYPE := USER
 
 BUILD_DIR := build
