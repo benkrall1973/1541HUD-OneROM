@@ -17,8 +17,8 @@
 int pio(void) {
     int rc;
 
-#if defined(DRIVEHUD_PASSIVE_UB4)
-    // DriveHUD UB4 is a passive monitor. setup_initial_gpios() has already
+#if defined(HUD1541_PASSIVE_UB4)
+    // 1541HUD UB4 is a passive monitor. setup_initial_gpios() has already
     // placed every GPIO in input-only mode (except board system LED pins).
     // Do NOT call piorom2(): that would configure and enable the normal ROM
     // serving state machines and could drive the 1541 data bus.
@@ -38,4 +38,3 @@ int pio(void) {
 
     return rc;
 }
-
