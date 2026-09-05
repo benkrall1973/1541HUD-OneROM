@@ -1,0 +1,56 @@
+name: DriveHUD Sanity
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'drivehud/**'
+      - 'plugins/user/drivehud-probe/**'
+      - 'plugins/system/usb/**'
+      - 'firmware/src/piodma/pio.c'
+      - '.github/workflows/drivehud-sanity.yml'
+  pull_request:
+    paths:
+      - 'drivehud/**'
+      - 'plugins/user/drivehud-probe/**'
+      - 'plugins/system/usb/**'
+      - 'firmware/src/piodma/pio.c'
+      - '.github/workflows/drivehud-sanity.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  source-sanity:
+    name: DriveHUD source sanity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate canonical DriveHUD sources
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -f drivehud/Build-DriveHUD-V030.ps1
+          test -f drivehud/gui/DriveHUD_V0.0.30_PIO_DMA.py
+          test -f drivehud/README.md
+          test -f plugins/user/drivehud-probe/src/drivehud_probe_v030.c
+          test -f plugins/user/drivehud-probe/src/drivehud_mailbox.h
+          test -f plugins/system/usb/include/drivehud_mailbox.h
+
+          cmp plugins/user/drivehud-probe/src/drivehud_mailbox.h \
+              plugins/system/usb/include/drivehud_mailbox.h
+
+          grep -q 'DRIVEHUD_PASSIVE_UB4' firmware/src/piodma/pio.c
+          grep -q 'DRIVEHUD_PASSIVE_UB4' ci/build.sh
+          grep -q 'DriveHUD_V0.0.30_PIO_DMA.py' drivehud/README.md
+
+          python3 -m py_compile drivehud/gui/DriveHUD_V0.0.30_PIO_DMA.py
+
+          if git ls-files | grep -Ei '(^|/)(build-drivehud|__pycache__)(/|$)|(\.bin$|\.uf2$|\.elf$|\.o$|\.pyc$)|pre_drivehud'; then
+            echo 'Tracked generated artifact or obsolete backup found.' >&2
+            exit 1
+          fi
+
+          echo 'DriveHUD source sanity checks passed.'
