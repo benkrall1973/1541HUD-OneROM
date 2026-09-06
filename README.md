@@ -2,18 +2,20 @@
 
 **1541HUD** is a passive real-time Commodore 1541 drive monitor built on the [OneROM](https://onerom.org) platform.
 
-This repository is a derivative/fork of **OneROM v0.7.1**, originally created and maintained by **Piers Finlayson**. 1541HUD uses the OneROM Fire-24-E hardware, firmware, plugin architecture, and build tooling as its foundation, then adds Commodore 1541-specific passive monitoring, USB state transport, a Python desktop GUI, and a reproducible build path.
+The current stable release is **1541HUD V0.0.31**. The previous **DriveHUD V0.0.30** tag is preserved as the immutable hardware-proven baseline.
 
-1541HUD is **not the upstream OneROM project**. For general OneROM hardware, firmware, documentation, purchasing information, or support, use the original project:
+This repository is an independent derivative of **OneROM v0.7.1**, originally created and maintained by **Piers Finlayson**. It is not a GitHub fork and is not the upstream OneROM project. 1541HUD retains the OneROM source tree because the monitor is built together with the OneROM Fire-24-E firmware and plugin system.
+
+For general OneROM hardware, firmware, documentation, purchasing information, or support, use the original project:
 
 - [OneROM website](https://onerom.org)
 - [Original OneROM GitHub repository](https://github.com/piersfinlayson/one-rom)
 
 ## What 1541HUD Does
 
-1541HUD monitors a Commodore 1541 while the drive is operating and presents live drive state in a desktop GUI.
+1541HUD monitors a Commodore 1541 while the drive is operating and presents live drive state in a desktop GUI. The monitor is intentionally **passive**: it observes the 1541 bus but does not drive it.
 
-The hardware-proven baseline, released under the project's former **DriveHUD** name as **V0.0.30**, supports:
+The proven monitor architecture supports:
 
 - Track and half-track position
 - Diagnostic-cartridge half-step tracking
@@ -25,65 +27,60 @@ The hardware-proven baseline, released under the project's former **DriveHUD** n
 - USB late connection and GUI reconnect
 - RP2350 state caching and STATE resend
 
-The monitor is intentionally **passive**. It observes the 1541 bus but does not drive the 1541 bus.
-
-## How 1541HUD Uses OneROM
-
-```text
-OneROM v0.7.1
-    |
-    +-- Fire-24-E firmware and build infrastructure
-    +-- 1541HUD passive firmware configuration
-    +-- 1541HUD USER acquisition plugin
-    +-- USB SYSTEM plugin with 1541HUD mailbox transport
-    +-- 1541HUD Python GUI
-    +-- 1541HUD build and documentation
-```
-
-The complete OneROM source tree remains in this repository because 1541HUD firmware is built together with the OneROM base firmware and plugins to produce the final Fire-24-E image. Keeping the upstream history also makes future OneROM releases easy to compare and selectively integrate without sacrificing the known-good 1541HUD baseline.
-
 ## Hardware Architecture
 
-The proven configuration uses a **OneROM Fire-24-E** in a Commodore 1541:
+The established configuration uses a **OneROM Fire-24-E** in a Commodore 1541:
 
 - **UB3**: normal ROM-serving OneROM
 - **UB4**: dedicated passive 1541HUD monitor
 
-The UB4 monitor must remain passive. Acquisition is performed with RP2350 PIO/DMA and is independent of USB or GUI timing.
+Acquisition is performed with RP2350 PIO/DMA and is independent of USB or GUI timing.
+
+```text
+1541 bus activity
+      |
+      v
+RP2350 PIO/DMA capture
+      |
+      v
+1541HUD state decoder/cache
+      |
+      v
+shared mailbox -> USB CDC -> Python GUI
+```
 
 ## Repository Layout
 
 | Path | Purpose |
 |---|---|
-| [`1541hud/`](1541hud) | 1541HUD build script, documentation, and GUI |
-| [`1541hud/gui/1541HUD_V0.0.31_PIO_DMA.py`](1541hud/gui/1541HUD_V0.0.31_PIO_DMA.py) | Current rename candidate GUI source |
+| [`1541hud/`](1541hud) | 1541HUD build script, project documentation, changelog, and GUI |
+| [`1541hud/gui/1541HUD_V0.0.31_PIO_DMA.py`](1541hud/gui/1541HUD_V0.0.31_PIO_DMA.py) | Current stable GUI entry point |
 | [`plugins/user/1541hud-probe/`](plugins/user/1541hud-probe) | Passive acquisition/decoder USER plugin |
-| [`plugins/system/usb/`](plugins/system/usb) | OneROM USB SYSTEM plugin with 1541HUD mailbox transport |
+| [`plugins/system/usb/`](plugins/system/usb) | USB SYSTEM plugin with 1541HUD mailbox transport |
 | [`firmware/src/piodma/pio.c`](firmware/src/piodma/pio.c) | Passive firmware integration |
-| [`1541hud/Build-1541HUD-V031.ps1`](1541hud/Build-1541HUD-V031.ps1) | Canonical candidate build script |
+| [`1541hud/Build-1541HUD-V031.ps1`](1541hud/Build-1541HUD-V031.ps1) | Canonical V0.0.31 build script |
 
-See [`1541hud/README.md`](1541hud/README.md) for build and reproducibility details.
+The rest of the repository largely remains the upstream OneROM v0.7.1 foundation required to build, test, and maintain 1541HUD. Upstream documentation and tooling are intentionally retained rather than copied into a separate vendored snapshot.
+
+See [`1541hud/README.md`](1541hud/README.md) for 1541HUD-specific build details and [`1541hud/CHANGELOG.md`](1541hud/CHANGELOG.md) for project release history.
 
 ## Versioning
 
-The existing tag **`v0.0.30`** remains the immutable, hardware-proven DriveHUD baseline. It is intentionally not moved or rewritten as part of the project rename.
+- **`v0.0.30`**: immutable DriveHUD hardware-proven baseline.
+- **`v0.0.31`**: current stable 1541HUD release and project rename baseline.
+- Future development starts from V0.0.31 and should preserve the passive-monitor invariants unless a change is deliberately tested and documented.
 
-The 1541HUD rename work is being prepared as a **V0.0.31 candidate** because source/build identifiers have changed. V0.0.31 should not be called hardware-proven until the renamed build passes CI and is verified on a real 1541.
+Tags are not moved or rewritten after release.
 
 ## Relationship to Upstream OneROM
 
-1541HUD-OneROM is based on **OneROM v0.7.1** and intentionally retains the upstream project history and source structure. Upstream OneROM remains the authority for general OneROM development.
+1541HUD-OneROM is based on **OneROM v0.7.1** and intentionally retains upstream history and source structure. Upstream OneROM remains the authority for general OneROM development.
 
-Future upstream releases should be evaluated and incorporated deliberately rather than automatically merged into the hardware-proven 1541HUD line.
+Future upstream releases should be evaluated and incorporated deliberately rather than automatically merged into the stable 1541HUD line.
 
 ## Credits
 
-**OneROM** was created by **Piers Finlayson**. 1541HUD would not exist in its current form without the OneROM Fire hardware, firmware architecture, plugin system, CLI tooling, and associated open-source work.
-
-Original project:
-
-- [github.com/piersfinlayson/one-rom](https://github.com/piersfinlayson/one-rom)
-- [onerom.org](https://onerom.org)
+**OneROM** was created by **Piers Finlayson**. 1541HUD depends on the OneROM Fire hardware, firmware architecture, plugin system, CLI tooling, and associated open-source work.
 
 1541HUD is an independent derivative project focused specifically on passive Commodore 1541 monitoring.
 
