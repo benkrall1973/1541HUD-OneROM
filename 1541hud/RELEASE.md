@@ -1,6 +1,6 @@
 # 1541HUD Release Process
 
-This file documents 1541HUD releases. The repository root `RELEASE.md` is retained as upstream OneROM reference material.
+This file is the authoritative release procedure for 1541HUD. The repository root `RELEASE.md` is a short pointer to this document so visitors do not accidentally follow the upstream OneROM publishing process.
 
 ## Stable release rules
 
