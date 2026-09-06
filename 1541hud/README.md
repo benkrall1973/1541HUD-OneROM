@@ -4,13 +4,13 @@
 
 1541HUD is the renamed continuation of the project originally developed as **DriveHUD**. It is a passive Commodore 1541 monitor for OneROM Fire-24-E.
 
-The hardware-proven runtime remains **DriveHUD V0.0.30**, preserved by tag `v0.0.30` at commit `73769e1`. That tag is historical and immutable. The current rename work is a **1541HUD V0.0.31 candidate** until the renamed build passes CI and is verified on real hardware.
+The previous **DriveHUD V0.0.30** release remains the immutable hardware-proven baseline at tag `v0.0.30`. **1541HUD V0.0.31** is the current stable renamed release and preserves the proven V0.0.30 acquisition/mailbox behavior while presenting the project under the 1541HUD name.
 
 1541HUD observes 1541 mechanism and DOS activity using RP2350 PIO/DMA capture and reports state to a Python GUI over USB CDC. The monitor is passive and never drives the 1541 bus.
 
-## Proven V0.0.30 Behavior
+## Established Behavior
 
-Hardware testing confirmed:
+The stable monitor line supports:
 
 - Normal cycle-program track tracking
 - 1541 Diagnostic Cartridge manual half-steps
@@ -30,7 +30,7 @@ UB3 remains the normal ROM-serving OneROM. UB4 runs 1541HUD as a passive monitor
 
 ## Important Invariants
 
-The rename does not authorize functional redesign. In particular:
+These rules come from the proven monitor behavior and should not be changed casually:
 
 - Do not casually retune the hardware-proven PIO/DMA acquisition.
 - `$0022=1` is the strong HOME anchor.
@@ -50,12 +50,13 @@ The rename does not authorize functional redesign. In particular:
 - `1541hud/gui/1541HUD_V0.0.31_PIO_DMA.py`
 - `plugins/user/1541hud-probe/`
 - `plugins/system/usb/`
+- `1541hud/CHANGELOG.md`
 
 The USER and SYSTEM `1541hud_mailbox.h` files define the shared mailbox protocol and must remain byte-identical.
 
-Thin `drivehud_mailbox.h` compatibility headers remain temporarily for the hardware-proven acquisition/USB implementation. They only alias legacy C identifiers to the renamed mailbox interface; they do not change the mailbox address, magic, size, ring offset, or event encoding.
+Thin `drivehud_mailbox.h` compatibility headers remain for the proven acquisition/USB implementation. They alias legacy C identifiers to the renamed mailbox interface and do not change the mailbox address, magic, size, ring offset, or event encoding.
 
-## Canonical Candidate Build
+## Canonical V0.0.31 Build
 
 From Windows PowerShell:
 
@@ -73,7 +74,7 @@ The script:
 6. Converts BIN to UF2.
 7. Reports SHA-256 hashes.
 
-Outputs are written to `build-1541hud/`.
+Outputs are written to `build-1541hud/` and are intentionally ignored by Git.
 
 ## Proven Build Environment
 
@@ -86,7 +87,7 @@ Outputs are written to `build-1541hud/`.
 
 ## Historical V0.0.30 Reproducibility
 
-The following hashes belong to the hardware-proven DriveHUD V0.0.30 source/build environment and are retained for historical verification. They are **not** expected to match the renamed candidate because source paths and metadata names have changed.
+The following hashes belong to the hardware-proven DriveHUD V0.0.30 source/build environment. They are retained for historical verification and are not expected to match renamed V0.0.31 builds because OneROM embeds source/path metadata.
 
 Original Desktop build:
 
@@ -100,13 +101,11 @@ Fresh-clone V0.0.30 hashes:
 - BIN SHA256: `6d9e59e3436f85899b68e42a3b2c1623a23a0494519f90a6223a3968cab67a25`
 - UF2 SHA256: `d50b21e8bdad7acd654bd9e70e41d029a4ff7bf23e8fb084e8dd79dcbe710c35`
 
-OneROM embeds source/path metadata, so cross-path whole-image hash equality is not expected.
-
 ## External Dependencies
 
 `picobootx` is pinned to `picobootx-rp2350-v0.1.0`.
 
-TinyUSB and pico-sdkless are not pinned to known historical commits. Do not invent pins for them merely to make a reproducibility claim look cleaner than reality.
+TinyUSB and pico-sdkless are not pinned to known historical commits. The repository therefore claims source-build reproducibility, not cross-machine bit-for-bit identity for all future dependency states.
 
 ## Attribution
 
