@@ -53,7 +53,7 @@ shared mailbox -> USB CDC -> Python GUI
 
 | Path | Purpose |
 |---|---|
-| [`1541hud/`](1541hud) | 1541HUD build script, project documentation, changelog, and GUI |
+| [`1541hud/`](1541hud) | 1541HUD build script, project documentation, changelog, release process, and GUI |
 | [`1541hud/gui/1541HUD_V0.0.31_PIO_DMA.py`](1541hud/gui/1541HUD_V0.0.31_PIO_DMA.py) | Current stable GUI entry point |
 | [`plugins/user/1541hud-probe/`](plugins/user/1541hud-probe) | Passive acquisition/decoder USER plugin |
 | [`plugins/system/usb/`](plugins/system/usb) | USB SYSTEM plugin with 1541HUD mailbox transport |
@@ -62,7 +62,15 @@ shared mailbox -> USB CDC -> Python GUI
 
 The rest of the repository largely remains the upstream OneROM v0.7.1 foundation required to build, test, and maintain 1541HUD. Upstream documentation and tooling are intentionally retained rather than copied into a separate vendored snapshot.
 
-See [`1541hud/README.md`](1541hud/README.md) for 1541HUD-specific build details and [`1541hud/CHANGELOG.md`](1541hud/CHANGELOG.md) for project release history.
+## Which Documentation to Use
+
+For 1541HUD itself, use these files first:
+
+- [`1541hud/README.md`](1541hud/README.md) for build, architecture, and reproducibility details.
+- [`1541hud/CHANGELOG.md`](1541hud/CHANGELOG.md) for 1541HUD/DriveHUD release history.
+- [`1541hud/RELEASE.md`](1541hud/RELEASE.md) for the 1541HUD release process.
+
+The repository root `CHANGELOG.md`, much of `docs/`, and other retained OneROM material describe the upstream OneROM foundation. They remain for provenance, build support, and future upstream comparison; they are not the 1541HUD release history or release procedure.
 
 ## Versioning
 
