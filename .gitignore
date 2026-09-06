@@ -10,6 +10,8 @@ apio/
 epio/
 pico-sdk/
 build-test/
+build-1541hud/
+build-drivehud/
 firmware/build*
 build/
 builds/
