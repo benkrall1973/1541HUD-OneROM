@@ -48,6 +48,7 @@ These rules come from the proven monitor behavior and should not be changed casu
 
 - `1541hud/Build-1541HUD-V031.ps1`
 - `1541hud/gui/1541HUD_V0.0.31_PIO_DMA.py`
+- `1541hud/gui/hud_core_v030.py` - intentionally retained hardware-proven V0.0.30 GUI core used by the V0.0.31 wrapper
 - `plugins/user/1541hud-probe/`
 - `plugins/system/usb/`
 - `1541hud/CHANGELOG.md`
