@@ -34,7 +34,7 @@ function Quote-Bash {
 }
 
 Write-Host ""
-Write-Host "1541HUD V0.0.31 candidate - canonical source build"
+Write-Host "1541HUD V0.0.31 - canonical source build"
 Write-Host ""
 
 if ([string]::IsNullOrWhiteSpace($Repo)) {
