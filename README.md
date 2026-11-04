@@ -12,9 +12,10 @@ The current Fire-24G baseline provides several paths:
 
 - Flash the supplied stock UB3 image for a safe Control/USB starting point.
 - Use 1541HUD on Windows for ROM selection, IEC device 8/9 selection, reset,
-  write-protect control, and LED policy.
+  UB3 write-protect sense/override, and LED policy.
 - Add a second, passive **UB4 Monitor** board for live telemetry on motor
-  activity, full- and half-track position, stepping activity, write status,
+  activity, full- and half-track position, stepping activity, observed
+  write-gate/write-pulse activity,
   disk density, headers, RPM, and SYNC activity. Unlike a simple activity
   light, the passive monitor can decode checksum-validated physical GCR
   headers, show sector coverage and recent header order, estimate disk identity,
