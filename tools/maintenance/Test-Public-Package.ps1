@@ -13,6 +13,23 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $PackageRoot = (Resolve-Path -LiteralPath $PackageRoot).Path
 
+function Get-Sha256Hex {
+    param([Parameter(Mandatory)][string]$Path)
+    $stream = [System.IO.File]::OpenRead($Path)
+    try {
+        $sha256 = [System.Security.Cryptography.SHA256]::Create()
+        try {
+            return ([System.BitConverter]::ToString($sha256.ComputeHash($stream))).Replace('-', '')
+        }
+        finally {
+            $sha256.Dispose()
+        }
+    }
+    finally {
+        $stream.Dispose()
+    }
+}
+
 $required = @(
     'README.md',
     'LICENSE',
@@ -85,7 +102,7 @@ foreach ($relative in $expectedMonitorInputs.Keys) {
     if ((Get-Item -LiteralPath $input).Length -ne 8192) {
         throw "Monitor input is not 8192 bytes: $relative"
     }
-    $actual = (Get-FileHash -LiteralPath $input -Algorithm SHA256).Hash
+    $actual = Get-Sha256Hex -Path $input
     if ($actual -ne $expectedMonitorInputs[$relative]) {
         throw "Monitor input hash mismatch: $relative"
     }
