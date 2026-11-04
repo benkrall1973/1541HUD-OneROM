@@ -41,14 +41,6 @@ time.
 > ideas, and troubleshooting, while learning and validating the hardware as I
 > go.
 
-1541HUD is a touchscreen/desktop companion for a Commodore 1541 fitted with
-two OneROM Fire-24G boards:
-
-- **UB3 Control** serves the drive ROM and provides USB control of ROM choice,
-  IEC device address, reset, write-protect override, and LED policy.
-- **UB4 Monitor** is electrically passive. It observes drive activity, head
-  movement, sync, motor state, and estimated RPM for display in 1541HUD.
-
 This repository is the public V8.1 Fire-24G baseline. It includes qualified
 source, wiring records, the 1541HUD Python application, ROM-free templates,
 and two ready-to-flash stock images. It deliberately does **not** distribute
