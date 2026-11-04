@@ -1,5 +1,10 @@
 # Fire-24G V8.1 Engineering Dossier
 
+> **Upstream status:** This work is based on a pinned, unreleased OneROM V8.1
+> development snapshot from [upstream `releases/0.8.1`](https://github.com/piersfinlayson/one-rom/tree/releases/0.8.1).
+> The 1541HUD integration is community-tested; it is not an official upstream
+> OneROM V8.1 release.
+
 This is the build-critical contract for the qualified 1541HUD system:
 Fire-24G OneROM UB3 Control, Fire-24G OneROM UB4 Monitor, and the Windows
 1541HUD. It supplements the detailed build/runbook documents. If a historical

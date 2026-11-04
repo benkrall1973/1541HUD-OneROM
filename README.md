@@ -37,10 +37,13 @@ time.
 > ideas, and troubleshooting, while learning and validating the hardware as I
 > go.
 
-This repository is the public V8.1 Fire-24G baseline. It includes qualified
-source, wiring records, the 1541HUD Python application, ROM-free templates,
-and two ready-to-flash stock images. It deliberately does **not** distribute
-third-party DOS ROMs.
+This repository is the public Fire-24G baseline built from a pinned,
+**unreleased** OneROM V8.1 development snapshot from
+[Piers Finlayson's upstream `releases/0.8.1` branch](https://github.com/piersfinlayson/one-rom/tree/releases/0.8.1).
+It is a community-tested integration, not an official upstream OneROM V8.1
+release. It includes qualified source, wiring records, the 1541HUD Python
+application, ROM-free templates, and two ready-to-flash stock images. It
+deliberately does **not** distribute third-party DOS ROMs.
 
 ## Before you start
 
