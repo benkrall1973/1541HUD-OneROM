@@ -4,9 +4,10 @@
 
 1541HUD is a OneROM community project for Commodore 1541 owners who want
 easier ROM switching, USB control, and optional live drive-status monitoring.
-It begins with one compatible **UB3 Control** OneROM board and a Windows
-interface, using the drive ROMs that you are entitled to use. From there, the
-installation can grow at your own pace.
+It begins with one compatible **UB3 Control** OneROM board and a practical
+Windows interface, using the drive ROMs that you are entitled to use. From
+there, the installation can grow at your own pace, including an optional small
+Raspberry Pi touchscreen display mounted with the drive.
 
 The current Fire-24G baseline provides several paths:
 
@@ -25,11 +26,6 @@ The current Fire-24G baseline provides several paths:
   the included templates and build documentation. A RAMBoard-capable C/A/E
   installation can support owner-supplied SpeedDOS, JiffyDOS, and DolphinDOS
   2.0 ROM sets where the required hardware and lawful ROM pages are present.
-
-The project is designed to work as a practical Windows-based tool today and
-can also support a small Raspberry Pi touchscreen display mounted with the
-drive. Firmware, setup guides, source, and testing material are available in
-this repository: [github.com/benkrall1973/1541HUD-OneROM](https://github.com/benkrall1973/1541HUD-OneROM).
 
 The goal is a useful baseline that the community can build on: additional
 qualified ROM layouts, monitor cards, diagnostics, display options, and
