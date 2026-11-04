@@ -1,0 +1,172 @@
+name: Release Build
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write
+  actions: read
+
+# Structured like ci.yml: the checks fan out across jobs, and the release itself
+# waits on them.  The tests and the firmware build are here as a gate on the tag
+# - a release should not be cut from a commit whose firmware does not build.
+#
+# No firmware binary is attached to the release.  The firmware everyone actually
+# uses is published to images.onerom.org, and Web and CLI fetch it from there;
+# a second binary, built on a different machine under the same version number,
+# was only ever a way for the two to drift apart.
+
+jobs:
+  emulator-tests:
+    name: Emulator tests (${{ matrix.name }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - group: 24-1
+            name: 24 pin, part 1
+          - group: 24-2
+            name: 24 pin, part 2
+          - group: 28-1
+            name: 28 pin, part 1
+          - group: 28-2
+            name: 28 pin, part 2
+          - group: 32
+            name: 32 pin
+          - group: 40
+            name: 40 pin
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libcurl4-openssl-dev libjson-c-dev libzip-dev make
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Arm GNU toolchain
+      uses: actions/cache@v6
+      with:
+        path: ~/arm-gnu-toolchain
+        key: arm-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/arm-toolchain-version') }}
+
+    - name: Install Arm GNU toolchain
+      run: echo "TOOLCHAIN=$(ci/install-arm-toolchain.sh)" >> "$GITHUB_ENV"
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: rust
+        shared-key: emulator-tests
+
+    - name: Run One ROM emulator tests
+      run: ci/test-emu.sh ${{ matrix.group }}
+
+  c-tests:
+    name: C tests
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v7
+
+    # These compile firmware C for the host, so they need neither Rust nor the
+    # Arm toolchain.  They do need the host compiler pinned in
+    # ci/c-compiler-version: the runner's default cc is GCC 13, which predates
+    # the -std=gnu23 these are built as.  ci/c-tests.sh defaults $CC to the
+    # pinned one, so nothing here names a version.
+    - name: Install host compiler
+      run: ci/install-c-compiler.sh
+
+    - name: Check log format strings
+      run: ci/check-log-formats.sh
+
+    - name: Run host C tests
+      run: ci/c-tests.sh
+
+  firmware:
+    name: Firmware and plugins
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libcurl4-openssl-dev libjson-c-dev libzip-dev make
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Arm GNU toolchain
+      uses: actions/cache@v6
+      with:
+        path: ~/arm-gnu-toolchain
+        key: arm-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/arm-toolchain-version') }}
+
+    - name: Install Arm GNU toolchain
+      run: echo "TOOLCHAIN=$(ci/install-arm-toolchain.sh)" >> "$GITHUB_ENV"
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: rust
+
+    - name: Build firmware
+      run: ci/build.sh ci
+
+    - name: Build plugins
+      run: |
+        make clean
+        make
+        make -C plugins/system/usb
+        make -C plugins/user/activity
+        make -C plugins/user/blink
+        make -C plugins/user/ext-flash
+        make -C plugins/user/host-control
+        make -C plugins/user/rgb
+        make -C plugins/user/slot-colour
+        make -C firmware/ora/examples
+
+  release:
+    name: Create GitHub release
+    runs-on: ubuntu-24.04
+    needs: [emulator-tests, c-tests, firmware]
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Extract version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+    - name: Build release notes
+      run: |
+        VERSION="${{ steps.version.outputs.VERSION }}"
+        if [ -f "CHANGELOG.md" ]; then
+        # Find the version line and extract everything after it until next ## or end of file
+        CHANGELOG_SECTION=$(awk "/^## ${VERSION}/ { found=1; next } found && /^## / { exit } found { print }" CHANGELOG.md)
+
+        if [ -z "$CHANGELOG_SECTION" ]; then
+            CHANGELOG_SECTION="No changelog entry found for this version."
+        fi
+
+        # Replace placeholder (escape newlines for sed)
+        printf '%s\n' "$CHANGELOG_SECTION" > /tmp/changelog.txt
+        sed -e '/\[CHANGELOG_PLACEHOLDER\]/{
+            r /tmp/changelog.txt
+            d
+        }' docs/release-notes-common.md > release.md.tmp && mv release.md.tmp release.md
+        else
+        sed -i 's/\[CHANGELOG_PLACEHOLDER\]/No CHANGELOG.md found./' docs/release-notes-common.md
+        cp docs/release-notes-common.md release.md
+        fi
+
+    - name: Create GitHub Release
+      run: |
+        gh release create ${{ steps.version.outputs.VERSION }} \
+          --title "Release ${{ steps.version.outputs.VERSION }}" \
+          --notes-file release.md \
+          --latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

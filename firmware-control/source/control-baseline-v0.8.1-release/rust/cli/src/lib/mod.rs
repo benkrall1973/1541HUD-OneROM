@@ -1,0 +1,58 @@
+// Copyright (C) 2026 Piers Finlayson <piers@piers.rocks>
+//
+// MIT License
+
+//! One ROM CLI library.
+//!
+//! Implements the logic behind each CLI command. The binary in main.rs
+//! handles argument parsing and output formatting; this library owns
+//! everything in between.
+
+use clap::ValueEnum;
+
+pub mod byte_order;
+pub mod cdc;
+pub mod colour;
+pub mod device;
+pub mod error;
+pub mod fetch;
+pub mod gpio;
+pub mod hint;
+pub mod image;
+pub mod otp;
+pub mod picobootx;
+pub mod pin;
+pub mod plugin;
+pub mod ram_log;
+pub mod read_back;
+pub mod release;
+pub mod reset;
+pub mod scan;
+pub mod signing;
+pub mod slot;
+pub mod usb;
+
+pub use device::{Device, DeviceState, Firmware};
+pub use error::Error;
+pub use fetch::CliFetch;
+
+pub const LIVE_ROM_BASE: u32 = onerom_metadata::LIVE_ROM_BASE_ADDR;
+pub const LIVE_ROM_MAX_OFFSET: u32 = onerom_metadata::MAX_ROM_IMAGE_SIZE as u32;
+
+#[derive(ValueEnum, Clone, Default, Debug)]
+pub enum LogLevel {
+    #[default]
+    Warn,
+    Info,
+    Debug,
+    Trace,
+}
+
+pub struct Options {
+    pub verbose: bool,
+    pub log_level: LogLevel,
+    pub yes: bool,
+    pub unrecognised: bool,
+    pub device: Option<Device>,
+    pub vid_pid: Vec<(u16, u16)>,
+}

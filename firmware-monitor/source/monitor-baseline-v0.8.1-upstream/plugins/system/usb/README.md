@@ -1,0 +1,126 @@
+# System USB Plugin
+
+This directory holds the source code for One ROM's USB plugin, which provides USB management of One ROM while it is serving ROMs.  This USB support can be used to live inspect and modify the ROM currently being served, as well as the rest of the One ROM firmware.
+
+The USB stack is implemented as one of One ROM's plugins, allowing users to customize their One ROM configuration (to add or remove USB stack support as desired), and also allowing users to replace the USB with their own, or modify One ROM's - all while using the stock core firmware.
+
+The protocol used over USB is a variant of Raspberry Pi's picoboot protocol, which is normally supported by an RP2350 in BOOTSEL mode.  However, this plugin implements the picoboot protocol while the device is running (i.e. isn't in BOOTSEL mode), and also extends picoboot with additional custom One ROM specific commands, in a method that is compatible with the original picoboot protocol.
+
+The picoboot protocol is specified in the RP2350 datasheet, and this plugin uses the [picobootx](https://github.com/piersfinlayson/picobootx) library to implement and extend picoboot.
+
+The primary tool used to manage live One ROMs is the [One ROM Cli](/rust/cli).
+
+## Pre-requisites
+
+A One ROM [build environment](/INSTALL.md).
+
+## Building
+
+From this directory:
+
+```bash
+make
+```
+
+Produces:
+
+```bash
+$ ls -l build/plugin*
+-rwxr-xr-x  1 pdf  staff   23932 Mar 18 08:20 build/plugin_system_usb.bin
+-rw-r--r--@ 1 pdf  staff  387695 Mar 18 08:20 build/plugin_system_usb.dis
+-rwxr-xr-x  1 pdf  staff   49968 Mar 18 08:20 build/plugin_system_usb.elf
+-rw-r--r--@ 1 pdf  staff   64681 Mar 18 08:20 build/plugin_system_usb.map
+```
+
+## Using
+
+Config set/slot 0 of your One ROM to use the `plugin_system_usb.bin` file as a system plugin.  Here is a sample config fragment to do that:
+
+```json
+{
+    "$schema": "https://images.onerom.org/configs/schema.json",
+    "version": 1,
+    "name": "24-plugin",
+    "description": "24 pin plugin example",
+    "categories": [],
+    "rom_sets": [
+        {
+            "type": "single",
+            "roms": [
+                {
+                    "description": "System plugin - USB",
+                    "file": "/Users/pdf/builds/one-rom-temp/plugins/system/usb/build/plugin_system_usb.bin",
+                    "type": "system_plugin",
+                    "size_handling": "pad"
+                }
+            ]
+        },
+        {
+            "type": "single",
+            "roms": [
+                {
+                    "description": "C64 stock kernal",
+                    "file": "https://www.zimmers.net/anonftp/pub/cbm/firmware/computers/c64/kernal.901227-03.bin",
+                    "type": "2364",
+                    "cs1": "active_low"
+                }
+            ]
+        }
+    ]
+}
+```
+
+## How it works
+
+As of firmware 0.6.7 One ROM supports up to 2 plugins.  It launches these after the core byte serving has been started, one plugin on each of the RP2350's cores.
+
+The USB system plugin uses tinyusb to implement a USB device containing:
+- a dummy vendor interface (required to provide compatibility with Raspberry Pi's picotool)
+- the picobootx vendor interface used to manage One ROM live
+- a bi-directional CDC interface, carrying One ROM's logs out to and data in from a terminal and data what the terminal sends back in. See [Logging](/docs/LOGGING.md).
+- a second CDC interface, serial port 2, enabled when a user plugin's peer data block has its flag set. It sends log channel 2 to the host and writes data from the host to log channel 3. See [Serial ports](#serial-ports).
+
+The majority of the picoboot protocol is supported, and there are also extensions to provide additional functionality:
+- Live ROM image reading/writing (using a virtual address located at 0x9000_0000)
+- Control of the status LED
+- Control of standby mode
+
+Additional function is expected be added in the future.
+
+Currently, updating the firmware, ROM metadata and this USB plugin must be done with One ROM in BOOTSEL ("stopped") mode.  The picoboot REBOOT2 command can be used to reboot a running One ROM with this USB plugin into stopped mode.  ROM images stored on flash can be updated while One ROM is running.
+
+For more information about One ROM's plugin system, see the [plugin API documentation](/firmware/ora/plugin.h).
+
+## Serial ports
+
+A user plugin sets the serial ports and their descriptions with a peer data block in this format. A plugin's peer data blocks are described at `ora_peer_data_header_t` in the [plugin API](/firmware/ora/api.h).
+
+| Word | Contents | Default |
+| --- | --- | --- |
+| 0 | `0x63425355`, "USBc" | |
+| 1 | The block's size in bytes, 24 | |
+| 2 | The version, 1 | |
+| 3 | Flags. Serial port 1 is enabled when bit 0 is set, and serial port 2 is enabled when bit 1 is set. | `0x1`, serial port 1 only |
+| 4 | Address of serial port 1's description | 0, "One ROM Serial" |
+| 5 | Address of serial port 2's description | 0, "One ROM Serial 2" |
+
+[usb_peer.h](include/usb_peer.h) defines this format as `usb_peer_usbc_t`.
+
+The defaults are used when the user plugin doesn't have a valid USBc block.
+
+A description is NUL-terminated printable ASCII of at most 31 characters in the user plugin's flash region.
+
+If only serial port 2 is enabled it is the host's first serial port.
+
+Log channels 2 and 3 exist only if their sizes are set in a plugin header.
+
+The USB plugin's own peer data block is used to advertise its capabilities to other plugins, using the following format:
+
+| Word | Contents |
+| --- | --- |
+| 0 | `0x69425355`, "USBi" |
+| 1 | The block's size in bytes, 16 |
+| 2 | The version, 1 |
+| 3 | Supported serial ports. Bit 0 is set if serial port 1 is supported, and bit 1 is set if serial port 2 is supported. |
+
+`usb_peer.h` defines this format as `usb_peer_usbi_t`.

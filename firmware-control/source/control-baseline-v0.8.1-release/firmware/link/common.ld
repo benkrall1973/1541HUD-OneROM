@@ -1,0 +1,139 @@
+/* This is the main One ROM linker script. */
+/* */
+/* It is included by linker.ld: */
+/* */
+/* INCLUDE "common_vars.ld" */
+/* */
+/* MEMORY */
+/* { */
+/*     FLASH (rx) : ORIGIN = FLASH_CS0_BASE_ADDR, LENGTH = FIRMWARE_SIZE */
+/*     RAM (xrw)  : ORIGIN = 0x20000000, LENGTH = 520K */
+/* } */
+/*  */
+/* _Ram_Rom_Image_Start = ORIGIN(RAM); */
+/* _Ram_Rom_Image_Size = MAX_ROM_IMAGE_SIZE; */
+/*  */
+/* INCLUDE "common.ld" */
+/* */
+
+/* Entry Point */
+ENTRY(Reset_Handler)
+
+SECTIONS
+{
+    /* -------------- */
+    /* Flash sections */
+    /* -------------- */
+
+    /* Reset and interrupt vectors - must come first*/
+    INCLUDE "flash_isr_vector.ld"
+
+    /* Boot block - must come next (is auto-generated and RP2350 specific) */
+    INCLUDE "platform_boot_block.ld"
+
+    /* Next, at offset 0x200 is the onerom_info_t structure, containing info */
+    /* about the specific firmware build, pointers to ROM metadata, etc */
+    INCLUDE "flash_onerom_info.ld"
+
+    /* Next the binary info header, which picotool only finds if it is inside */
+    /* the first 1KB of the image.  Its own script asserts that it is. */
+    INCLUDE "flash_binary_info.ld"
+
+    /* Next goes text. */
+    INCLUDE "flash_text.ld"
+
+    /* Rest of the code comes next */
+    INCLUDE "flash_rodata.ld"
+
+    /* Mark the end of main portion of the firmware - later stuff is going */
+    /* to get put in the firmware section as well - specifically data: */
+    /* - onerom_runtime_info */
+    /* - data */
+    /* These are stored in the firmware (flash) and copied to RAM at startup */
+    /* in vector.c.*/
+    _flash_main_firmware_end = .;
+
+    /* ------------ */
+    /* RAM sections */
+    /* ------------ */
+
+    /* Reserved space in RAM to store the ROM image, so it can be looked-up */
+    /* directly from RAM.  This is specified so on the RP2350 we can set it */
+    /* to a specific SRAM bank, to try and avoid bus contention. */
+    INCLUDE "ram_rom_image.ld"
+
+    /* Next include space for any functions that may be copied to RAM. It */
+    /* doesn't really matter where these go. */
+    /* */
+    /* Remove, at least for now, to allow RP2350 access to 512KB RAM */
+    /* This will break the RAM function feature */
+    /* */
+    /* INCLUDE "ram_functions.ld" */
+
+    /* This is onerom_runtime_info_t.  This is pointed to by onerom_info_t, */
+    /* so that it is easy to analyse RAM and find it.  It contains useful */
+    /* runtime information about One ROM, like what ROM is being served and, */
+    /* if so configured, the number of ROM accesses. */
+    INCLUDE "ram_runtime_info.ld"
+
+    /* RAM data sections - data and bss */
+    INCLUDE "ram_data.ld"
+
+    /* BSS section - RAM to be zeroed on startup */
+    INCLUDE "ram_bss.ld"
+
+    ASSERT(. <= 0x20081000, "Error: RAM data/bss overlaps system plugin data region")
+
+    /* No stack section is reserved here.  The stacks are not placed by the */
+    /* linker: both cores' stacks are measured down from _estack at the top */
+    /* of RAM, by paint_stack_core0()/paint_stack_core1() in plugin.c, using */
+    /* the _Min_Stack_Size symbol from common_vars.ld.  The ASSERT above is */
+    /* what guarantees room for them, by keeping bss below the plugin data */
+    /* region.  A ._user_heap_stack section used to sit here, reserving */
+    /* _Min_Stack_Size of location counter immediately after bss - nowhere */
+    /* near where the stacks actually live, defining no symbols, and a */
+    /* strictly weaker check than the ASSERT.  There is no heap: libc, libm */
+    /* and libgcc are discarded below. */
+
+    /* Remove information from standard libraries */
+    /DISCARD/ :
+    {
+        libc.a ( * )
+        libm.a ( * )
+        libgcc.a ( * )
+    }
+}
+
+_ram_size = LENGTH(RAM);
+_end = ORIGIN(RAM) + _ram_size;
+
+_onerom_runtime_info_location = _end - 8192;
+
+/* Set initial stack pointer to end of RAM, except for reserved space */
+_estack = _end;
+
+/* Limit bss.  Almost all of it is the RTT log region: the 3584 byte up */
+/* buffer, the 16 byte down buffer and the 168 byte control block, declared */
+/* in src/rtt.c.  Reduce ONEROM_RTT_UP_BUFFER_SIZE there to reduce it. */
+/* */
+/* 3840 is the space between the start of bss and the system plugin data */
+/* region at 0x20081000, matching the overlap ASSERT after ram_bss.ld above. */
+/* The previous limit of 4284 was above that boundary, so it could never */
+/* fire before the overlap check did. */
+ASSERT(_bss_size <= 3840, "Error: BSS section too large")
+
+/* That leaves < 4K for stack, for both processors */
+
+/* Check data is zero */
+ASSERT(SIZEOF(.data) == 0, 
+    "Error: Data section is non zero - turn globals into const data")
+
+/* Check enough space for onerom_runtime_info structure */
+ASSERT(SIZEOF(.onerom_runtime_info) <= _Onerom_Runtime_Info_Size, 
+    "Error: onerom_runtime_info structure too large for allocated space")
+
+/* The FLASH region doesn't cover the runtime info's load copy, which AT() */
+/* places after the flash sections.  This checks the whole image, that copy */
+/* included, fits the firmware region. */
+ASSERT(_flash_firmware_end <= ORIGIN(FLASH) + FIRMWARE_SIZE,
+    "Error: Firmware exceeds its flash region")

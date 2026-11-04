@@ -1,0 +1,253 @@
+// Copyright (C) 2026 Piers Finlayson <piers@piers.rocks>
+//
+// MIT License
+
+// What an integrator's partial ops table does.
+//
+// picoboot_ops_t is a table of callbacks, and an integrator fills in the ones
+// their device supports.  A hole in it is not a mistake — it is how a device
+// says it does not do that — so every hole has a defined answer, and the answers
+// are not all the same.  A command whose work is entirely the callback's is
+// refused as unknown.  An action whose callback is advisory succeeds without it.
+// Each scenario here also shows the same command working once the callback is
+// put back, so what is being pinned is the hole and not the command.
+
+#include <string.h>
+
+#include "pbt.h"
+
+// ---------------------------------------------------------------------------
+// Actions whose callbacks are optional
+// ---------------------------------------------------------------------------
+
+static void scenario_optional_action_callbacks_may_be_absent(void) {
+    // These three commands are acknowledged whether or not the integrator has
+    // anything to do for them.  A device with no exclusive-access notion and
+    // nothing to do on entering or leaving execute-in-place is a device that
+    // simply agrees, which is what a host expects of a no-op command.
+    const struct {
+        const char *name;
+        uint8_t     cmd_id;
+        uint8_t     cmd_size;
+        const char *op;
+    } cases[] = {
+        { "EXCLUSIVE_ACCESS", PB_CMD_EXCLUSIVE_ACCESS, 0x01u,
+          "op_exclusive_access" },
+        { "EXIT_XIP",  PB_CMD_EXIT_XIP,  0x00u, "op_exit_xip" },
+        { "ENTER_XIP", PB_CMD_ENTER_XIP, 0x00u, "op_enter_xip" },
+    };
+
+    for (unsigned i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
+        pbt_begin();
+        pbt_ops.exclusive_access = NULL;
+        pbt_ops.exit_xip         = NULL;
+        pbt_ops.enter_xip        = NULL;
+        pbt_start();
+
+        picoboot_cmd_t cmd = pbt_cmd(cases[i].cmd_id, cases[i].cmd_size, 0u);
+        pb_status_t got = pbt_run_cmd(&cmd);
+        if (got != PB_STATUS_OK) {
+            pbt_fail(__FILE__, __LINE__, "%s without its callback: %s",
+                     cases[i].name, pbt_status_name((int)got));
+            continue;
+        }
+        if (pbt_count(cases[i].op) != 0) {
+            pbt_fail(__FILE__, __LINE__, "%s called a callback that is not there",
+                     cases[i].name);
+        }
+        // Acknowledged, so the host is not left waiting on a command that was
+        // quietly dropped.
+        if (pbt_packet_count() != 1u || pbt_packet(0)->len != 1u) {
+            pbt_fail(__FILE__, __LINE__, "%s was not acknowledged",
+                     cases[i].name);
+        }
+
+        // With the table complete the same command reaches the callback, so the
+        // silence above was the hole and not the command.
+        pbt_begin();
+        pbt_start();
+        picoboot_cmd_t again = pbt_cmd(cases[i].cmd_id, cases[i].cmd_size, 0u);
+        if (pbt_run_cmd(&again) != PB_STATUS_OK ||
+            pbt_count(cases[i].op) != 1) {
+            pbt_fail(__FILE__, __LINE__,
+                     "%s did not reach its callback with the table complete",
+                     cases[i].name);
+        }
+    }
+}
+
+static void scenario_an_action_callback_that_refuses_stalls(void) {
+    pbt_begin();
+    pbt_start();
+
+    // The default implementation accepts the three defined exclusive-access
+    // types and refuses anything else, and a refusal from an action's callback
+    // halts the command with the callback's own status rather than a generic
+    // one.
+    picoboot_cmd_t cmd = pbt_cmd(PB_CMD_EXCLUSIVE_ACCESS, 0x01u, 0u);
+    pbt_args_exclusive_access(&cmd, 0x7Fu);
+
+    PBT_CHECK_STATUS(pbt_run_cmd(&cmd), PB_STATUS_INVALID_ARG);
+    PBT_CHECK_EQ(pbt_count("op_exclusive_access"), 1);
+    PBT_CHECK_EQ(pbt_cur_state(), PB_STATE_STALLED);
+    PBT_CHECK_EQ(pbt_packet_count(), 0u);
+
+    // Each defined type is accepted, so what was refused was the value and not
+    // the command.
+    const uint8_t accepted[] = {
+        PB_EA_NOT_EXCL, PB_EA_EXCL, PB_EA_EXCL_AND_EJECT,
+    };
+    for (unsigned i = 0; i < sizeof(accepted) / sizeof(accepted[0]); i++) {
+        pbt_recover();
+        picoboot_cmd_t ok = pbt_cmd(PB_CMD_EXCLUSIVE_ACCESS, 0x01u, 0u);
+        pbt_args_exclusive_access(&ok, accepted[i]);
+        pb_status_t got = pbt_run_cmd(&ok);
+        if (got != PB_STATUS_OK) {
+            pbt_fail(__FILE__, __LINE__, "exclusive access type %u: %s",
+                     accepted[i], pbt_status_name((int)got));
+        }
+    }
+}
+
+// The status the stub below returns, set by the scenario that installs it.
+static pb_status_t s_forced_status;
+
+static pb_status_t forced_exit_xip(void *ctx) {
+    (void)ctx;
+    pbt_log("op_exit_xip", 0u, 0u, 0u, 0u);
+    return s_forced_status;
+}
+
+static void scenario_every_status_a_callback_returns_reaches_the_host(void) {
+    // A callback's return is the whole of what the host is told about the
+    // command, and it crosses the library from an integrator's function to the
+    // status packet without being interpreted.  Every value the header defines
+    // is sent through one at a time, so a library that recognises some of them
+    // and turns the rest into a generic failure is caught here rather than by
+    // whichever integrator first returned the one that was dropped.
+    const pb_status_t all[] = {
+        PB_STATUS_OK,
+        PB_STATUS_UNKNOWN_CMD,
+        PB_STATUS_INVALID_CMD_LENGTH,
+        PB_STATUS_INVALID_TRANSFER_LEN,
+        PB_STATUS_INVALID_ADDRESS,
+        PB_STATUS_BAD_ALIGNMENT,
+        PB_STATUS_INTERLEAVED_WRITE,
+        PB_STATUS_REBOOTING,
+        PB_STATUS_UNKNOWN_ERROR,
+        PB_STATUS_INVALID_STATE,
+        PB_STATUS_NOT_PERMITTED,
+        PB_STATUS_INVALID_ARG,
+        PB_STATUS_BUFFER_TOO_SMALL,
+        PB_STATUS_PRECONDITION_NOT_MET,
+        PB_STATUS_MODIFIED_DATA,
+        PB_STATUS_INVALID_DATA,
+        PB_STATUS_NOT_FOUND,
+        PB_STATUS_UNSUPPORTED_MOD,
+    };
+
+    for (unsigned i = 0; i < sizeof(all) / sizeof(all[0]); i++) {
+        pbt_begin();
+        s_forced_status  = all[i];
+        pbt_ops.exit_xip = forced_exit_xip;
+        pbt_start();
+
+        picoboot_cmd_t cmd = pbt_cmd(PB_CMD_EXIT_XIP, 0x00u, 0u);
+        pb_status_t    got = pbt_run_cmd(&cmd);
+        if (got != all[i]) {
+            pbt_fail(__FILE__, __LINE__, "EXIT_XIP returning %s: host read %s",
+                     pbt_status_name((int)all[i]), pbt_status_name((int)got));
+            continue;
+        }
+        if (pbt_count("op_exit_xip") != 1) {
+            pbt_fail(__FILE__, __LINE__, "%s: the callback was not reached",
+                     pbt_status_name((int)all[i]));
+            continue;
+        }
+
+        // Success is acknowledged and everything else halts, so the status a
+        // host reads back is not the only thing that separates them.
+        bool ok = all[i] == PB_STATUS_OK;
+        if (ok && (pbt_cur_state() != PB_STATE_IDLE || pbt_packet_count() != 1u)) {
+            pbt_fail(__FILE__, __LINE__, "OK did not acknowledge the command");
+        }
+        if (!ok && (pbt_cur_state() != PB_STATE_STALLED || pbt_packet_count() != 0u)) {
+            pbt_fail(__FILE__, __LINE__, "%s did not halt the command",
+                     pbt_status_name((int)all[i]));
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// REBOOT2
+// ---------------------------------------------------------------------------
+
+static void scenario_reboot2_without_its_callback_is_refused(void) {
+    pbt_begin();
+    pbt_ops.reboot2 = NULL;
+    pbt_start();
+
+    // With no reboot callback the command fails.  Acknowledging it would
+    // promise a reboot that never happens.
+    picoboot_cmd_t cmd = pbt_cmd(PB_CMD_REBOOT2, 0x10u, 0u);
+    pbt_args_reboot2(&cmd, 0x0002u, 10u, 0u, 0u);
+
+    PBT_CHECK_STATUS(pbt_run_cmd(&cmd), PB_STATUS_UNKNOWN_CMD);
+    PBT_CHECK_EQ(pbt_count("rom_reboot"), 0);
+    PBT_CHECK_EQ(pbt_packet_count(), 0u);
+
+    pbt_begin();
+    pbt_start();
+    picoboot_cmd_t again = pbt_cmd(PB_CMD_REBOOT2, 0x10u, 0u);
+    pbt_args_reboot2(&again, 0x0002u, 10u, 0u, 0u);
+    PBT_CHECK_STATUS(pbt_run_cmd(&again), PB_STATUS_OK);
+    PBT_CHECK_EQ(pbt_count("rom_reboot"), 1);
+}
+
+// ---------------------------------------------------------------------------
+// WRITE
+// ---------------------------------------------------------------------------
+
+static void scenario_write_without_prepare_is_refused(void) {
+    pbt_begin();
+    pbt_ops.write_prepare = NULL;
+    pbt_start();
+
+    // Preparing is what decides whether the destination is writable at all, and
+    // whether it is flash or memory.  Without it the library cannot tell which
+    // of the two paths a write belongs to, so it refuses instead of guessing.
+    picoboot_cmd_t cmd = pbt_cmd(PB_CMD_WRITE, 0x08u, 16u);
+    pbt_args_addr_size(&cmd, RP2350_SRAM_BASE, 16u);
+
+    PBT_CHECK_STATUS(pbt_run_cmd(&cmd), PB_STATUS_UNKNOWN_CMD);
+    PBT_CHECK_EQ(pbt_count("op_write"), 0);
+    PBT_CHECK_EQ(pbt_cur_state(), PB_STATE_STALLED);
+
+    // The same write with the callback present is accepted and reaches memory.
+    pbt_begin();
+    pbt_start();
+    uint8_t data[16];
+    memset(data, 0x3Cu, sizeof(data));
+    picoboot_cmd_t again = pbt_cmd(PB_CMD_WRITE, 0x08u, sizeof(data));
+    pbt_args_addr_size(&again, RP2350_SRAM_BASE, sizeof(data));
+    pbt_host_send_cmd(&again);
+    pbt_pump();
+    pbt_host_send(data, sizeof(data));
+    pbt_pump();
+    PBT_CHECK_EQ(memcmp(pbt_sram(), data, sizeof(data)), 0);
+}
+
+static const pbt_scenario_t k_scenarios[] = {
+    { "an action's optional callback may be absent",
+      scenario_optional_action_callbacks_may_be_absent },
+    { "an action callback that refuses halts with its own status",
+      scenario_an_action_callback_that_refuses_stalls },
+    { "every status a callback returns reaches the host",
+      scenario_every_status_a_callback_returns_reaches_the_host },
+    { "REBOOT2 without its callback is refused",
+      scenario_reboot2_without_its_callback_is_refused },
+    { "WRITE without its prepare callback is refused",
+      scenario_write_without_prepare_is_refused },
+};
+
+PBT_SUITE(pbt_suite_ops, "ops", k_scenarios);

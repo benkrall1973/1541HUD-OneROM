@@ -1,0 +1,1312 @@
+// Copyright (C) 2026 Piers Finlayson <piers@piers.rocks>
+//
+// MIT License
+
+#include <string.h>
+#include "tusb.h"
+#include "picobootx_private.h"
+#include "picobootx_vendor.h"
+
+// picobootx's states as strings for logging
+const char * const pb_state_to_str[] = {
+    "IDLE",
+    "DATA_OUT",
+    "DATA_IN",
+    "CUSTOM_IN",
+    "AWAIT_ZLP",
+    "AWAIT_ACK",
+    "STALLED"
+};
+
+// ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
+
+#define USB_DPRAM_BASE      0x50100000u
+#define EP3_OUT_BUF_CTRL    (*(volatile uint32_t *)(USB_DPRAM_BASE + 0x80 + (3 * 8) + 4))
+#define EP83_IN_BUF_CTRL    (*(volatile uint32_t *)(USB_DPRAM_BASE + 0x80 + (4 * 8)))
+#define USB_BUFF_STATUS     (*(volatile uint32_t *)(0x50110058u))
+
+// Key bits in BUF_CTRL
+#define BUF_CTRL_AVAIL      (1u << 10)
+#define BUF_CTRL_STALL      (1u << 11)
+#define BUF_CTRL_FULL       (1u << 15)
+
+static void pb_set_state(pb_state_block_t *s, pb_state_t new_state) {
+    DEBUG("STATE: %s -> %s", pb_state_to_str[s->state], pb_state_to_str[new_state]);
+    s->state = new_state;
+
+    // A state that owes the host packets takes nothing from it.  What the host
+    // sends before it has collected them belongs to no command, and serving it
+    // sends those packets out to answer it.  The RP2350 boot ROM refuses the
+    // host here (datasheet 5.6.5.1).
+    if (new_state == PB_STATE_DATA_IN || new_state == PB_STATE_CUSTOM_IN) {
+        s->data_in_filled = false;
+        picoboot_vendor_read_pause();
+    } else {
+        picoboot_vendor_read_resume();
+    }
+#if 0
+    DEBUG("bc3=0x%08lx a=%u s=%u f=%u bs=0x%08lx",
+        EP3_OUT_BUF_CTRL,
+        (EP3_OUT_BUF_CTRL & BUF_CTRL_AVAIL) ? 1 : 0,
+        (EP3_OUT_BUF_CTRL & BUF_CTRL_STALL) ? 1 : 0,
+        (EP3_OUT_BUF_CTRL & BUF_CTRL_FULL)  ? 1 : 0,
+        USB_BUFF_STATUS);
+    DEBUG("bc84=0x%08lx a=%u s=%u f=%u bs=0x%08lx",
+        EP83_IN_BUF_CTRL,
+        (EP83_IN_BUF_CTRL & BUF_CTRL_AVAIL) ? 1 : 0,
+        (EP83_IN_BUF_CTRL & BUF_CTRL_STALL) ? 1 : 0,
+        (EP83_IN_BUF_CTRL & BUF_CTRL_FULL)  ? 1 : 0,
+        USB_BUFF_STATUS);
+        for (volatile int ii = 0; ii < 1000000; ii++);
+#endif
+}
+
+void pb_set_status(pb_state_block_t *s, pb_status_t code, bool in_progress) {
+    s->status.token       = s->token;
+    s->status.status_code = (uint32_t)code;
+    s->status.cmd_id      = s->cmd_id;
+    s->status.in_progress = in_progress ? 1u : 0u;
+    memset(s->status.reserved, 0, sizeof(s->status.reserved));
+}
+
+// Adopt a command as the one the device is working on.
+//
+// GET_COMMAND_STATUS answers out of the status block, and the picoboot
+// specification (RP2350 datasheet 5.6.5.2) requires it to answer for a command
+// that is still running as well as one that has finished — that is how a host
+// discovers why the bulk pipe stalled.  So the block names this command from
+// the moment it arrives, and reports it as in progress until pb_stall,
+// pb_send_zlp or the host's acknowledgement replaces that with an outcome.
+//
+// Every place that takes a command off the wire goes through here, so the
+// status block cannot be left naming a command the device has moved on from.
+static void pb_begin_cmd(pb_state_block_t *s, const picoboot_cmd_t *cmd) {
+    s->token  = cmd->token;
+    s->cmd_id = cmd->cmd_id;
+    pb_set_status(s, PB_STATUS_OK, true);
+}
+
+void pb_stall(pb_state_block_t *s, pb_status_t code) {
+    // Stall is used per the picoboot specification (RP2350 datasheet 5.6.4)
+    // if the command received was invalid or not recognised.  Both bulk
+    // endpoints are stalled.  The specification also implies the stall
+    // condition is set if a command failed (set GET_COMMAND_STATUS, RP2350
+    // datasheet 5.6.5.2).
+    // The RP2350 bootrom concurs, and sets in_progress to false.
+    ERR("STALL: cmd_id=0x%02x status=%u", s->cmd_id, code);
+    pb_set_status(s, code, false);
+    picoboot_vendor_stall_endpoint(s->ep_out);
+    picoboot_vendor_stall_endpoint(s->ep_in);
+    s->status.in_progress = false;
+    pb_set_state(s, PB_STATE_STALLED);
+}
+
+void pb_send_zlp(pb_state_block_t *s) {
+    pb_set_status(s, PB_STATUS_OK, false);
+    pb_set_state(s, PB_STATE_AWAIT_ZLP);
+    if (!picoboot_vendor_send_zlp()) {
+        ERR("pb_send_zlp: picoboot_vendor_send_zlp failed");
+        pb_stall(s, PB_STATUS_UNKNOWN_ERROR);
+        return;
+    }
+}
+
+const char *command_to_str(pb_cmd_id_t cmd) {
+    switch (cmd) {
+        case PB_CMD_EXCLUSIVE_ACCESS: return "EXCLUSIVE_ACCESS";
+        case PB_CMD_REBOOT:           return "REBOOT";
+        case PB_CMD_FLASH_ERASE:      return "FLASH_ERASE";
+        case PB_CMD_WRITE:            return "WRITE";
+        case PB_CMD_EXIT_XIP:         return "EXIT_XIP";
+        case PB_CMD_ENTER_XIP:        return "ENTER_XIP";
+        case PB_CMD_EXEC:             return "EXEC";
+        case PB_CMD_VECTORIZE_FLASH:  return "VECTORIZE_FLASH";
+        case PB_CMD_REBOOT2:          return "REBOOT2";
+        case PB_CMD_OTP_WRITE:        return "OTP_WRITE";
+        case PB_CMD_READ:             return "READ";
+        case PB_CMD_GET_INFO:         return "GET_INFO";
+        case PB_CMD_OTP_READ:         return "OTP_READ";
+        default:                     return "UNKNOWN";
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Data-in prepare functions
+// ---------------------------------------------------------------------------
+
+static pb_status_t pb_read_prepare(
+    pb_state_block_t *s,
+    const picoboot_cmd_t *cmd,
+    void *ctx
+) {
+    if (!s->ops->read_prepare || !s->ops->read) {
+        return PB_STATUS_UNKNOWN_CMD;
+    }
+    const pb_addr_size_args_t *args = (const pb_addr_size_args_t *)cmd->args;
+    pb_status_t st = s->ops->read_prepare(args->addr, args->size, ctx);
+    if (st != PB_STATUS_OK) {
+        return st;
+    }
+    s->xfer.read.addr      = args->addr;
+    s->xfer.read.remaining = args->size;
+    return PB_STATUS_OK;
+}
+
+static pb_status_t pb_get_info_prepare(
+    pb_state_block_t *s,
+    const picoboot_cmd_t *cmd,
+    void *ctx
+) {
+    if (cmd->transfer_len == 0u ||
+        (cmd->transfer_len & 0x3u) != 0u ||
+        cmd->transfer_len > PICOBOOT_GET_INFO_MAX_LEN) {
+        return PB_STATUS_INVALID_TRANSFER_LEN;
+    }
+    const pb_get_info_args_t *args = (const pb_get_info_args_t *)cmd->args;
+
+    // The four types the protocol defines (RP2350 datasheet 5.6.4.11).  Gating
+    // here rather than in the callback means a type outside them is refused
+    // without reaching an integrator, and the callback only ever sees a value
+    // pb_info_type_t names.  GET_INFO itself was recognised, so the command
+    // identifier was not the problem — the type asked for is outside the range
+    // the library serves, which is what INVALID_ARG says (table 471).
+    switch (args->info_type) {
+        case PB_INFO_SYS:
+        case PB_INFO_PARTITION:
+        case PB_INFO_UF2_TARGET:
+        case PB_INFO_UF2_STATUS:
+            break;
+        default:
+            LOG("Unsupported info_type: 0x%02x", args->info_type);
+            return PB_STATUS_INVALID_ARG;
+    }
+
+    if (!s->ops->get_info_prepare || !s->ops->get_info) {
+        return PB_STATUS_UNKNOWN_CMD;
+    }
+
+    uint32_t words = 0u;
+    pb_status_t st = s->ops->get_info_prepare((pb_info_type_t)args->info_type,
+                                              args->param0, &words, ctx);
+    if (st != PB_STATUS_OK) {
+        return st;
+    }
+    if (words > PICOBOOT_INFO_MAX_ANSWER_WORDS) {
+        ERR("GET_INFO type 0x%02x reported %u words, more than a transfer holds",
+            args->info_type, words);
+        return PB_STATUS_UNKNOWN_ERROR;
+    }
+
+    // The whole answer or none of it, judged against the answer this device
+    // says it will actually give rather than against what was asked for.
+    // BUFFER_TOO_SMALL is what PICOBOOT carries that refusal in (table 471).
+    uint32_t needed = (1u + words) * (uint32_t)sizeof(uint32_t);
+    if (cmd->transfer_len < needed) {
+        LOG("GET_INFO needs %u bytes, host asked for %u",
+            needed, cmd->transfer_len);
+        return PB_STATUS_BUFFER_TOO_SMALL;
+    }
+
+    s->xfer.get_info.type               = args->info_type;
+    s->xfer.get_info.param0             = args->param0;
+    s->xfer.get_info.answer_words       = (uint8_t)words;
+    s->xfer.get_info.answer_sent        = 0u;
+    s->xfer.get_info.count_sent         = false;
+    s->xfer.get_info.transfer_remaining = cmd->transfer_len;
+    return PB_STATUS_OK;
+}
+
+static pb_status_t pb_otp_read_prepare(
+    pb_state_block_t *s,
+    const picoboot_cmd_t *cmd,
+    void *ctx
+) {
+    if (!s->ops->otp_read) {
+        return PB_STATUS_UNKNOWN_CMD;
+    }
+    const pb_otp_args_t *args = (const pb_otp_args_t *)cmd->args;
+    if (s->ops->otp_read_prepare) {
+        pb_status_t st = s->ops->otp_read_prepare(args->row, args->row_count,
+                                                  args->ecc, ctx);
+        if (st != PB_STATUS_OK) {
+            return st;
+        }
+    }
+    s->xfer.otp.current_row    = args->row;
+    s->xfer.otp.rows_remaining = args->row_count;
+    s->xfer.otp.ecc            = args->ecc;
+    return PB_STATUS_OK;
+}
+
+// ---------------------------------------------------------------------------
+// Data-in fill functions
+// ---------------------------------------------------------------------------
+
+static pb_status_t pb_read_fill(
+    pb_state_block_t *s,
+    uint8_t *buf,
+    uint32_t max_len,
+    uint32_t *bytes_written,
+    bool *done,
+    void *ctx
+) {
+    pb_in_read_t *r = &s->xfer.read;
+    *bytes_written = 0u;
+    *done = false;
+
+    if (r->remaining == 0u) {
+        *done = true;
+        return PB_STATUS_OK;
+    }
+
+    uint32_t chunk = r->remaining < max_len ? r->remaining : max_len;
+    pb_status_t st = s->ops->read(r->addr, buf, chunk, ctx);
+    if (st != PB_STATUS_OK) {
+        return st;
+    }
+    r->addr        += chunk;
+    r->remaining   -= chunk;
+    *bytes_written  = chunk;
+    *done           = (r->remaining == 0u);
+    return PB_STATUS_OK;
+}
+
+static pb_status_t pb_get_info_fill(
+    pb_state_block_t *s,
+    uint8_t *buf,
+    uint32_t max_len,
+    uint32_t *bytes_written,
+    bool *done,
+    void *ctx
+) {
+    pb_in_get_info_t *gi = &s->xfer.get_info;
+    *bytes_written = 0u;
+    *done = false;
+
+    // Unreachable.  pb_get_info_prepare refuses a transfer length of zero
+    // before the command reaches a data phase, so the first call here always
+    // has bytes owed, and each of the three places below that takes the count
+    // down reports done in the same call when it reaches zero — on which the
+    // pump leaves the data-in state.  So there is no call with nothing left to
+    // send.  The arm stays because the same guard opens all three data-in
+    // fills, and READ and OTP_READ do carry a zero-length transfer.
+    if (gi->transfer_remaining == 0u) {
+        // LCOV_UNREACHABLE_START
+        *done = true;
+        return PB_STATUS_OK;
+        // LCOV_UNREACHABLE_STOP
+    }
+
+    if (max_len < sizeof(uint32_t)) {
+        return PB_STATUS_OK;  // signal retry
+    }
+
+    // The count of the significant words that follow (RP2350 datasheet
+    // 5.6.4.11).  This word is the library's, and everything after it is the
+    // device's answer, whatever shape its type gives that.
+    if (!gi->count_sent) {
+        uint32_t word = gi->answer_words;
+        memcpy(buf, &word, sizeof(uint32_t));
+        gi->count_sent = true;
+        gi->transfer_remaining -= sizeof(uint32_t);
+        *bytes_written = sizeof(uint32_t);
+        *done = (gi->transfer_remaining == 0u);
+        return PB_STATUS_OK;
+    }
+
+    // The answer, from where the last call left off.  The room offered is never
+    // more than the answer has left to give, so the callback cannot put a byte
+    // past what the count word promised.
+    if (gi->answer_sent < gi->answer_words) {
+        uint32_t owed = (uint32_t)(gi->answer_words - gi->answer_sent)
+                        * (uint32_t)sizeof(uint32_t);
+        uint32_t room = max_len < owed ? max_len : owed;
+        room &= ~(uint32_t)(sizeof(uint32_t) - 1u);
+
+        pb_status_t st = s->ops->get_info((pb_info_type_t)gi->type, gi->param0,
+                                          gi->answer_sent, buf, room,
+                                          bytes_written, ctx);
+        if (st != PB_STATUS_OK) {
+            *bytes_written = 0u;
+            return st;
+        }
+        // The count comes from the integrator.  More than the room offered
+        // would read past the end of buf, and a part word would leave at_word
+        // naming a boundary that is not one.
+        if (*bytes_written > room || (*bytes_written & 0x3u) != 0u) {
+            ERR("get_info type 0x%02x wrote %u bytes for %u of room",
+                gi->type, *bytes_written, room);
+            *bytes_written = 0u;
+            return PB_STATUS_UNKNOWN_ERROR;
+        }
+        gi->answer_sent = (uint8_t)(gi->answer_sent
+                                    + *bytes_written / sizeof(uint32_t));
+        gi->transfer_remaining -= *bytes_written;
+        *done = (gi->transfer_remaining == 0u);
+        return PB_STATUS_OK;  // a count of zero signals retry
+    }
+
+    // Whatever the host still expects, and nothing left to say.  Padded in
+    // whole words, like everything else this reply carries, which is what keeps
+    // transfer_remaining a multiple of four: the call above declines room for
+    // less than a word, and a part word left behind here would leave it
+    // declining that room for the rest of the transfer.
+    uint32_t chunk = gi->transfer_remaining < max_len ? gi->transfer_remaining : max_len;
+    chunk &= ~(uint32_t)(sizeof(uint32_t) - 1u);
+    memset(buf, 0, chunk);
+    gi->transfer_remaining -= chunk;
+    *bytes_written = chunk;
+    *done = (gi->transfer_remaining == 0u);
+    return PB_STATUS_OK;
+}
+
+static pb_status_t pb_otp_read_fill(
+    pb_state_block_t *s,
+    uint8_t *buf,
+    uint32_t max_len,
+    uint32_t *bytes_written,
+    bool *done,
+    void *ctx
+) {
+    pb_otp_access_t *otp = &s->xfer.otp;
+    *bytes_written = 0u;
+    *done = false;
+
+    if (otp->rows_remaining == 0u) {
+        *done = true;
+        return PB_STATUS_OK;
+    }
+
+    uint32_t row_size        = otp->ecc ? 2u : 4u;
+    uint32_t total_remaining = row_size * otp->rows_remaining;
+    uint32_t chunk           = total_remaining < max_len ? total_remaining : max_len;
+    chunk = (chunk / row_size) * row_size;  // round down to row boundary
+
+    if (chunk == 0u) {
+        return PB_STATUS_OK;  // signal retry
+    }
+
+    pb_status_t st = s->ops->otp_read(otp->current_row, otp->ecc, buf, chunk, ctx);
+    if (st != PB_STATUS_OK) {
+        return st;
+    }
+
+    uint32_t rows_done  = chunk / row_size;
+    otp->current_row    += (uint16_t)rows_done;
+    otp->rows_remaining -= (uint16_t)rows_done;
+    *bytes_written      = chunk;
+    *done               = (otp->rows_remaining == 0u);
+    return PB_STATUS_OK;
+}
+
+static pb_status_t pb_otp_write_prepare(
+    pb_state_block_t *s,
+    const picoboot_cmd_t *cmd,
+    void *ctx
+) {
+    if (!s->ops->otp_write) {
+        return PB_STATUS_UNKNOWN_CMD;
+    }
+    const pb_otp_args_t *args = (const pb_otp_args_t *)cmd->args;
+    if (s->ops->otp_write_prepare) {
+        pb_status_t st = s->ops->otp_write_prepare(args->row, args->row_count,
+                                                   args->ecc, ctx);
+        if (st != PB_STATUS_OK) {
+            return st;
+        }
+    }
+    s->xfer.otp.current_row    = args->row;
+    s->xfer.otp.rows_remaining = args->row_count;
+    s->xfer.otp.ecc            = args->ecc;
+    return PB_STATUS_OK;
+}
+
+static pb_status_t pb_otp_write_consume(
+    pb_state_block_t *s,
+    const uint8_t *buf,
+    uint32_t len,
+    bool *done,
+    void *ctx
+) {
+    pb_otp_access_t *otp = &s->xfer.otp;
+    *done = false;
+
+    uint32_t row_size = otp->ecc ? 2u : 4u;
+
+    // len must be a multiple of row_size — should be guaranteed by transfer_len validation
+    uint32_t rows = len / row_size;
+    if (rows == 0u) {
+        return PB_STATUS_OK;
+    }
+
+    pb_status_t st = s->ops->otp_write(otp->current_row, otp->ecc, buf, len, ctx);
+    if (st != PB_STATUS_OK) {
+        return st;
+    }
+
+    otp->current_row    += (uint16_t)rows;
+    otp->rows_remaining -= (uint16_t)rows;
+    *done = (otp->rows_remaining == 0u);
+    return PB_STATUS_OK;
+}
+
+// ---------------------------------------------------------------------------
+// Data-out prepare and consume functions
+// ---------------------------------------------------------------------------
+
+static pb_status_t pb_write_prepare(
+    pb_state_block_t *s,
+    const picoboot_cmd_t *cmd,
+    void *ctx
+) {
+    if (!s->ops->write_prepare) {
+        return PB_STATUS_UNKNOWN_CMD;
+    }
+    const pb_addr_size_args_t *args = (const pb_addr_size_args_t *)cmd->args;
+    bool is_flash = false;
+    pb_status_t st = s->ops->write_prepare(args->addr, args->size, &is_flash, ctx);
+    if (st != PB_STATUS_OK) {
+        return st;
+    }
+    if (is_flash) {
+        if (!s->flash_write_buf || !s->ops->flash_page_write) {
+            return PB_STATUS_NOT_PERMITTED;
+        }
+    } else {
+        if (!s->ops->write) {
+            return PB_STATUS_UNKNOWN_CMD;
+        }
+    }
+    s->xfer.write.addr        = args->addr;
+    s->xfer.write.expected    = args->size;
+    s->xfer.write.received    = 0u;
+    s->xfer.write.is_flash    = is_flash;
+    s->xfer.write.page_offset = 0u;
+    return PB_STATUS_OK;
+}
+
+static pb_status_t pb_write_consume(
+    pb_state_block_t *s,
+    const uint8_t *buf,
+    uint32_t len,
+    bool *done,
+    void *ctx
+) {
+    pb_out_write_t *w = &s->xfer.write;
+    *done = false;
+
+    if (w->is_flash) {
+        const uint8_t *src = buf;
+        uint32_t remaining = len;
+
+        while (remaining > 0u) {
+            uint32_t space = 256u - w->page_offset;
+            uint32_t chunk = remaining < space ? remaining : space;
+            memcpy(s->flash_write_buf + w->page_offset, src, chunk);
+            w->page_offset += (uint16_t)chunk;
+            src            += chunk;
+            remaining      -= chunk;
+            w->received    += chunk;
+
+            bool page_full = (w->page_offset == 256u);
+            bool all_done  = (w->received == w->expected);
+
+            if (page_full || all_done) {
+                // Zero-pad partial final page before writing
+                if (w->page_offset < 256u) {
+                    memset(s->flash_write_buf + w->page_offset, 0,
+                           256u - w->page_offset);
+                }
+                pb_status_t st = s->ops->flash_page_write(
+                    w->addr, s->flash_write_buf, ctx);
+                if (st != PB_STATUS_OK) {
+                    return st;
+                }
+                w->addr       += w->page_offset;
+                w->page_offset = 0u;
+            }
+        }
+    } else {
+        pb_status_t st = s->ops->write(w->addr, buf, len, ctx);
+        if (st != PB_STATUS_OK) {
+            return st;
+        }
+        w->addr     += len;
+        w->received += len;
+    }
+
+    *done = (w->received == w->expected);
+    return PB_STATUS_OK;
+}
+
+// ---------------------------------------------------------------------------
+// Per-command dispatch table
+// ---------------------------------------------------------------------------
+
+// Transfer length derivation functions for args-computed cases
+static uint32_t tlen_addr_size(const picoboot_cmd_t *cmd) {
+    const pb_addr_size_args_t *a = (const pb_addr_size_args_t *)cmd->args;
+    return a->size;
+}
+
+static uint32_t tlen_otp(const picoboot_cmd_t *cmd) {
+    const pb_otp_args_t *a = (const pb_otp_args_t *)cmd->args;
+    return a->row_count * (a->ecc ? 2u : 4u);
+}
+
+static const pb_cmd_table_entry_t k_cmd_table[] = {
+    { PB_CMD_EXCLUSIVE_ACCESS, PB_CAT_ACTION_SYNC,     0x01u, NULL,           false, NULL,                 { NULL }              },
+    { PB_CMD_EXIT_XIP,         PB_CAT_ACTION_SYNC,     0x00u, NULL,           false, NULL,                 { NULL }              },
+    { PB_CMD_ENTER_XIP,        PB_CAT_ACTION_SYNC,     0x00u, NULL,           false, NULL,                 { NULL }              },
+    { PB_CMD_FLASH_ERASE,      PB_CAT_ACTION_ASYNC,    0x08u, NULL,           false, NULL,                 { NULL }              },
+    { PB_CMD_REBOOT2,          PB_CAT_ACTION_DEFERRED, 0x10u, NULL,           false, NULL,                 { NULL }              },
+    { PB_CMD_READ,             PB_CAT_DATA_IN,         0x08u, tlen_addr_size, false, pb_read_prepare,      { .fill = pb_read_fill }     },
+    { PB_CMD_GET_INFO,         PB_CAT_DATA_IN,         0x10u, NULL,           true,  pb_get_info_prepare,  { .fill = pb_get_info_fill } },
+    { PB_CMD_OTP_READ,         PB_CAT_DATA_IN,         0x05u, tlen_otp,       false, pb_otp_read_prepare,  { .fill = pb_otp_read_fill } },
+    { PB_CMD_WRITE,            PB_CAT_DATA_OUT,        0x08u, tlen_addr_size, false, pb_write_prepare,     { .consume = pb_write_consume } },
+    { PB_CMD_OTP_WRITE,        PB_CAT_DATA_OUT,        0x05u, tlen_otp,       false, pb_otp_write_prepare, { .consume = pb_otp_write_consume } },
+    { PB_CMD_REBOOT,           PB_CAT_UNSUPPORTED,     0x00u, NULL,           false, NULL,                { NULL }              },
+    { PB_CMD_EXEC,             PB_CAT_UNSUPPORTED,     0x00u, NULL,           false, NULL,                 { NULL }              },
+    { PB_CMD_VECTORIZE_FLASH,  PB_CAT_UNSUPPORTED,     0x00u, NULL,           false, NULL,                 { NULL }              },
+};
+
+#define CMD_TABLE_COUNT (sizeof(k_cmd_table) / sizeof(k_cmd_table[0]))
+
+static const pb_cmd_table_entry_t *pb_find_cmd(uint8_t cmd_id) {
+    for (uint32_t i = 0u; i < CMD_TABLE_COUNT; i++) {
+        if (k_cmd_table[i].cmd_id == cmd_id) {
+            return &k_cmd_table[i];
+        }
+    }
+    return NULL;
+}
+
+// ---------------------------------------------------------------------------
+// Category handlers
+// ---------------------------------------------------------------------------
+
+static void pb_handle_action_sync(pb_state_block_t *s, const picoboot_cmd_t *cmd) {
+    pb_status_t st = PB_STATUS_OK;
+
+    // The default arm below cannot be reached: this handler runs only for a
+    // command the table gave the PB_CAT_ACTION_SYNC category to, and the cases
+    // are every such row.  It defends a table edit that adds one without
+    // adding it here.  The switch's own branches are excluded with it, since
+    // the arm that cannot be taken is one of them.
+    switch ((pb_cmd_id_t)cmd->cmd_id) {
+        case PB_CMD_EXCLUSIVE_ACCESS:
+            if (s->ops->exclusive_access) {
+                st = s->ops->exclusive_access(
+                    (const pb_exclusive_access_args_t *)cmd->args, s->ctx);
+            }
+            break;
+        case PB_CMD_EXIT_XIP:
+            if (s->ops->exit_xip) {
+                st = s->ops->exit_xip(s->ctx);
+            }
+            break;
+        case PB_CMD_ENTER_XIP:
+            if (s->ops->enter_xip) {
+                st = s->ops->enter_xip(s->ctx);
+            }
+            break;
+        // LCOV_UNREACHABLE_START
+        default:
+            pb_stall(s, PB_STATUS_UNKNOWN_CMD);
+            return;
+        // LCOV_UNREACHABLE_STOP
+    }
+
+    if (st != PB_STATUS_OK) {
+        pb_stall(s, st);
+        return;
+    }
+    pb_send_zlp(s);
+}
+
+static void pb_handle_action_async(pb_state_block_t *s, const picoboot_cmd_t *cmd) {
+    pb_status_t st = PB_STATUS_OK;
+
+    // Unreachable default, for the same reason as pb_handle_action_sync's:
+    // FLASH_ERASE is the only PB_CAT_ACTION_ASYNC row in the table.
+    switch ((pb_cmd_id_t)cmd->cmd_id) {
+        case PB_CMD_FLASH_ERASE:
+            if (!s->ops->flash_erase_prepare || !s->ops->flash_erase) {
+                pb_stall(s, PB_STATUS_UNKNOWN_CMD);
+                return;
+            }
+
+            LOG("Note FLASH_ERASE may need to be made properly async to avoid stalling USB");
+            DEBUG("f erase: addr=0x%08x size=%u",
+                ((const pb_addr_size_args_t *)cmd->args)->addr,
+                ((const pb_addr_size_args_t *)cmd->args)->size);
+
+            st = s->ops->flash_erase_prepare((const pb_addr_size_args_t *)cmd->args, s->ctx);
+            if (st != PB_STATUS_OK) {
+                pb_stall(s, st);
+                return;
+            }
+            st = s->ops->flash_erase((const pb_addr_size_args_t *)cmd->args, s->ctx);
+            break;
+        // LCOV_UNREACHABLE_START
+        default:
+            pb_stall(s, PB_STATUS_UNKNOWN_CMD);
+            return;
+        // LCOV_UNREACHABLE_STOP
+    }
+
+    if (st != PB_STATUS_OK) {
+        pb_stall(s, st);
+        return;
+    }
+    pb_send_zlp(s);
+}
+
+static void pb_handle_action_deferred(pb_state_block_t *s, const picoboot_cmd_t *cmd) {
+    // Unreachable default, for the same reason as pb_handle_action_sync's:
+    // REBOOT2 is the only PB_CAT_ACTION_DEFERRED row in the table.
+    switch ((pb_cmd_id_t)cmd->cmd_id) {
+        case PB_CMD_REBOOT2: {
+            if (!s->ops->reboot2_prepare) {
+                pb_stall(s, PB_STATUS_UNKNOWN_CMD);
+                return;
+            }
+            s->xfer.reboot2_args = *(const pb_reboot2_args_t *)cmd->args;
+            pb_status_t st = s->ops->reboot2_prepare(&s->xfer.reboot2_args, s->ctx);
+            if (st != PB_STATUS_OK) {
+                pb_stall(s, st);
+                return;
+            }
+            break;
+        }
+        // LCOV_UNREACHABLE_START
+        default:
+            pb_stall(s, PB_STATUS_UNKNOWN_CMD);
+            return;
+        // LCOV_UNREACHABLE_STOP
+    }
+    pb_send_zlp(s);
+}
+
+static void pb_handle_data_in(pb_state_block_t *s, const picoboot_cmd_t *cmd) {
+    const pb_cmd_table_entry_t *entry = pb_find_cmd(cmd->cmd_id);
+    // Unreachable: pb_dispatch_cmd found this same identifier in the table
+    // before routing here on its category, and every PB_CAT_DATA_IN row carries
+    // both a prepare and a fill.
+    if (!entry || !entry->prepare || !entry->fill) {
+        // LCOV_UNREACHABLE_START
+        pb_stall(s, PB_STATUS_UNKNOWN_CMD);
+        return;
+        // LCOV_UNREACHABLE_STOP
+    }
+    pb_status_t st = entry->prepare(s, cmd, s->ctx);
+    if (st != PB_STATUS_OK) {
+        pb_stall(s, st);
+        return;
+    }
+    s->data_in_remaining = cmd->transfer_len;
+    pb_set_state(s, PB_STATE_DATA_IN);
+}
+
+static void pb_handle_data_out(pb_state_block_t *s, const picoboot_cmd_t *cmd) {
+    const pb_cmd_table_entry_t *entry = pb_find_cmd(cmd->cmd_id);
+    // Unreachable: pb_dispatch_cmd found this same identifier in the table
+    // before routing here on its category, and every PB_CAT_DATA_OUT row
+    // carries both a prepare and a consume.
+    if (!entry || !entry->prepare || !entry->consume) {
+        // LCOV_UNREACHABLE_START
+        pb_stall(s, PB_STATUS_UNKNOWN_CMD);
+        return;
+        // LCOV_UNREACHABLE_STOP
+    }
+    pb_status_t st = entry->prepare(s, cmd, s->ctx);
+    if (st != PB_STATUS_OK) {
+        pb_stall(s, st);
+        return;
+    }
+    pb_set_state(s, PB_STATE_DATA_OUT);
+}
+
+static void pb_task_data_out(pb_state_block_t *s) {
+    const pb_cmd_table_entry_t *entry = pb_find_cmd(s->cmd_id);
+    if (entry && entry->consume) {
+        uint8_t  buf[64];
+        uint32_t available = picoboot_vendor_available();
+        if (available == 0u) {
+            return;
+        }
+
+        uint32_t chunk = available < sizeof(buf) ? available : sizeof(buf);
+        uint32_t n = picoboot_vendor_read(buf, chunk);
+        if (n == 0u) {
+            return;
+        }
+
+        bool done = false;
+        pb_status_t st = entry->consume(s, buf, n, &done, s->ctx);
+        if (st != PB_STATUS_OK) {
+            pb_stall(s, st);
+            return;
+        }
+
+        if (done) {
+            pb_send_zlp(s);
+        }
+    } else {
+        // The else cannot be taken.  This state is entered only by
+        // pb_handle_data_out, which found this command in the table and checked
+        // that its row carries a consume function, and cmd_id changes only when
+        // the next command arrives in PB_STATE_IDLE.
+        // LCOV_UNREACHABLE_START
+        ERR("pb_task_data_out: no consume fn for cmd 0x%02x", s->cmd_id);
+        pb_stall(s, PB_STATUS_UNKNOWN_ERROR);
+        // LCOV_UNREACHABLE_STOP
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Refactored dispatch entry point
+// ---------------------------------------------------------------------------
+
+static void pb_dispatch_cmd(pb_state_block_t *s, const picoboot_cmd_t *cmd) {
+    pb_begin_cmd(s, cmd);
+
+    DEBUG("%s id=0x%02x token=0x%08x tlen=%u",
+          command_to_str((pb_cmd_id_t)cmd->cmd_id), cmd->cmd_id, cmd->token, cmd->transfer_len);
+
+    const pb_cmd_table_entry_t *entry = pb_find_cmd(cmd->cmd_id);
+    if (!entry) {
+        ERR("Unknown command ID 0x%02x", cmd->cmd_id);
+        pb_stall(s, PB_STATUS_UNKNOWN_CMD);
+        return;
+    }
+
+    if (entry->category == PB_CAT_UNSUPPORTED) {
+        LOG("Unsupported command ID 0x%02x", cmd->cmd_id);
+        pb_stall(s, PB_STATUS_UNKNOWN_CMD);
+        return;
+    }
+
+    // Validate cmd_size
+    if (cmd->cmd_size != entry->cmd_size) {
+        LOG("Invalid cmd_size: expected %u, got %u", entry->cmd_size, cmd->cmd_size);
+        pb_stall(s, PB_STATUS_INVALID_CMD_LENGTH);
+        return;
+    }
+
+    // Validate transfer_len unless the command handles it itself
+    if (entry->skip_tlen_check) {
+        // category handler is responsible for transfer_len validation
+    } else if (entry->get_transfer_len) {
+        uint32_t expected_tlen = entry->get_transfer_len(cmd);
+        if (cmd->transfer_len != expected_tlen) {
+            LOG("Invalid transfer_len: expected %u, got %u", expected_tlen, cmd->transfer_len);
+            pb_stall(s, PB_STATUS_INVALID_TRANSFER_LEN);
+            return;
+        }
+    } else {
+        if (cmd->transfer_len != 0u) {
+            LOG("Invalid transfer_len: expected 0, got %u", cmd->transfer_len);
+            pb_stall(s, PB_STATUS_INVALID_TRANSFER_LEN);
+            return;
+        }
+    }
+
+    // The default arm below cannot be reached: every row in the table carries
+    // one of the categories the arms above enumerate.  It defends a table edit
+    // that introduces a category without routing it.  The switch's own branches
+    // are excluded with it, since the arm that cannot be taken is one of them.
+    switch (entry->category) {
+        case PB_CAT_ACTION_SYNC:
+            pb_handle_action_sync(s, cmd);
+            break;
+
+        case PB_CAT_ACTION_ASYNC:
+            pb_handle_action_async(s, cmd);
+            break;
+            
+        case PB_CAT_ACTION_DEFERRED:
+            pb_handle_action_deferred(s, cmd);
+            break;
+
+        case PB_CAT_DATA_IN:
+            pb_handle_data_in(s, cmd);
+            break;
+
+        case PB_CAT_DATA_OUT:
+            pb_handle_data_out(s, cmd);
+            break;
+
+        // LCOV_UNREACHABLE_START
+        default:
+            ERR("Invalid command category %u for cmd_id 0x%02x", entry->category, cmd->cmd_id);
+            pb_stall(s, PB_STATUS_UNKNOWN_CMD);
+            break;
+        // LCOV_UNREACHABLE_STOP
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Custom (alternative magic) command dispatch
+// ---------------------------------------------------------------------------
+
+// Handles a command carrying the integrator's custom magic.  These bypass the
+// standard command table entirely — the integrator owns the command IDs, the
+// args and any validation — so the only thing the library reads from the
+// command here is transfer_len and the direction bit, to decide whether a data
+// phase follows.
+static void pb_dispatch_custom_cmd(pb_state_block_t *s, const picoboot_cmd_t *cmd) {
+    pb_begin_cmd(s, cmd);
+
+    DEBUG("CUSTOM id=0x%02x token=0x%08x tlen=%u",
+          cmd->cmd_id, cmd->token, cmd->transfer_len);
+
+    if (!s->custom->dispatch) {
+        // A custom ops block registered with a magic but no dispatch cannot
+        // serve any command.  Stall rather than call through a null pointer.
+        ERR("Custom dispatch fn not supplied: cmd_id=0x%02x", cmd->cmd_id);
+        pb_stall(s, PB_STATUS_UNKNOWN_CMD);
+        return;
+    }
+
+    if (cmd->transfer_len != 0u) {
+        if (!pb_cmd_is_in(cmd->cmd_id)) {
+            // Custom host->device data phases are not implemented.
+            LOG("Custom data-out unsupported: cmd_id=0x%02x tlen=%u",
+                cmd->cmd_id, cmd->transfer_len);
+            pb_stall(s, PB_STATUS_UNKNOWN_CMD);
+            return;
+        }
+        if (!s->custom->fill) {
+            // The integrator did not supply a fill callback, so it cannot
+            // return data to the host.
+            LOG("Custom data-in unsupported (no fill fn): cmd_id=0x%02x", cmd->cmd_id);
+            pb_stall(s, PB_STATUS_UNKNOWN_CMD);
+            return;
+        }
+    }
+
+    // dispatch runs for every custom command.  For a data-in command it takes
+    // the "prepare" role a command table entry would.
+    uint32_t bytes_written = 0u;
+    pb_status_t st = s->custom->dispatch(cmd, NULL, 0u, &bytes_written, s->ctx);
+    if (st != PB_STATUS_OK) {
+        pb_stall(s, st);
+        return;
+    }
+
+    if (cmd->transfer_len == 0u) {
+        pb_send_zlp(s);
+        return;
+    }
+
+    // Preserve the command for the duration of the data phase — fill is handed
+    // it on every call, and the caller's copy is about to go out of scope.
+    s->xfer.custom_cmd = *cmd;
+    s->data_in_remaining = cmd->transfer_len;
+    pb_set_state(s, PB_STATE_CUSTOM_IN);
+}
+
+// ---------------------------------------------------------------------------
+// State machine handlers
+// ---------------------------------------------------------------------------
+
+static void pb_task_idle(pb_state_block_t *s) {
+    uint32_t avail = picoboot_vendor_available();
+    if (avail < (uint32_t)PICOBOOT_CMD_LEN) {
+        if (avail > 1u) {
+            LOG("Partial packet received, ignoring: %u bytes", avail);
+            picoboot_vendor_read_clear();
+        }
+        // Note that 0/1 bytes are handled in all idle cases in _rx_cb()
+        return;
+    }
+
+    // One command at a time, the way the RP2350 boot ROM takes them.  Emptying
+    // the FIFO is what lets the endpoint arm again, so the close comes first
+    // and the state this command lands in is what opens it.
+    picoboot_vendor_read_pause();
+
+    picoboot_cmd_t cmd;
+    uint32_t n = picoboot_vendor_read(&cmd, sizeof(cmd));
+    if (n != PICOBOOT_CMD_LEN) {
+        ERR("pb_task_idle: short read %u", n);
+        pb_stall(s, PB_STATUS_UNKNOWN_ERROR);
+        return;
+    }
+
+    if (cmd.magic == PICOBOOT_MAGIC) {
+        pb_dispatch_cmd(s, &cmd);
+    } else if (s->custom && cmd.magic == s->custom->magic) {
+        pb_dispatch_custom_cmd(s, &cmd);
+    } else {
+        pb_begin_cmd(s, &cmd);
+        ERR("pb_task_idle: unknown magic 0x%08x", cmd.magic);
+        pb_stall(s, PB_STATUS_UNKNOWN_CMD);
+    }
+
+    // Every outcome above left this state, and leaving it opens the endpoint.
+}
+
+// Drives a device->host data phase: calls fill repeatedly, moving what it
+// produces onto the IN endpoint, until the transfer completes or the endpoint
+// runs out of space.  Shared by built-in and custom data-in commands.
+//
+// The host is sent dTransferLength bytes and no more (RP2350 datasheet 5.6.4),
+// and that is held here rather than in each fill.  The room offered is never
+// more than the transfer has left, so no fill can put a further byte on the
+// pipe — an integrator's own fill included, which is the one the library cannot
+// reach into.
+static void pb_pump_data_in(pb_state_block_t *s, pb_data_in_fill_fn fill) {
+    // Word aligned, which is part of what a fill is promised.  A fill whose
+    // producer writes words — the RP2350 ROM information routines do — can then
+    // write them straight into this rather than into a buffer of its own.
+    _Alignas(uint32_t) uint8_t buf[PB_DATA_IN_BUF_SIZE];
+
+    // The fill is done and the wire is not.  The phase ends when the host has
+    // the bytes rather than when the queue has them.
+    if (s->data_in_filled) {
+        picoboot_vendor_write_flush();
+        if (!picoboot_vendor_write_pending()) {
+            pb_set_state(s, PB_STATE_AWAIT_ACK);
+        }
+        return;
+    }
+
+    while (true) {
+        uint32_t space = picoboot_vendor_write_available();
+        if (space == 0u) {
+            picoboot_vendor_write_flush();
+            return;
+        }
+
+        uint32_t max_len      = space < sizeof(buf) ? space : sizeof(buf);
+        // Whether what is left of the transfer, rather than the endpoint, is
+        // what limits the room on offer.  If it is, this is as much room as
+        // there will ever be, and a fill that declines it is asking for more
+        // than the host made room for.
+        bool     transfer_capped = s->data_in_remaining <= max_len;
+        if (transfer_capped) {
+            max_len = s->data_in_remaining;
+        }
+        uint32_t bytes_written = 0u;
+        bool     done          = false;
+
+        pb_status_t st = fill(s, buf, max_len, &bytes_written, &done, s->ctx);
+        if (st != PB_STATUS_OK) {
+            pb_stall(s, st);
+            return;
+        }
+
+        // The count comes from the fill, and for a custom command that is the
+        // integrator's code.  A count larger than the room it was offered would
+        // read past the end of buf and would take the counter below zero,
+        // leaving the clamp above meaningless for the rest of the transfer.
+        if (bytes_written > max_len) {
+            ERR("pb_task_data_in: fill reported %u bytes for %u of room",
+                bytes_written, max_len);
+            pb_stall(s, PB_STATUS_UNKNOWN_ERROR);
+            return;
+        }
+
+        if (bytes_written > 0u) {
+            uint32_t written = picoboot_vendor_write(buf, bytes_written);
+            if (written != bytes_written) {
+                ERR("pb_task_data_in: write short %u/%u", written, bytes_written);
+                pb_stall(s, PB_STATUS_UNKNOWN_ERROR);
+                return;
+            }
+            s->data_in_remaining -= bytes_written;
+        }
+
+        if (done) {
+            s->data_in_filled = true;
+            picoboot_vendor_write_flush();
+            if (!picoboot_vendor_write_pending()) {
+                pb_set_state(s, PB_STATE_AWAIT_ACK);
+            }
+            return;
+        }
+
+        if (bytes_written == 0u) {
+            // Fill couldn't produce data this call (insufficient space for next item)
+            if (transfer_capped || max_len == sizeof(buf)) {
+                // And what it was offered was the largest offer this loop can
+                // make — the whole of what the transfer has left, or the whole
+                // of the buffer the fill is handed.  Asking again offers no
+                // more, so the answer would be the same one for ever.
+                LOG("Data-in fill declined %u bytes, the largest offer there is",
+                    max_len);
+                pb_stall(s, PB_STATUS_BUFFER_TOO_SMALL);
+                return;
+            }
+            picoboot_vendor_write_flush();
+            return;
+        }
+    }
+}
+
+static void pb_task_data_in(pb_state_block_t *s) {
+    const pb_cmd_table_entry_t *entry = pb_find_cmd(s->cmd_id);
+    // Unreachable: PB_STATE_DATA_IN is entered only by pb_handle_data_in, which
+    // found a table row carrying a fill, and cmd_id is written only when a
+    // command is taken off the wire in PB_STATE_IDLE.
+    if (!entry || !entry->fill) {
+        // LCOV_UNREACHABLE_START
+        ERR("pb_task_data_in: no fill fn for cmd 0x%02x", s->cmd_id);
+        pb_stall(s, PB_STATUS_UNKNOWN_ERROR);
+        return;
+        // LCOV_UNREACHABLE_STOP
+    }
+
+    pb_pump_data_in(s, entry->fill);
+}
+
+// Adapts the integrator's fill callback to the internal fill signature, so a
+// custom data-in transfer can share pb_pump_data_in with the built-ins.
+static pb_status_t pb_custom_fill(
+    pb_state_block_t *s,
+    uint8_t *buf,
+    uint32_t max_len,
+    uint32_t *bytes_written,
+    bool *done,
+    void *ctx
+) {
+    return s->custom->fill(&s->xfer.custom_cmd, buf, max_len, bytes_written,
+                           done, ctx);
+}
+
+static void pb_task_custom_in(pb_state_block_t *s) {
+    // Unreachable: pb_dispatch_custom_cmd checks both before entering this
+    // state, and neither can change afterwards.
+    if (!s->custom || !s->custom->fill) {
+        // LCOV_UNREACHABLE_START
+        ERR("pb_task_custom_in: no fill fn for cmd 0x%02x", s->cmd_id);
+        pb_stall(s, PB_STATUS_UNKNOWN_ERROR);
+        return;
+        // LCOV_UNREACHABLE_STOP
+    }
+
+    pb_pump_data_in(s, pb_custom_fill);
+}
+
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
+
+void picoboot_init(pb_state_block_t            *state,
+                   const picoboot_ops_t        *ops,
+                   const picoboot_custom_ops_t *custom,
+                   uint8_t                     *flash_write_buf,
+                   uint8_t                      rhport,
+                   uint8_t                      ep_out,
+                   uint8_t                      ep_in,
+                   void                        *ctx) {
+    memset(state, 0, sizeof(*state));
+
+    state->ops = ops;
+    state->custom = custom;
+    state->flash_write_buf = flash_write_buf;
+    state->ctx = ctx;
+
+    state->state = PB_STATE_IDLE;
+
+    state->token = 0u;
+    state->rhport = rhport;
+    state->ep_out = ep_out;
+    state->ep_in = ep_in;
+    state->cmd_id = 0u;
+
+    pb_set_status(state, PB_STATUS_OK, false);
+}
+
+void picoboot_task(pb_state_block_t *state) {
+    switch (state->state) {
+        case PB_STATE_IDLE:
+            pb_task_idle(state);
+            break;
+        case PB_STATE_DATA_IN:
+            pb_task_data_in(state);
+            break;
+        case PB_STATE_CUSTOM_IN:
+            pb_task_custom_in(state);
+            break;
+        case PB_STATE_AWAIT_ZLP:
+            // Transition to IDLE happens in picoboot_vendor_tx_cb()
+            break;
+        case PB_STATE_AWAIT_ACK:
+            // Transition to IDLE happens in picoboot_vendor_rx_cb()
+            break;
+        case PB_STATE_DATA_OUT:
+            pb_task_data_out(state);
+            break;
+        case PB_STATE_STALLED:
+            break;
+    }
+}
+
+void picoboot_tx_cb(
+    pb_state_block_t *state,
+    uint32_t sent_bytes
+) {
+    (void)sent_bytes;
+
+    //DEBUG("TX callback: sent_bytes=%u", sent_bytes);
+
+    if (state->state != PB_STATE_AWAIT_ZLP) {
+        // Ignore notifications for non-ZLP sent events
+        return;
+    }
+
+    if (state->cmd_id == (uint8_t)PB_CMD_REBOOT2) {
+        // As we have now sent the ZLP we can reboot
+        if (state->ops->reboot2_execute) {
+            state->ops->reboot2_execute(&state->xfer.reboot2_args, state->ctx);
+        }
+    }
+
+    // For the non-reboot2 case (reboot2 should never get this far)
+    LOG("ZLP ACK sent, returning to IDLE %u bytes", sent_bytes);
+    pb_set_state(state, PB_STATE_IDLE);
+}
+
+void picoboot_rx_cb(
+    pb_state_block_t *state,
+    uint32_t available_bytes
+) {
+    DEBUG("RX callback: available_bytes=%u", available_bytes);
+    if (available_bytes <= 1) {
+        if (state->state == PB_STATE_AWAIT_ACK) {
+            // Both 0 and 1 byte values are considered ZLP by this stack in case
+            // the host implementation doesn't support sending real ZLPs.
+            LOG("Received ZLP ACK (available_bytes=%u)", available_bytes);
+            pb_set_status(state, PB_STATUS_OK, false);
+            pb_set_state(state, PB_STATE_IDLE);
+        }
+
+        // Consume the byte if it's 1 byte, otherwise no need to do a read at
+        // all.  Don't consume it if we're in DATA_OUT, but do in other states
+        // as it likely won't ever get read otherwise.
+        if ((available_bytes == 1) && (state->state != PB_STATE_DATA_OUT)){
+            uint8_t dummy;
+            picoboot_vendor_read(&dummy, 1);
+        }
+    }
+
+    if (state->state == PB_STATE_AWAIT_ACK) {
+        // Assume we've just "missed" the ACK.
+        LOG("Received non-ZLP data while awaiting ACK");
+        pb_set_status(state, PB_STATUS_OK, false);
+        pb_set_state(state, PB_STATE_IDLE);
+    }
+}
+
+bool picoboot_control_xfer_cb(
+    pb_state_block_t *state,
+    uint8_t rhport,
+    uint8_t stage,
+    tusb_control_request_t const *req
+) {
+    // Handle CLEAR_FEATURE(ENDPOINT_HALT) requests from the host to unstall our endpoints.
+    if ((req->bmRequestType_bit.type == TUSB_REQ_TYPE_STANDARD) &&
+        (req->bRequest == TUSB_REQ_CLEAR_FEATURE) &&
+        (req->wValue == TUSB_REQ_FEATURE_EDPT_HALT)) {
+        uint8_t ep = (uint8_t)(req->wIndex & 0xFFu);
+        if (ep == state->ep_out || ep == state->ep_in) {
+            if (stage == CONTROL_STAGE_SETUP) {
+                DEBUG("CTRL: CLEAR_FEATURE(ENDPOINT_HALT) for EP%02x", ep);
+                // tinyusb will have unstalled the endpoint by the time we get
+                // here - we need to re-arm the endpoint
+                //
+                // The second test cannot fail: the enclosing condition has
+                // already established that ep is one of the two endpoints, so
+                // an ep that is not the OUT one is the IN one.
+                if (ep == state->ep_out) {
+                    DEBUG("Re-arming OUT endpoint");
+                    picoboot_vendor_read_clear();
+                } else if (ep == state->ep_in) {
+                    DEBUG("Re-arming IN endpoint");
+                    picoboot_vendor_write_clear();
+                }
+                // Do not touch the state machine, this is how the bootrom
+                // implementation handles it.
+                return tud_control_status(rhport, req);
+            }
+            return true;
+        }
+    }
+
+    if ((req->bmRequestType_bit.type != TUSB_REQ_TYPE_CLASS &&
+         req->bmRequestType_bit.type != TUSB_REQ_TYPE_VENDOR) ||
+        req->bmRequestType_bit.recipient != TUSB_REQ_RCPT_INTERFACE) {
+        DEBUG("CTRL: ignore type=%u recipient=%u",
+            req->bmRequestType_bit.type, req->bmRequestType_bit.recipient);
+        return false;
+    }
+
+#if 0
+#define USB_DPRAM_BASE      0x50100000u
+#define EP3_OUT_BUF_CTRL    (*(volatile uint32_t *)(USB_DPRAM_BASE + 0x80 + (3 * 8) + 4))
+#define USB_BUFF_STATUS     (*(volatile uint32_t *)(0x50110058u))
+
+// Key bits in BUF_CTRL
+#define BUF_CTRL_AVAIL      (1u << 10)
+#define BUF_CTRL_STALL      (1u << 11)
+#define BUF_CTRL_FULL       (1u << 15)
+#endif
+
+    switch (req->bRequest) {
+        case PICOBOOT_BREQUEST_INTERFACE_RESET:
+            if (stage == CONTROL_STAGE_SETUP) {
+                DEBUG("CTRL: IR");
+                picoboot_vendor_unstall_endpoint(state->ep_out);
+                picoboot_vendor_unstall_endpoint(state->ep_in);
+
+                // Clear out state
+                pb_set_state(state, PB_STATE_IDLE);
+                pb_set_status(state, PB_STATUS_OK, false);
+
+#if 0
+                DEBUG("bc3=0x%08lx a=%u s=%u f=%u bs=0x%08lx",
+                    EP3_OUT_BUF_CTRL,
+                    (EP3_OUT_BUF_CTRL & BUF_CTRL_AVAIL) ? 1 : 0,
+                    (EP3_OUT_BUF_CTRL & BUF_CTRL_STALL) ? 1 : 0,
+                    (EP3_OUT_BUF_CTRL & BUF_CTRL_FULL)  ? 1 : 0,
+                    USB_BUFF_STATUS);
+                for (volatile int ii = 0; ii < 10000000; ii++);
+#endif
+
+                return tud_control_status(rhport, req);
+            }
+            return true;
+
+        case PICOBOOT_BREQUEST_GET_CMD_STATUS:
+            if (stage == CONTROL_STAGE_SETUP) {
+                DEBUG("CTRL: GCS s=%u sc=%u t=0x%08x ip=%u",
+                    stage, state->status.status_code, state->status.token, state->status.in_progress);
+
+                // See if either endpoint is stalled
+                bool stalled_out = picoboot_vendor_is_endpoint_stalled(state->ep_out);
+                bool stalled_in  = picoboot_vendor_is_endpoint_stalled(state->ep_in);
+                if (stalled_out || stalled_in) {
+                    DEBUG("GCS Endpoint stalled: OUT=%u EP%02X IN=%u EP%02X", stalled_out, state->ep_out, stalled_in, state->ep_in);
+                    if (state->status.status_code == PB_STATUS_OK) {
+                        ERR("GCS: endpoint stalled but status OK, setting to UNKNOWN_ERROR");
+                        pb_set_status(state, PB_STATUS_UNKNOWN_ERROR, false);
+                        pb_set_state(state, PB_STATE_STALLED);
+                    }
+                }
+                return tud_control_xfer(rhport, req,
+                                        &state->status,
+                                        sizeof(state->status));
+            }
+            return true;
+
+        default:
+            DEBUG("CTRL: unknown request 0x%02x", req->bRequest);
+            return false;
+    }
+}
+

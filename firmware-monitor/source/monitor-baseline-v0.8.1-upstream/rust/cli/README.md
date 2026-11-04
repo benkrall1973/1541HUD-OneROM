@@ -1,0 +1,88 @@
+# One ROM CLI
+
+This directory contains the source code and build scripts for the One ROM command-line interface (CLI) tool.
+
+The CLI is a Rust application that provides a cross-platform CLI to manage One ROMs, including those with the USB plugin to provide management of One ROM while running (serving bytes).
+
+For instructions on using the CLI, see [The CLI manual](/docs/CLI-MANUAL.md).
+
+## Building
+
+With the One ROM [build environment](/INSTALL.md) installed, from this directory:
+
+```bash
+cargo build --release
+```
+
+To build the Windows artifacts you need a Windows build machine — see
+[Setting up a Windows build machine](/docs/SETUP-WINDOWS-BUILD-MACHINE.md).
+
+## Releasing
+
+`onerom-cli` has two release channels:
+
+- **The `onerom` binary** — cross-platform CLI artifacts distributed via
+  https://onerom.org/cli and tagged `cli-vX.Y.Z`. Steps below.
+- **The `onerom-cli` library crate** — published to crates.io as part of the
+  main One ROM release (see [RELEASE.md](/RELEASE.md)). Studio and other
+  applications build on this library, so it is published consistently alongside
+  its dependencies (`onerom-app`, `onerom-config`, `onerom-fw`, `onerom-gen`,
+  `onerom-fw-parser`, `onerom-metadata`).
+
+### Binary release
+
+1. Check whether [the CLI manual](/docs/CLI-MANUAL.md) needs updating for this
+    release, including its "as of release vX.Y.Z" banner.  The manual's PDF also
+    contains [the overview](/docs/OVERVIEW.md), so check that too.  Do this
+    first — step 4 renders the manual to PDF, so any correction has to be in
+    before then.
+
+2. Build the release artifacts for all platforms:
+
+    ```bash
+    scripts/build-release.sh pin=WIN_SIGNING_PIN
+    ```
+
+    Artifacts are placed in the `dist/` directory.
+
+3. Update the CLI release manifest and copy the artifacts to the One ROM images repo.  Assuming ../../../one-rom-images exists:
+
+    ```bash
+    scripts/release.py --input-dir dist --output-dir ../../../one-rom-images
+    ```
+
+4. Build and stage the CLI manual PDF, so the manual is published with the
+    binary it documents.  From the repository root:
+
+    ```bash
+    ci/build-docs.sh ../one-rom-images --source cli
+    ```
+
+    `--source cli` selects the documents on the CLI's release cycle, which is
+    the manual alone — the chip references move with the firmware and are
+    published by its release instead.  The toolchain is installed once with
+    `ci/install-doc-tools.sh`, which prints a directory to put on `PATH`.
+
+    The manual is staged at
+    `one-rom-images/docs/cli-manual/vX.Y.Z/` and merged into that document's
+    `releases.json`.  The script does not set `latest` - review the diff and set
+    it there.
+
+5. Commit the changes to the one-rom-images repo and push:
+    ```bash
+    cd ../../../one-rom-images
+    git add .
+    git commit -m "Update One ROM CLI releases"
+    git push
+    ```
+
+6. Tag the current commit in `one-rom` and push.  Tags are signed, so they
+    take a message:
+
+    ```bash
+    cd ../one-rom
+    git tag -s -a cli-vX.Y.Z -m "CLI vX.Y.Z"
+    git push origin cli-vX.Y.Z
+    ```
+
+7. Check new releases appear at https://onerom.org/cli/

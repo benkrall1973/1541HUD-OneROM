@@ -1,0 +1,491 @@
+// Copyright (C) 2026 Piers Finlayson <piers@piers.rocks>
+//
+// MIT License
+
+//! The USB CDC serial port a running One ROM presents.
+//!
+//! A One ROM running the USB system plugin enumerates a CDC ACM interface
+//! alongside the vendor interface picoboot uses. The plugin forwards One ROM's
+//! log into that port's IN endpoint while a terminal has the port open, so
+//! reading it is how the CLI shows firmware and plugin logging.
+//!
+//! A user plugin can request serial port 2, a second CDC ACM interface for its
+//! own data. The two ports are identified by USB interface number.
+//!
+//! The port is reached through the operating system's own CDC class driver -
+//! cdc_acm, AppleUSBCDCACM or usbser - rather than by claiming the interface
+//! over USB directly, because that driver owns the interface on every platform
+//! the CLI ships for.
+//!
+//! Two things gate what arrives:
+//!
+//! - The device forwards only while DTR is asserted, which is what marks a
+//!   terminal as having the port open. [`stream`] asserts it explicitly rather
+//!   than relying on the platform doing so at open.
+//! - A debug probe reading the log over SWD consumes the same bytes. Both
+//!   advance the same read position, so a probe and this command running at
+//!   once split the stream arbitrarily between them and neither sees all of it.
+
+use serialport::SerialPort;
+use std::io::{ErrorKind, Read, Write};
+use std::path::Path;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::time::{Duration, Instant};
+
+use log::warn;
+use serialport::{SerialPortInfo, SerialPortType};
+
+use crate::device::Device;
+use crate::error::Error;
+
+/// How long a freshly attached port may stay silent before the caller is told.
+///
+/// The USB plugin writes a banner when a terminal opens the port, so nothing at
+/// all within this window means the bytes are not reaching us - the wrong port,
+/// a plugin that does not forward, or another consumer holding the log.
+pub const SILENCE_TIMEOUT: Duration = Duration::from_secs(2);
+
+/// Line speed requested when opening the port.
+///
+/// CDC ACM carries no line at all, so the device ignores this, but the platform
+/// APIs all require a rate to open with.
+const BAUD: u32 = 115_200;
+
+/// How long a read waits before returning so the silence check can run.
+const READ_TIMEOUT: Duration = Duration::from_millis(100);
+
+/// Bytes read per pass.
+const READ_CHUNK: usize = 256;
+
+/// How long a write may stall before the caller is told the device is not
+/// taking input.
+///
+/// When the input channel is full the USB plugin stops accepting data and the
+/// write blocks in the operating system.  A blocked write and a slow one look
+/// the same until this long has passed.
+pub const STALL_NOTICE: Duration = Duration::from_secs(1);
+
+/// Find serial port `port`, 1 or 2, of `device`.
+///
+/// Returns [`Error::SerialPortNotFound`] if the device has no serial port 1,
+/// which is what a One ROM running a USB plugin that predates the CDC
+/// interface looks like from here, and [`Error::SerialPort2NotFound`] if it has
+/// no serial port 2.
+pub fn find_port(device: &Device, port: u8) -> Result<String, Error> {
+    let ports = serialport::available_ports()
+        .map_err(|e| Error::SerialPort(format!("Failed to list serial ports: {e}")))?;
+
+    let mut matches = select_ports(
+        &ports,
+        device.vid,
+        device.pid,
+        device.serial.as_deref(),
+        port,
+    );
+
+    match matches.len() {
+        0 if port == 2 => Err(Error::SerialPort2NotFound(device.to_string())),
+        0 => Err(Error::SerialPortNotFound(device.to_string())),
+        1 => Ok(matches.remove(0)),
+        _ => {
+            // Reachable where select_ports() can't order the ports. Say which
+            // was taken rather than choosing in silence.
+            warn!(
+                "More than one serial port matches this One ROM, using the first: {}",
+                matches.join(", ")
+            );
+            Ok(matches.remove(0))
+        }
+    }
+}
+
+/// Pick the ports belonging to one USB device out of an enumerated list.
+///
+/// Matching is on vendor, product and serial. Serial comparison ignores case
+/// because the platforms differ in how they render the string and a One ROM
+/// serial is hex, so case can never be what distinguishes two of them.
+///
+/// A device with no serial is matched on vendor and product alone. Nothing else
+/// is available to tell two apart, and refusing outright would be worse than
+/// naming the ambiguity, which the caller does.
+///
+/// Serial port 2's interfaces follow serial port 1's, so the device's ports
+/// sorted by interface number are serial port 1 then serial port 2. Every
+/// matching port is returned if they can't be sorted, because:
+/// - the platform doesn't report an interface number
+/// - two devices have the same serial
+///
+/// macOS lists both nodes of each port, the callout `/dev/cu.*` and the dialin
+/// `/dev/tty.*`. Only the callout node is usable: opening the dialin node
+/// blocks until carrier is asserted, which a CDC device never does, so the
+/// command would hang rather than fail. Dropping names beginning `tty.` leaves
+/// Linux untouched, where the node is `/dev/ttyACM0` and has no dot.
+fn select_ports(
+    ports: &[SerialPortInfo],
+    vid: u16,
+    pid: u16,
+    serial: Option<&str>,
+    port: u8,
+) -> Vec<String> {
+    let mut matched: Vec<(Option<u8>, String)> = ports
+        .iter()
+        .filter_map(|port| {
+            let SerialPortType::UsbPort(info) = &port.port_type else {
+                return None;
+            };
+            if info.vid != vid || info.pid != pid || is_dialin_node(&port.port_name) {
+                return None;
+            }
+            let serial_matches = match (serial, info.serial_number.as_deref()) {
+                (Some(wanted), Some(found)) => wanted.eq_ignore_ascii_case(found),
+                (Some(_), None) => false,
+                (None, _) => true,
+            };
+            serial_matches.then(|| (info.interface, port.port_name.clone()))
+        })
+        .collect();
+
+    matched.sort_by_key(|(interface, _)| *interface);
+    let ordered = matched.iter().all(|(interface, _)| interface.is_some())
+        && matched.windows(2).all(|pair| pair[0].0 != pair[1].0);
+    if !ordered {
+        return matched.into_iter().map(|(_, name)| name).collect();
+    }
+    usize::from(port)
+        .checked_sub(1)
+        .and_then(|index| matched.into_iter().nth(index))
+        .map(|(_, name)| name)
+        .into_iter()
+        .collect()
+}
+
+/// Whether a port name is a macOS dialin node.
+fn is_dialin_node(port_name: &str) -> bool {
+    Path::new(port_name)
+        .file_name()
+        .and_then(|name| name.to_str())
+        .is_some_and(|name| name.starts_with("tty."))
+}
+
+/// Open `port_name`, assert DTR, and copy what the device sends to stdout until
+/// it goes away.
+///
+/// Returns the number of bytes copied. Returning `Ok` at all means the session
+/// ended in one of its two normal ways: the device went away - unplugged,
+/// rebooted or stopped - or `stop` was set.
+///
+/// `stop` is how a caller ends a session it started, and is read once per read
+/// timeout rather than continuously, so it takes effect within `READ_TIMEOUT`.
+/// It exists so that a Ctrl-C leaves through this function rather than taking
+/// the process with it, which is what lets the caller report what was copied.
+///
+/// Device bytes go to stdout untouched, so the stream can be redirected on its
+/// own. When `capture` is given the same bytes are also written there, and
+/// nothing else is: the file is a transcript of the device, not of this
+/// command.
+///
+/// Blocks for as long as the device is attached, so callers on an async runtime
+/// need [`tokio::task::spawn_blocking`] or equivalent.
+///
+/// Returns [`Error::LogSilent`] if nothing arrives within `silence` of the port
+/// being opened. The check is armed until the first byte and not afterwards - a
+/// device that has said its piece and gone quiet is working normally.
+pub fn stream(
+    port_name: &str,
+    capture: Option<&Path>,
+    silence: Duration,
+    stop: &AtomicBool,
+) -> Result<u64, Error> {
+    let port = open(port_name)?;
+    stream_port(port, capture, silence, stop)
+}
+
+/// Open `port_name` and assert DTR.
+///
+/// The device forwards only while DTR is asserted.  Every platform raises it at
+/// open, but it is asserted explicitly because the stream depends on it.
+///
+/// Reads and writes time out after `READ_TIMEOUT`, so a loop on either can
+/// check whether it has been told to stop.
+pub fn open(port_name: &str) -> Result<Box<dyn SerialPort>, Error> {
+    let mut port = serialport::new(port_name, BAUD)
+        .timeout(READ_TIMEOUT)
+        .open()
+        .map_err(|e| Error::SerialPortOpen(port_name.to_string(), e.to_string()))?;
+    port.write_data_terminal_ready(true)
+        .map_err(|e| Error::SerialPortOpen(port_name.to_string(), e.to_string()))?;
+    Ok(port)
+}
+
+/// Write all of `bytes` to the device, waiting while the channel is full.
+///
+/// After [`STALL_NOTICE`] without progress, calls `notify(true)` once.  The
+/// next successful write calls `notify(false)`.  `stalled` carries that state
+/// between calls, so a caller sending line by line is told once per stall.
+///
+/// Returns early, with bytes unsent, only when `stop` is set.
+pub fn send(
+    port: &mut dyn SerialPort,
+    mut bytes: &[u8],
+    stop: &AtomicBool,
+    stalled: &mut bool,
+    notify: &mut dyn FnMut(bool),
+) -> Result<(), Error> {
+    let mut since = Instant::now();
+    while !bytes.is_empty() {
+        if stop.load(Ordering::Relaxed) {
+            return Ok(());
+        }
+        match port.write(bytes) {
+            Ok(n) if n > 0 => {
+                bytes = &bytes[n..];
+                since = Instant::now();
+                if *stalled {
+                    *stalled = false;
+                    notify(false);
+                }
+            }
+            Ok(_) => {}
+            Err(e) if e.kind() == ErrorKind::TimedOut => {
+                if !*stalled && since.elapsed() >= STALL_NOTICE {
+                    *stalled = true;
+                    notify(true);
+                }
+            }
+            Err(e) => {
+                return Err(Error::SerialPort(format!(
+                    "Failed to send data to One ROM: {e}"
+                )));
+            }
+        }
+    }
+    Ok(())
+}
+
+/// [`stream`], on a port already opened by [`open`].
+pub fn stream_port(
+    mut port: Box<dyn SerialPort>,
+    capture: Option<&Path>,
+    silence: Duration,
+    stop: &AtomicBool,
+) -> Result<u64, Error> {
+    // Deliberately unbuffered. Ctrl-C is how a session normally ends, and it
+    // takes the process with it, so anything held back here would be lost from
+    // the transcript.
+    let mut capture_file = match capture {
+        Some(path) => Some(
+            std::fs::File::create(path)
+                .map_err(|e| Error::Io(format!("Failed to create {}: {e}", path.display())))?,
+        ),
+        None => None,
+    };
+
+    let stdout = std::io::stdout();
+    let mut stdout = stdout.lock();
+    let mut buf = [0u8; READ_CHUNK];
+    let opened = Instant::now();
+    let mut copied: u64 = 0;
+
+    loop {
+        match port.read(&mut buf) {
+            Ok(0) => return Ok(copied),
+            Ok(count) => {
+                copied += count as u64;
+                let bytes = &buf[..count];
+
+                // Flush every pass. A log line the device wrote is worth
+                // nothing to the person watching if it sits here until the next
+                // one fills the buffer.
+                stdout
+                    .write_all(bytes)
+                    .and_then(|()| stdout.flush())
+                    .map_err(|e| Error::Io(format!("Failed to write to stdout: {e}")))?;
+
+                if let Some(file) = capture_file.as_mut() {
+                    file.write_all(bytes)
+                        .map_err(|e| Error::Io(format!("Failed to write capture file: {e}")))?;
+                }
+            }
+            Err(e) if e.kind() == ErrorKind::TimedOut => {
+                // Before the silence check, so that stopping a session inside
+                // the attach window ends it rather than reporting a fault the
+                // user did not wait to find out about.
+                if stop.load(Ordering::Relaxed) {
+                    return Ok(copied);
+                }
+                if copied == 0 && opened.elapsed() >= silence {
+                    return Err(Error::LogSilent(silence.as_secs_f32()));
+                }
+            }
+            // Anything else is the port going away under us, which is a device
+            // that has been unplugged, rebooted or stopped.
+            Err(_) => return Ok(copied),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use onerom_metadata::{USB_PLUGIN_PID as PID, USB_PLUGIN_VID as VID};
+    use serialport::UsbPortInfo;
+
+    fn usb_port(name: &str, vid: u16, pid: u16, serial: Option<&str>) -> SerialPortInfo {
+        usb_port_on(name, vid, pid, serial, None)
+    }
+
+    fn usb_port_on(
+        name: &str,
+        vid: u16,
+        pid: u16,
+        serial: Option<&str>,
+        interface: Option<u8>,
+    ) -> SerialPortInfo {
+        SerialPortInfo {
+            port_name: name.to_string(),
+            port_type: SerialPortType::UsbPort(UsbPortInfo {
+                vid,
+                pid,
+                serial_number: serial.map(str::to_string),
+                manufacturer: None,
+                product: None,
+                interface,
+            }),
+        }
+    }
+
+    fn other_port(name: &str) -> SerialPortInfo {
+        SerialPortInfo {
+            port_name: name.to_string(),
+            port_type: SerialPortType::Unknown,
+        }
+    }
+
+    #[test]
+    fn picks_the_port_with_the_matching_serial() {
+        let ports = [
+            usb_port("/dev/ttyACM0", VID, PID, Some("deadbeef")),
+            usb_port("/dev/ttyACM1", VID, PID, Some("cafef00d")),
+        ];
+        assert_eq!(
+            select_ports(&ports, VID, PID, Some("cafef00d"), 1),
+            vec!["/dev/ttyACM1".to_string()]
+        );
+    }
+
+    #[test]
+    fn ignores_serial_case() {
+        let ports = [usb_port("/dev/ttyACM0", VID, PID, Some("DEADBEEF"))];
+        assert_eq!(
+            select_ports(&ports, VID, PID, Some("deadbeef"), 1),
+            vec!["/dev/ttyACM0".to_string()]
+        );
+    }
+
+    #[test]
+    fn rejects_a_different_device() {
+        let ports = [
+            usb_port("/dev/ttyACM0", 0x2e8a, 0x000f, Some("deadbeef")),
+            other_port("/dev/ttyS0"),
+        ];
+        assert!(select_ports(&ports, VID, PID, Some("deadbeef"), 1).is_empty());
+    }
+
+    #[test]
+    fn rejects_a_matching_device_with_the_wrong_serial() {
+        let ports = [usb_port("/dev/ttyACM0", VID, PID, Some("deadbeef"))];
+        assert!(select_ports(&ports, VID, PID, Some("cafef00d"), 1).is_empty());
+    }
+
+    /// The dialin node must never be chosen - opening it hangs.
+    #[test]
+    fn takes_the_macos_callout_node_not_the_dialin_node() {
+        let ports = [
+            usb_port("/dev/tty.usbmodem1103", VID, PID, Some("deadbeef")),
+            usb_port("/dev/cu.usbmodem1103", VID, PID, Some("deadbeef")),
+        ];
+        assert_eq!(
+            select_ports(&ports, VID, PID, Some("deadbeef"), 1),
+            vec!["/dev/cu.usbmodem1103".to_string()]
+        );
+    }
+
+    /// Linux nodes start with `tty` and must survive the dialin filter.
+    #[test]
+    fn keeps_the_linux_node() {
+        let ports = [usb_port("/dev/ttyACM0", VID, PID, Some("deadbeef"))];
+        assert_eq!(
+            select_ports(&ports, VID, PID, Some("deadbeef"), 1),
+            vec!["/dev/ttyACM0".to_string()]
+        );
+    }
+
+    #[test]
+    fn matches_on_vid_pid_when_the_device_has_no_serial() {
+        let ports = [
+            usb_port("/dev/ttyACM0", VID, PID, Some("deadbeef")),
+            usb_port("/dev/ttyACM1", 0x2e8a, 0x000f, None),
+        ];
+        assert_eq!(
+            select_ports(&ports, VID, PID, None, 1),
+            vec!["/dev/ttyACM0".to_string()]
+        );
+    }
+
+    /// The ports are ordered by interface number, so a platform reporting the
+    /// control or the data interface both work.
+    #[test]
+    fn picks_each_serial_port_by_interface_order() {
+        for (port_1, port_2) in [(2, 4), (3, 5)] {
+            let ports = [
+                usb_port_on("/dev/ttyACM1", VID, PID, Some("deadbeef"), Some(port_2)),
+                usb_port_on("/dev/ttyACM0", VID, PID, Some("deadbeef"), Some(port_1)),
+            ];
+            assert_eq!(
+                select_ports(&ports, VID, PID, Some("deadbeef"), 1),
+                vec!["/dev/ttyACM0".to_string()]
+            );
+            assert_eq!(
+                select_ports(&ports, VID, PID, Some("deadbeef"), 2),
+                vec!["/dev/ttyACM1".to_string()]
+            );
+        }
+    }
+
+    #[test]
+    fn finds_no_serial_port_2_on_a_device_without_one() {
+        let ports = [usb_port_on(
+            "/dev/ttyACM0",
+            VID,
+            PID,
+            Some("deadbeef"),
+            Some(2),
+        )];
+        assert!(select_ports(&ports, VID, PID, Some("deadbeef"), 2).is_empty());
+    }
+
+    #[test]
+    fn matches_every_port_where_the_interface_is_not_reported() {
+        let ports = [
+            usb_port_on("/dev/ttyACM0", VID, PID, Some("deadbeef"), Some(2)),
+            usb_port("/dev/ttyACM1", VID, PID, Some("deadbeef")),
+        ];
+        for port in [1, 2] {
+            assert_eq!(
+                select_ports(&ports, VID, PID, Some("deadbeef"), port).len(),
+                2
+            );
+        }
+    }
+
+    /// Two devices presenting the same serial can't be ordered, so the caller
+    /// warns.
+    #[test]
+    fn matches_every_port_of_two_devices_with_the_same_serial() {
+        let ports = [
+            usb_port_on("/dev/ttyACM0", VID, PID, Some("deadbeef"), Some(2)),
+            usb_port_on("/dev/ttyACM1", VID, PID, Some("deadbeef"), Some(2)),
+        ];
+        assert_eq!(select_ports(&ports, VID, PID, Some("deadbeef"), 1).len(), 2);
+    }
+}

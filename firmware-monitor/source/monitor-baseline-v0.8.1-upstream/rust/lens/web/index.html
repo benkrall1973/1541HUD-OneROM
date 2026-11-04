@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One ROM Lens</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <h2>One ROM Lens</h2>
+            
+            <div class="control-group">
+                <label for="addrBits">Address Line:</label>
+                <select id="addrBits">
+                    <option value="11">11 (16Kb/2KB)</option>
+                    <option value="12">12 (32Kb/4KB)</option>
+                    <option value="13" selected>13 (64Kb/8KB)</option>
+                    <option value="14">14 (128Kb/16KB)</option>
+                    <option value="15">15 (256Kb/32KB)</option>
+                    <option value="16">16 (512Kb/64KB)</option>
+                    <option value="17">17 (1Mb/128KB)</option>
+                    <option value="18">18 (2Mb/256KB)</option>
+                    <option value="19">19 (4Mb/512KB)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="dataBits">Data Lines:</label>
+                <select id="dataBits">
+                    <option value="8" selected>8 (8 bit)</option>
+                    <option value="16">16 (16 bit)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="accessWidth">Access Width:</label>
+                <select id="accessWidth">
+                    <option value="8" selected>8-bit (byte mode)</option>
+                    <option value="16">16-bit (27C400 only)</option>
+                </select>
+            </div>
+
+            
+            <div class="control-group">
+                <label for="setupCycles">Setup Cycles:</label>
+                <input type="number" id="setupCycles" value="20" min="1" max="1000">
+            </div>
+            
+            <div class="control-group">
+                <label for="recoveryCycles">Recovery Cycles:</label>
+                <input type="number" id="recoveryCycles" value="20" min="1" max="1000">
+            </div>
+            
+            <div class="control-group">
+                <label for="cyclesPerPixel">Cycles/Pixel:</label>
+                <input type="range" id="cyclesPerPixel" min="-200" max="300" value="0" step="1">
+                <span id="cyclesPerPixelValue">1.00</span>
+            </div>
+            
+            <div class="control-group">
+                <label for="speedControl">Execution Speed (cycles/frame):</label>
+                <select id="speedControl">
+                    <option value="1">1 (Very Slow)</option>
+                    <option value="10">10 (Slow)</option>
+                    <option value="100" selected>100 (Medium)</option>
+                    <option value="1000">1,000 (Fast)</option>
+                    <option value="10000">10,000 (Very Fast)</option>
+                    <option value="50000">50,000 (Extreme)</option>
+                    <option value="100000">100,000 (Insane)</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label>
+                    <input type="checkbox" id="autoScroll" checked>
+                    Auto-scroll to follow execution
+                </label>
+            </div>
+
+            <div class="control-group">
+                <label for="readMode">Read Mode:</label>
+                <select id="readMode">
+                    <option value="sequential_once" selected>Sequential (once)</option>
+                    <option value="sequential_forever">Sequential (forever)</option>
+                    <option value="there_and_back">There and back again</option>
+                    <option value="random_forever">Random (forever)</option>
+                </select>
+            </div>
+            
+            <div class="control-group execution-controls">
+                <button id="startBtn" class="primary">Start</button>
+                <button id="stepBtn" disabled>Step</button>
+                <button id="pauseBtn" disabled>Pause</button>
+                <button id="stopBtn" disabled>Stop</button>
+            </div>
+            
+            <div class="control-group">
+                <button id="clearBtn">Clear All Samples</button>
+            </div>
+            
+            <div class="status">
+                <div>Status:&nbsp&nbsp <span id="status">Ready</span></div>
+                <div>ROM Size: <span id="romSize">unknown</span></div>
+                <div>Clock:&nbsp&nbsp <span id="sysclk">unknown</span></div>
+                <div>Samples:&nbsp <span id="sampleCount">0</span></div>
+                <div>Cycles:&nbsp&nbsp <span id="cycleCount">0</span></div>
+                <div>Progress: <span id="progress">0%</span></div>
+            </div>
+            
+            <div class="signal-groups">
+                <h3>Signal Groups</h3>
+                <div class="group-control">
+                    <label>
+                        <input type="checkbox" id="toggleAddr" checked>
+                        Address Lines
+                    </label>
+                    <button id="collapseAddr" class="small">−</button>
+                </div>
+                <div class="group-control">
+                    <label>
+                        <input type="checkbox" id="toggleData" checked>
+                        Data Lines
+                    </label>
+                    <button id="collapseData" class="small">−</button>
+                </div>
+                <div class="control-signals">
+                    <h3>Control Signals</h3>
+                    <label>
+                        <input type="checkbox" id="toggleCS1" checked>
+                        CS1
+                    </label>
+                    <label>
+                        <input type="checkbox" id="toggleCS2">
+                        CS2
+                    </label>
+                    <label>
+                        <input type="checkbox" id="toggleCS3">
+                        CS3
+                    </label>
+                    <label>
+                        <input type="checkbox" id="toggleX1">
+                        X1
+                    </label>
+                    <label>
+                        <input type="checkbox" id="toggleX2">
+                        X2
+                    </label>
+                    <label>
+                        <input type="checkbox" id="toggleCE">
+                        /CE
+                    </label>
+                    <label>
+                        <input type="checkbox" id="toggleOE">
+                        /OE
+                    </label>
+                    <label>
+                        <input type="checkbox" id="toggleByte">
+                        /BYTE
+                    </label>
+                </div>
+            </div>
+
+            <div class="pio-disassembly">
+                <h3>PIO Programs</h3>
+                <pre id="pioCode"><code>Initializing...</code></pre>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="waveform"></canvas>
+            <div class="scroll-controls">
+                <input type="range" id="scrollbar" min="0" max="0" value="0">
+            </div>
+        </div>
+    </div>
+
+    <div id="signalTooltip" class="signal-tooltip"></div>
+    
+    <script src="onerom-lens.js"></script>
+    <script src="logic-analyzer.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+    "$schema": "https://images.onerom.org/configs/schema.json",
+    "version": 1,
+    "name": "32-random-27c080",
+    "description": "27C080 test config with random data",
+    "categories": [
+    ],
+    "rom_sets": [
+        {
+            "type": "single",
+            "roms": [
+                {
+                    "description": "27C080 low half",
+                    "file": "images/test/rand_512KB.rom",
+                    "type": "27C080",
+                    "cs1": "active_low"
+                }
+            ]
+        },
+        {
+            "type": "single",
+            "roms": [
+                {
+                    "description": "27C080 high half",
+                    "file": "images/test/rand_512KB_alt.rom",
+                    "type": "27C080",
+                    "cs1": "active_high"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+private-roms/*
+!private-roms/README.md
+**/build/
+**/build-*/
+**/.git-local-metadata/
+*.bin
+*.uf2
+*.d64
+*.prg
+*.exe
+!releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0.8.1.bin
+!releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.28.bin

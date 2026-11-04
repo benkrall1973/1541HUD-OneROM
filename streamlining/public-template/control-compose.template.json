@@ -1,0 +1,18 @@
+{
+  "$schema": "https://images.onerom.org/configs/schema.json",
+  "version": 1,
+  "name": "1541HUD Fire-24G Control - DolphinDOS C/A/E",
+  "description": "ROM-free CLI template for a three-page C/A/E installation, including DolphinDOS-style ROM sets. Supply lawful 8 KiB pages under private-roms/control/.",
+  "categories": ["drive", "firmware", "commodore", "iec"],
+  "reserved_pins": ["sel_b", "sel_c", "sel_d"],
+  "rom_sets": [
+    {"type":"single","roms":[{"description":"1541HUD USB Control plugin","file":"../firmware-control/active-plugins/system/1541HUD-USB-v0.8.1/build/1541-OneROM-1541HUD-USB-v0.8.1.10.bin","type":"system_plugin"}]},
+    {"type":"single","roms":[{"description":"1541HUD Host Control plugin","file":"../firmware-control/active-plugins/user/1541HUD-Host-Control-v0.8.1/build/1541-OneROM-1541HUD-Host-Control-v0.8.1.3.bin","type":"user_plugin"}]},
+    {"type":"multi","roms":[
+      {"label":"PRIVATE ROM SET","description":"C000-DFFF page supplied by owner","file":"control/slot0-c000-dfff.bin","type":"2364","cs1":"active_low"},
+      {"description":"A000-BFFF page supplied by owner","file":"control/slot0-a000-bfff.bin","type":"2364","cs1":"active_low"},
+      {"description":"E000-FFFF page supplied by owner","file":"control/slot0-e000-ffff.bin","type":"2364","cs1":"active_low"}
+    ]}
+  ],
+  "notes":"Three-page C/A/E layout: C000-DFFF, A000-BFFF via X1/Y5, then E000-FFFF via X2/Y7. Use only where that wiring exists. This template does not require a RAMBoard by itself; it requires the documented A-page decode wiring. SEL_B reset is LOW for 350 ms then input through 1 kOhm to C46+/CR7; SEL_A IEC address; SEL_C write-protect override; SEL_D sense. Duplicate the final multi-ROM entry locally for additional legally held ROM sets."
+}

@@ -1,0 +1,450 @@
+# CLI Changelog
+
+## v0.6.0 - unreleased
+
+- **Breaking** `program` and `firmware build` automatically add the USB plugin when a system plugin isn't specified. Use `--no-plugin` to build without plugins.
+- Reword several error messages and `board` output.
+- `--config` on `program` and `firmware build` can be an http(s) URL.
+- Add the address monitor's minimum CS-active time to `program` and `firmware build` as `--addr-mon-min-cs-act-ns` and the `--slot` key `addr-mon-min-cs-act-ns`. `scan --slots`, `inspect slots` and `firmware inspect` display it.
+- `firmware inspect` displays each slot's firmware overrides.
+- `firmware inspect`, `scan --slots` and `inspect slots` display a slot's `force-16-bit` setting.
+- Add `update` which updates a One ROM's firmware version, one ROM image or a plugin.
+- Add `clone`, which copies a One ROM or firmware file to another One ROM.
+- Add `save`, which saves a One ROM's or firmware file's configuration and ROM images to a PC.
+- `firmware inspect` prints `Chip N` instead of `ROM N`.
+- Remove `inspect image`, which wasn't implemented. Use `save`.
+- Fix: `onerom` no longer crashes when its output is piped to a program that exits early, for example `head`.
+- Fix: a reboot no longer fails when the One ROM resets before the CLI reads its reply to the reboot command, for example after `program --verify`.
+- When the One ROM selected with `--serial` can't be opened the error is now "could not be opened", not "not found".
+- `program` and `firmware build` fail when a plugin's boot slot address is outside its region.
+- `monitor log` reads One ROM's log from RAM when a plugin has exclusive use of the serial port.
+- `inspect peek memory` can also read USB DPRAM.
+- `console --serial-port 2` opens serial port 2.
+- `hardware validate` displays the manufacturer's contact.
+- **Breaking** `hardware commission` and `hardware sign` add the board's size, and any `--revision` and `--batch`, to the signed commissioning data. An unused signature from an earlier CLI fails with `hardware commission --signature`. One ROMs already commissioned aren't affected.
+- `hardware validate`, `inspect otp` and `inspect info` display the size a One ROM was commissioned as where it differs from its current size. `hardware validate` fails where a One ROM was commissioned as L but its size isn't L.
+- `hardware request-signature`'s link contains the CLI version. A signing request from a CLI before v0.6.0 is rejected.
+- **Breaking** `program`'s `--config-name`, `--config-description`, `--save-config` and per-device overrides are rejected when used with `--firmware`. When used with `--base-firmware` these, `--plugin` and `--no-plugin` are rejected unless `--config` or `--slot` is used. Previously they were ignored.
+- **Breaking** `program --base-firmware` without `--config` or `--slot` requires `--no-config`.
+
+## v0.5.0 - 2026-10-06
+
+- **Breaking** With a One ROM and a Lab both connected, a command that uses a device requires `--serial`. `scan`, `inspect info` and `firmware inspect` display Lab.
+- `inspect info` indicates what it cannot decode and why.
+- `peek` no longer fails on a large read.
+- `peek` and `poke` no longer crash on a One ROM serving a 27C080. Their `--address` help says where address 0 is on a One ROM serving half a 27C080.
+- `program` and `firmware build` report a board mismatch correctly.
+- Add `hardware commission`, `validate`, `set-size`, `sign` and `request-signature` for commissioning a One ROM. See [COMMISSIONING](/docs/COMMISSIONING.md).
+- Add `inspect otp`, which prints what a One ROM's OTP contains.
+- On a commissioned One ROM `program` by default uses the commissioned board type. An image built for another board type fails to program unless `--force` is provided.
+- `scan --verbose` and `inspect info` report a One ROM's commissioning information, and each device's line ends `(L)` on an L board. `inspect info` prints the board's size.
+- `inspect info` prints the firmware's states.
+- Add `--reserve-pin` to `program` and `firmware build`, to reserve a pin for another use.
+- `control pin`, `control reset` and `--reset-host` can drive a GPIO used as a forced input by the core firmware.
+- `program` and `firmware build` print a warning for ROM slots the image select jumpers can't select.
+- Support L boards. `program` builds an image for the One ROM's size and `firmware build` takes `--size`.
+- A damaged `--firmware` file fails to program unless `--force` is used.
+- `scan --slots` and `inspect slots` say why they don't recognise a One ROM's firmware.
+- Help lists the global options under their own heading, and `--force`'s help no longer lists its cases.
+- Remove the hidden `update otp`, which did nothing.
+- `firmware inspect` lists a v0.7.0+ image's MCU, plugins and ROMs, and prints base firmware's board as `any (base firmware)` rather than warning about missing metadata.
+- Commands that don't need a One ROM, such as `image convert` or `firmware inspect --firmware`, no longer fail when two One ROMs are connected.
+- `program --reset-host` fails before programming where a ROM slot uses the pin, for example X1 for bank select.
+- Add `control standby on` and `off`, and the `--slot` key `standby` to boot a slot in standby mode.  `inspect gpio`, `inspect slots`, `peek live` and `poke live` display when standby mode is active.
+- `inspect peek live` displays a line saying what it read.
+- Intel HEX and S-record decode errors now identify the file by name, not by a chip number that include plugins.
+- `firmware inspect` displays an image's reserved pins.
+- A config can now refer to a plugin by name, `"plugin": "usb"`, instead of a URL. The latest plugin release compatible with the firmware version is used.
+- `--save-config` saves `--plugin usb` as `"plugin": "usb"`.
+- A config with a plugin in the slot for the other type of plugin fails with `'host-control' is a user plugin but is configured as the system plugin`, rather than a manifest type mismatch.
+- `--save-config` writes a `--plugin` plugin's type as `system_plugin` or `user_plugin`, which the config schema accepts, rather than `SystemPlugin` or `UserPlugin`. It leaves out `allow_cs_ignore`, `boot_logging`, `swd_enabled` and `turbo_boot` at their defaults.
+- The .deb supports glibc 2.35 and later.
+
+## v0.4.1 - 2026-09-17
+
+- **Add `onerom console`.**  Displays what One ROM sends, like `monitor log`,
+  and sends what you type to the retro system, which reads it with RBCP
+  `PIPE_READ`.  Requires firmware v0.7.3 with the USB and host-control plugins.
+- **Add the `27C400Pin31A17` and `27C200Pin31NC` chip types**, for the Amiga
+  A500 rev 5 Kickstart socket.
+
+## v0.4.0 - 2026-09-08
+
+- **`peek` and `poke` help no longer show an argument the commands reject.**
+  Both gave `onerom peek live ...`, and the top-level aliases take their options
+  directly.
+- **A device that cannot be read is now named in one line and ignored.**
+  `onerom scan` says whether it could not be opened or could not be read, warns
+  only where nothing else was found, and adds the USB identity and the
+  underlying error under `--verbose`. `--unrecognised` no longer picks one to
+  program, since a device that will not answer cannot be programmed.
+- **A ROM image smaller than the chip, with `size_handling=trunc`, no longer
+  reports the image as too large.** It said the image was larger than the chip
+  supported while printing a size smaller than the chip's. It now reads as too
+  small, and points at padding or duplication.
+- **Build errors name the ROM image at fault by its file.** They gave a chip
+  number that counted plugin slots and every chip in a set, so nothing a
+  `--slot` or a config entry produced it. A `location` window running past the
+  end of its file now says so, instead of advising padding that cannot reach
+  it, and an image too large for a 27C080 says that one One ROM serves half of
+  one.
+- **The CLI warns when a 16-bit ROM image looks to be stored the wrong way
+  round.** A 16-bit ROM supplies two bytes at a time, an image may hold each
+  pair in either order, and One ROM reads the low byte first. `program`,
+  `firmware build` and `image swap-bytes` now compare the image's first bytes
+  against known ROM headers and say what they recognised. An image matching
+  none is left alone, and nothing is refused.
+- **`onerom firmware inspect --verbose` lists plugins separately** and numbers
+  ROM slots from 0 with plugins excluded, as `onerom inspect slots` already
+  did. An image holding the USB plugin and two ROM images reported three slots.
+- **`onerom program --reset-host <PIN>` resets the host system after
+  programming.** It waits for the One ROM to come back on the USB bus and then
+  pulses that pin low, as `control reset` does, so flashing an image and
+  restarting the machine into it is one command. The pin is checked against the
+  image being flashed - a pin One ROM will serve with, or one the board uses
+  itself, is refused before its ROM images are fetched - and it runs for each device in
+  a `--batch`. The pulse is 100ms; `control reset` remains the way to choose
+  another. Conflicts with `--fast`, `--stopped` and `--no-reboot`.
+- **`program --follow` says up front when the image cannot serve it.** An image
+  with no USB system plugin leaves the bus the moment the One ROM starts
+  serving, so there was never a log to follow - previously discovered after
+  programming, when the port could not be found.
+- **`--hold` is bounded where the device bounds it.** `control pin --hold` and
+  `control reset --hold` refuse anything above the 60 second limit the device
+  enforces, as the command line is read rather than after it has been sent.
+- **`onerom inspect led --verbose` and `inspect rgb --verbose` now say when
+  they could not reach the device**, instead of reporting that the two LEDs are
+  not on the same GPIO.
+- **`onerom control pin`, `control rgb` and `inspect gpio` now work first time
+  against a One ROM running an older USB plugin.** They previously waited and
+  then failed, and succeeded when run again.
+- **`onerom control rgb` drives the RGB LED on the models that have one.**
+  `on`, `off`, `beacon`, `flame`, `cycle`, `breathe` and `blink`, with
+  `--colour` (ten names or `#RRGGBB`), `--brightness`, `--period` and `--hold`.
+  The device times a hold, so it completes even if the command does not. A
+  board without an RGB LED says so rather than appearing to work. Needs
+  firmware v0.7.2 with the v0.2.2 USB plugin.
+- **`onerom control led blink`** blinks the status LED on and off until
+  something changes it, or for a `--hold` if you give it one. A slower,
+  unbounded sibling of `beacon`.
+- **Each LED mode now has a shortest period it can run at**, and a shorter one
+  is refused with a message naming that mode's minimum rather than being
+  accepted and quietly run slower. 1000ms for `cycle` and `breathe`, 500ms for
+  `flame`, 50ms for `beacon` and `blink`.
+- **`onerom inspect led` and `onerom inspect rgb` say what each LED is doing.**
+  The mode it is in, how fast it is running and which GPIO it is on, plus the
+  colour and brightness for the RGB LED, read from the One ROM rather than
+  remembered by the CLI. A board with no RGB LED reports that rather than
+  failing, and where the two LEDs share a GPIO both commands say so. Needs
+  firmware v0.7.2 with the v0.2.2 USB plugin.
+- **`onerom control led` gains `--hold` and `--period`.** All four
+  subcommands take `--hold <MS>` to run the mode for a bounded time and then go
+  back to whatever the LED was doing, and `beacon` and `flame` take
+  `--period <MS>` for one blink and one pass of the flicker. The device times
+  the hold, so it finishes even if the command does not. Needs firmware v0.7.2
+  with the v0.2.2 USB plugin — the CLI checks first and says so, rather than
+  reporting success on a device that would ignore them. A plain `on`, `off`,
+  `beacon` or `flame` is unchanged and still works on any One ROM.
+- **Breaking: `--name` now names the One ROM, not the configuration.** It is an
+  alias for `--instance-name` on `program` and `firmware build`, where it was an
+  alias for `--config-name` — a command line using `--name` still runs and names
+  the device instead, except with `--no-config`, where it is now rejected.
+  `docs/CLI-MANUAL.md` gains a breaking-changes section near the top and the
+  full history at the end.
+- **`onerom monitor log` shows a running One ROM's log as it is written.**
+  It attaches to the One ROM's USB serial port and prints the firmware and
+  plugin logging it sends, until the One ROM is disconnected, rebooted or
+  stopped, or you press Ctrl-C. What the One ROM has logged since anything last
+  listened arrives first, so the boot log is still there when you attach.
+  `--output` keeps a transcript as well as showing it. Needs a running One ROM
+  programmed with the USB system plugin. On Linux the packaged udev rules now
+  tell ModemManager to leave One ROM alone — without that it probes the port and
+  consumes the log before you get to it, so a hand-installed copy of the rules
+  wants replacing.
+- **`onerom program --follow`** goes straight from programming to watching the
+  log, so you see the boot log of the firmware just flashed. It cannot be
+  combined with `--fast`, `--stopped`, `--no-reboot` or `--batch`.
+- **`onerom self` reports and downloads new releases of the CLI itself.**
+  `self check` says whether a newer CLI has been published for your platform;
+  `self download` fetches a published artifact — for this platform, another
+  (`--target`), or all of them — and verifies it against its published SHA-256.
+  Nothing is installed, and no check runs unless you ask for one.
+- **A plugin named by a config is now checked for firmware compatibility**, as
+  one given with `--plugin` already was. A plugin binary declares only the
+  minimum firmware it needs, so a release withdrawn for a newer firmware — USB
+  v0.1.2, which hard faults on v0.7.0 — was previously built in and flashed.
+  A local or third-party plugin has nothing published to check against and is
+  still built in as-is; an unreachable images server warns rather than failing.
+  A refusal names the newest release that does support the firmware, with the
+  URL to point the config at.
+- **Motorola S-record images are now accepted alongside Intel HEX.**
+  `--slot format=srec` decodes an S-record file to a binary image before it is
+  built in, with the same optional `load-address=` giving the absolute address
+  that maps to byte 0 of the ROM. Unwritten bytes read as `0xFF`.
+- **`onerom image convert` gains `srec`** on either side of `--from`/`--to`, so
+  it now converts between `binary`, `ihex` and `srec` in any direction,
+  including `ihex` to `srec` directly. S-record output uses one data record
+  type throughout — the narrowest that addresses the whole image — with the
+  paired terminator.
+- **`onerom program --verify` is supported**, and its help text and the CLI
+  manual now say so. It reads flash back after programming and compares it
+  against the image, and always did — both described it as not yet supported.
+- **New 24, 32 and 40 pin boards** — `fire-24-g`, `fire-32-c` and `fire-40-c`.
+
+## v0.3.0 - 2026-08-09
+
+- **`--slot` now accepts every chip type the target firmware can serve on the
+  board.** For v0.7.0 firmware onwards that is the served layout itself, so the
+  overhang and fly-lead combinations `docs/COMPATIBILITY.md` documents — a
+  `2764` on a Fire 24, a `28C16` on a Fire 28 — are accepted where they were
+  previously refused as "not supported by this board". Building for v0.6.x is
+  unchanged, and a rejection lists what that firmware does serve.
+  - **Breaking: `--allow-unsupported-chip-type` is removed** from `program` and
+    `firmware build`. It only ever bypassed the old per-board list; nothing it
+    can now permit is buildable.
+
+- **Breaking: the CLI's argument conventions are now consistent across every
+  command.** No command takes a positional argument — `board header` and
+  `board socket` take `--board`, where the error for omitting it already told
+  you to. Each short flag means one thing CLI-wide: `-b` is `--board` (was
+  `--byte` on `poke`), `-o` is `--output` (was `--offset` on `control erase`),
+  `-i` is `--input` (was the global `--vid-pid`, which keeps `--id`), `-l` is
+  `--length` (was `--slot`), and `-m` is `--msd` (was `--image` on
+  `update slot`). `--board`, `--chip-type`, `--all`, `--force`, `--no-reboot`,
+  `--input` and `--output` gain their short forms on the commands that lacked
+  them. Enforced by tests that walk the whole command tree.
+- **Breaking: `onerom control erase` uses `--stopped`/`--running`** for its
+  post-erase reboot mode, matching `control reboot` and `program`. As with
+  `onerom boards`, there is deliberately no alias for the old
+  `--reboot-stopped`/`--reboot-running`.
+- `--config` is now the primary spelling of the ROM configuration file option
+  on `program` and `firmware build`, matching how it is written throughout the
+  documentation; `--config-file`, `--config-json` and `--json` remain aliases.
+- `onerom image convert` validates `--from`/`--to` as the command line is
+  parsed and lists the accepted formats in `--help`, rather than failing
+  part-way through a conversion. The list comes from `onerom-gen`, so a format
+  added there needs no CLI change. `--load-address` is likewise parsed up
+  front, by the same code the config file uses, so `$E000` and a bad value
+  behave identically in both places.
+- `--slot` keys and values are documented kebab-case — `size-handling`,
+  `load-address`, `force-16-bit`, `cs1=active-low` — matching the CLI's own
+  argument naming. The snake_case config spellings are all still accepted, and
+  `size-handling`, the one key that took only the snake form, now parses.
+- **`--slot` accepts `cs<n>=ignore`**, which a config file always could.
+  Chip-select values now go through the same `onerom-gen` parser the config
+  file uses, replacing a second, narrower copy in the CLI — between them
+  `active_low` was accepted only on the command line and `ignore` only in a
+  config file, and neither took the full set. `ignore` says One ROM does not
+  monitor the line; whether a chip may use it is still settled by
+  `allow_cs_ignore`, so a 2332 asking for it now gets that rule explained
+  rather than "invalid CS logic".
+- `--serial-override` now has help text and a `<SERIAL>` value name; it shipped
+  with neither, from a `//` comment where clap needs `///`.
+- **Breaking: `onerom boards` is now `onerom board`**, and the bare listing it
+  printed is `onerom board list`. There is no alias, so scripts calling
+  `onerom boards` must be updated; the CLI suggests `board` rather than simply
+  failing.
+- **Ice (STM32) boards are listed separately and rejected where the CLI cannot
+  use them.** The CLI has never had an STM32 path — every firmware path
+  composes an RP2350 image and every device path speaks picoboot — but the
+  merged list implied otherwise, and `--board ice-24-d` failed several layers
+  down as a missing release. `scan`, `program`, `firmware build`,
+  `firmware download`, `firmware inspect --board`, `control pin`,
+  `control reset` and `inspect gpio` now reject an Ice `--board` up front. The
+  commands that only *describe* hardware still take them: `board header`,
+  `board socket`, `chips` and `firmware releases`.
+- **Add GPIO control**: `onerom control pin` drives a One ROM GPIO high, low or
+  high-impedance, `onerom control reset` pulses one low to reset the host
+  system One ROM is installed in, and `onerom inspect gpio` shows what every
+  GPIO is and what One ROM is doing with it. All three need a *running* device
+  with the USB system plugin, and say so.
+  - `control pin --hold <MS>` holds the state for a bounded period and then
+    applies `--then` (`z` by default); without `--hold` the state latches. The
+    **device** times the hold, so an interrupted CLI cannot leave a pin
+    latched. `control reset` is that with `--state low --then z` and `--hold`
+    defaulting to 100ms; it never drives the line high, and rejects `--hold 0`.
+  - `--pin` takes `gpio<N>` or a header pad name — `sel_a` to `sel_e` (`sel-a`
+    and `sela` accepted) and `x1`/`x2`. A bare number is rejected as ambiguous,
+    as are the broken-out address pads (`a<N>`), with a reason. `--state` and
+    `--then` accept `1`/`0` alongside `high`/`low`.
+  - A GPIO One ROM is itself using is refused, naming what it is doing, unless
+    `--force`, which prints what forcing costs: a pin serving *reads* goes back
+    with `--state z`, a pin serving *drives* leaves serving broken until
+    reboot. A GPIO that is not 5V-tolerant warns, which `--yes` or `--force`
+    answers.
+  - `control pin`, `control reset` and `inspect gpio` take `--board`, needed
+    only to resolve a `--pin` pad name on a board this build does not
+    recognise.
+
+  Requires One ROM firmware v0.7.1 or later and the v0.7.1 or later USB system
+  plugin; against anything older the CLI says which of the two is too old
+  rather than surfacing a USB stall.
+
+- **Add ASCII views of a board's physical pin layouts.** `onerom board header
+  [--board <board>]` draws the pin (jumper / programming) header, annotating each
+  image-select and X pad with the GPIO behind it and — on Fire boards —
+  whether that GPIO is 5V-tolerant (`5V`) or 3.3V-only (`!!3V3!!`, an ADC pin).
+  `onerom board socket [--board <board>] [--chip-type <chip>] [--gpio]` draws the ROM
+  socket as a DIP pinout: GPIOs by default, ROM pin functions with
+  `--chip-type`, and both with `--gpio`. A chip whose pin count differs from
+  the board's is drawn at the larger of the two, bottom-justified, marking
+  `overhang` and `(empty)` pins and the `X1`/`X2` fly-lead each overhanging
+  address line needs. The board is inferred from a connected One ROM when
+  omitted; `onerom inspect header` and `onerom inspect socket` are the
+  device-side forms, and take `--board` to override the board type the
+  connected One ROM reports.
+- **`onerom chips --board <board>` now reports how much flash each chip type
+  uses.** Each chip is listed with its ROM size and its image size — often
+  larger than the chip (a 2364 costs 8KB on a 24-pin board but 256KB
+  overhanging a 28-pin one) — grouped by socket fit, matching
+  `docs/COMPATIBILITY.md`. `--chip-type <chip>` (`-c`) answers for one type,
+  and `board socket --chip-type` / `inspect socket --chip-type` report the same
+  figure below the pinout. The listing now covers every chip the board can
+  emulate, including the overhang and fly-lead combinations the name-only list
+  omitted; a recognised type the board cannot serve is named in a trailing line
+  instead. Ice boards keep the plain name list.
+  - The Fit column is now legended, and the fit for a chip in a larger socket
+    needing no signal wiring reads `larger socket (no fly-leads)` rather than
+    `no fly-leads required`, which sat under a `(with fly-leads)` heading and
+    read as a contradiction.
+- **ROM images can be rearranged during a build**, via a new `transform=` key
+  on `--slot`: `swap_bytes` reverses the byte order within each 16-bit word,
+  and `deinterleave:<offset>/<stride>[/<bytes>]` extracts one lane from an
+  interleaved image. Several may be combined with `+` and are applied in the
+  order given, which matters. The same is expressible as a `"transform"` array
+  in a config file. Previously the only option was `onerom image swap-bytes`,
+  which rewrites the source file.
+- **Add `onerom image deinterleave`** — the standalone counterpart to
+  `onerom image swap-bytes` (`--offset`, `--stride`, `--bytes`). Both share
+  their implementation with the `transform=` slot key. Neither reads Intel HEX;
+  run `onerom image convert` first.
+- Add `onerom image convert --from <fmt> --to <fmt> --input <file> --output
+  <file> [--load-address <addr>]`, converting ROM images between `binary` and
+  `ihex` (Intel HEX). The format set is designed to accept further formats
+  later.
+- Add `format` and `load_address` keys to `--slot` for Intel HEX ROM images:
+  `--slot file=rom.hex,type=2364,cs1=active_low,format=ihex[,load_address=$E000]`.
+  `format` accepts `binary` (default) or `ihex`; `load_address` (only valid
+  with `format=ihex`) is a decimal or `0x`/`$`-prefixed address mapping to byte
+  0 of the ROM. The same keys are available in config files.
+- Add `--serial-override`, setting a custom USB serial number used while One
+  ROM is running. A stopped One ROM continues to use its chip ID.
+- Allow `--plugin` to be combined with `--config-file` on `program` and
+  `firmware build`; the plugins are inserted ahead of the config's ROM slots.
+  Errors if the config already defines a plugin of its own.
+- Turbo boot with more than one non-plugin ROM slot is now accepted under
+  `--force` rather than refused outright, for a first slot holding a bootloader
+  that selects the others itself. `--force` now covers config warnings as well
+  as firmware parse errors and a board type mismatch.
+- The ROM type is now stored in metadata using the exact spelling the user
+  entered, on both the `--config-file` (`"type"`) and `--slot type=...` paths,
+  instead of a canonicalised name (`27SF512` is retained rather than normalised
+  to `27512`). The resolved type still drives all behaviour.
+- `onerom scan --list-boards` now prints the same listing as `onerom board
+  list` rather than its own one-liner.
+- `onerom inspect gpio` now shows one `Function` column instead of separate
+  `Pad` and `Function` columns, listing everything the GPIO is: its ROM socket
+  signal under the image being served, then the board peripheral, then the
+  header pad, deduplicated.
+  - This **fixes a real omission**: the lookup stopped at the first system
+    function it matched, so on a `fire-24-f` — where the Status LED and the RGB
+    LED are both GPIO 29 — the table named only the Status LED.
+  - `Function` no longer claims a GPIO is `SWCLK` or `SWDIO`. Those are
+    dedicated RP2350 pins with no GPIO of their own; the `SEL_C`/`SEL_D` pads
+    merely share their nets. `onerom inspect header` remains the pad-indexed
+    view.
+- `onerom inspect gpio` now lists only the GPIOs connected to something, saying
+  how many were omitted; `--all` lists every GPIO. The `X1`/`X2` and
+  image-select pads always appear, being what the table is read to find.
+- The explanatory legend under the `inspect gpio` table is now shown only with
+  `--verbose`.
+- `board socket` and `inspect socket` now say when a board has no GPIO map,
+  instead of drawing the diagram with the GPIO column blank all the way down.
+  The `--chip-type` function view is unaffected, being drawn from the chip's
+  pinout rather than the socket map.
+- `board header` and `inspect header` now say `command unsupported` for a board
+  with no pin-header descriptor, where they said `nothing to draw` and called
+  the descriptor missing "yet".
+- `onerom inspect header` and `onerom inspect socket` now take `--board`,
+  overriding the board type the connected One ROM reports, as `inspect gpio`
+  already did. It is an override, not a substitute for the device — both still
+  need a One ROM connected, and `onerom board header`/`board socket` remain the
+  way to draw a board by name without one.
+  - Their "cannot determine the board type" error now advises `--board`, which
+    resolves it. The error only arises with a One ROM connected whose board type
+    this build does not recognise, so the previous advice to connect one was
+    unreachable.
+- Stop hard-wrapping prose in console output. A handful of messages broke a
+  sentence at a fixed width, which the terminal then wrapped again at its own.
+  Multi-line messages that put a *separate* sentence on its own indented line
+  are unchanged; that is structure, not wrapping.
+- Fix `onerom image swap-bytes` panicking at startup (even for `--help`) with a
+  clap short-option collision: `-i` was claimed by both the global `--vid-pid`
+  and swap-bytes' `--input`. `-i` now belongs to `--input` throughout, and
+  `--vid-pid` is long-only (alias `--id` unchanged).
+- New `Error` variants: `ImageTransform`, `IceBoardUnsupported`,
+  `TurboBootMultiSlot`, and the GPIO control errors (device not running, pin
+  in use, no free hold slot).
+- `--disable-swd` now takes effect on the device: SWD stays up for the whole of
+  boot and is shut off just before serving. It may now be combined with
+  `--logging`, previously rejected, and logging stops when SWD does. Its help
+  text now says what it does and does not do.
+- Fix `firmware build` accepting `--swd_disabled` where `program` accepted
+  `--swd_disable`, so each underscore spelling worked on only one subcommand.
+  `--disable-swd` and `--swd-disable` are unchanged and work on both.
+
+## v0.2.0 - 2026-07-20
+
+- Support firmware v0.7.x
+- Move plugin handling to onerom-app crate.
+
+## v0.1.11 - 2026-07-12
+
+- Prevent program command from allowing --plugin and --firmware simultanesouly (as ---plugins is ignored anyway).
+
+## v0.1.10 - 2026-07-02
+
+- Added more help on size handling when programming or building firmware.
+
+## v0.1.9 - 2026-06-02
+
+- New 28 and 32 pin boards - fire-28-c and fire-32-b.
+
+## v0.1.8 - 2026-05-26
+
+- Re-added 23QL384.
+- Add `onerom chips` to show supported chip types and their aliases.
+- Fixed `onerom program --scan-slots`, to correctly re-query One ROM after programming.
+- More ROM type aliases.
+
+## v0.1.7 - 2026-05-18
+
+- Added 27C100 type as synonym of 27C301/27C1000
+- Added `onerom image swap-bytes` to swap bytes in a 16-bit ROM image file.
+
+## v0.1.6 - 2026-05-14
+
+- Moved 23QL384 support to a 23QL512 type.
+- Fixed bug introduced in 0.1.5 where a (benign) error is reported requerying One ROM after programming.
+
+## [v0.1.5] - 2025-05-12
+
+- Added _prototype_ support for the new 23QL384 ROM type.  May be deprecated or modified in a future release.
+- Add support for `onerom program .. --scan-slots` to auto-run `onerom scan --slots` after programming. 
+
+## [0.1.4] - 2026-05-08
+
+- Add 2364, 2732, 2716, 2708 and 2704 support on One ROM 28 boards.  See the main [CHANGELOG](/CHANGELOG.md) for important notes on this support, including warnings about potential damage if not used correctly.
+
+## [0.1.3] - 2026-04-25
+
+- Add support for labels/names for slots.
+
+# [0.1.2] - 2026-04-02
+
+- Add batch programming mode for programming multiple devices with the same firmware more quickly.
+- Add 27C080, 28C16, 28C64, 28C256 and 28C512 ROM support.
+
+## [0.1.1] - 2026-03-26
+
+- Allow program --fw as well as --firmware.

@@ -1,0 +1,983 @@
+// Copyright (C) 2025 Piers Finlayson <piers@piers.rocks>
+//
+// MIT License
+
+use iced::widget::Row;
+use iced::{Element, Subscription, Task, time};
+#[allow(unused_imports)]
+use log::{debug, error, info, trace, warn};
+use std::time::Duration;
+
+use onerom_app::assemble_image;
+use onerom_cli::CliFetch;
+use onerom_cli::plugin::{PluginNote, check_config_plugins, resolve_config_plugins};
+use onerom_cli::slot::has_system_plugin;
+use onerom_config::fw::FirmwareVersion;
+use onerom_config::hw::Board;
+use onerom_config::mcu::Variant as McuVariant;
+use onerom_fw::get_rom_files_async;
+use onerom_fw::net::{Release, Releases};
+use onerom_gen::{Builder, Error as GenError, FlashChips, second_chip_supported};
+
+use crate::analyse::Analyse;
+use crate::app::AppMessage;
+use crate::app::manifest::FirmwareBuildCompatibility;
+use crate::config::{
+    Config, ConfigManifest, SelectedConfig, download_config_async, generate_built_config,
+    load_config_file,
+};
+use crate::create::{Create, Message as CreateMessage};
+use crate::hw::HardwareInfo;
+use crate::log::Log;
+use crate::style::Style;
+use crate::{AppVersion, ManifestType};
+use crate::{app_manifest, internal_error, task_from_msg};
+
+const MANIFEST_RETRY_SHORT: Duration = Duration::from_secs(10);
+const MANIFEST_RETRY_LONG: Duration = Duration::from_secs(60);
+
+/// Maximum firmware versions this app version can build with.
+///
+/// Introduced in Studio v0.1.12.
+///
+/// Studio uses onerom_gen to generate firmware.  That has its own maximum
+/// version, which defaults to the current major version.  However, if, for
+/// some reason that is unacceptable, it can be overridden for specific
+/// Studio version here.  This is normally the result of a mistake in
+/// onerom-gen - it claiming it can build versions it cannot.  Probably
+/// because we introduced a non-backwards compatible firmware format change,
+/// incorrectly without bumping the major version.
+pub const MAX_BUILD_FW_VERSIONS: [FirmwareBuildCompatibility; 1] = [FirmwareBuildCompatibility {
+    app_version: AppVersion::new(0, 1, 12),
+    max_buildable_firmware_version: FirmwareVersion::new(0, 6, 4, 0),
+}];
+
+/// Messages for main window
+#[derive(Debug, Clone)]
+pub enum Message {
+    TabSelected(StudioTab),
+    HardwareInfo(Option<HardwareInfo>),
+    FetchReleases,
+    Releases(Releases),
+    DownloadRelease(Release, Board, McuVariant),
+    ReleaseDownloaded(Download, Result<Vec<u8>, String>),
+    ReleaseDoesntExist(Download),
+    ClearDownloadedRelease,
+    FetchConfigs,
+    ConfigManifest(ConfigManifest),
+    LoadConfig(Config),
+    ConfigLoaded(Result<SelectedConfig, String>),
+    ClearDownloadedConfig,
+    BuildImage {
+        hw_info: HardwareInfo,
+        size_detected: bool,
+    },
+    BuildImageResult(Result<(Image, String), String>),
+    HelpPressed,
+
+    // Used to indicate network is down.  Only returned when trying to fetch
+    // configs or releases manifests - not any other files - as those failures
+    // might be due to images.onerom.org misconfiguration, rather than network
+    // issues.  This assumes releases and configs manifests are never mis-
+    // configured.
+    DownloadFailed,
+}
+
+impl std::fmt::Display for Message {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Message::TabSelected(tab) => write!(f, "TabSelected({tab})"),
+            Message::HardwareInfo(info) => write!(f, "HardwareInfo({info:?})"),
+            Message::FetchReleases => write!(f, "FetchReleases"),
+            Message::Releases(releases) => write!(f, "Releases({})  ", releases.releases_str()),
+            Message::DownloadRelease(release, board, mcu) => {
+                write!(f, "DownloadRelease({}, {board}, {mcu})", release.version)
+            }
+            Message::ReleaseDownloaded(download, result) => match result {
+                Ok(data) => write!(f, "ReleaseDownloaded({download}, {} bytes)", data.len()),
+                Err(_) => write!(f, "ReleaseDownloaded({download}, Err)"),
+            },
+            Message::ReleaseDoesntExist(download) => write!(f, "ReleaseDoesntExist({download})"),
+            Message::ClearDownloadedRelease => write!(f, "ClearDownloadedRelease"),
+            Message::FetchConfigs => write!(f, "FetchConfigs"),
+            Message::ConfigManifest(configs) => {
+                write!(f, "ConfigManifest({})", configs.names_str())
+            }
+            Message::LoadConfig(config) => write!(f, "LoadConfig({config})"),
+            Message::ConfigLoaded(result) => match result {
+                Ok(selected) => write!(f, "ConfigLoaded({} bytes)", selected.data.len()),
+                Err(_) => write!(f, "ConfigLoaded(Err)"),
+            },
+            Message::ClearDownloadedConfig => write!(f, "ClearDownloadedConfig"),
+            Message::BuildImage {
+                hw_info,
+                size_detected,
+            } => write!(f, "BuildImage({hw_info}, size_detected={size_detected})"),
+            Message::BuildImageResult(_) => write!(f, "BuildImageResult"),
+            Message::HelpPressed => write!(f, "HelpPressed"),
+            Message::DownloadFailed => write!(f, "DownloadFailed"),
+        }
+    }
+}
+
+/// Tabs for main window
+#[derive(Debug, Default, Clone, PartialEq)]
+pub enum StudioTab {
+    #[default]
+    Analyse,
+    Create,
+    Log,
+}
+
+impl std::fmt::Display for StudioTab {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            StudioTab::Create => write!(f, "Create"),
+            StudioTab::Analyse => write!(f, "Analyse"),
+            StudioTab::Log => write!(f, "Log"),
+        }
+    }
+}
+
+impl StudioTab {
+    /// Get the tab name
+    pub fn name(&self) -> &str {
+        match self {
+            StudioTab::Create => Create::top_level_button_name(),
+            StudioTab::Analyse => Analyse::top_level_button_name(),
+            StudioTab::Log => Log::top_level_button_name(),
+        }
+    }
+
+    /// Create the tab buttons
+    ///
+    /// Returns a row of buttons
+    pub fn buttons(active: &StudioTab, serious_errors: bool) -> Element<'_, AppMessage> {
+        let mut buttons = Vec::new();
+        for tab in [StudioTab::Analyse, StudioTab::Create, StudioTab::Log] {
+            let active = *active == tab;
+            let on_press = if active {
+                None
+            } else {
+                Some(AppMessage::Studio(Message::TabSelected(tab.clone())))
+            };
+            let button = if serious_errors && tab == StudioTab::Log {
+                Style::error_button(tab.name(), on_press, active)
+            } else {
+                Style::text_button(tab.name(), on_press, active)
+            };
+            buttons.push(button.into());
+        }
+
+        // Add the buttons to a row, with spacing between them
+        Row::with_children(buttons).spacing(20).into()
+    }
+}
+
+/// Image built by Studio
+#[derive(Debug, Clone)]
+pub struct Image {
+    data: Vec<u8>,
+
+    firmware_len: usize,
+
+    metadata_len: usize,
+
+    roms_len: usize,
+
+    usb_run_capable: bool,
+}
+
+impl std::fmt::Display for Image {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Image({}/{}/{}",
+            self.firmware_len, self.metadata_len, self.roms_len
+        )
+    }
+}
+
+impl Image {
+    /// Returns the length of the firmware portion
+    pub fn firmware_len(&self) -> usize {
+        self.firmware_len
+    }
+
+    /// Whether the image includes a system plugin, which keeps a running
+    /// device on USB
+    pub fn is_usb_run_capable(&self) -> bool {
+        self.usb_run_capable
+    }
+
+    /// Returns the length of the metadata portion
+    pub fn metadata_len(&self) -> usize {
+        self.metadata_len
+    }
+
+    /// Returns the length of the ROMs portion
+    pub fn roms_len(&self) -> usize {
+        self.roms_len
+    }
+
+    /// Returns full image as would be flashed to device
+    pub fn full_image(&self) -> &[u8] {
+        &self.data
+    }
+
+    /// Returns size of full image as would be flashed to device
+    pub fn full_image_len(&self) -> usize {
+        self.data.len()
+    }
+}
+
+/// Network state
+#[derive(Debug, Default, Clone)]
+pub enum NetworkState {
+    #[default]
+    Untested,
+    Online,
+    Offline,
+}
+
+impl NetworkState {
+    pub fn is_offline(&self) -> bool {
+        matches!(self, NetworkState::Offline)
+    }
+}
+
+/// A firmware download's release version and hardware
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Download {
+    version: FirmwareVersion,
+    board: Board,
+    mcu: McuVariant,
+}
+
+impl std::fmt::Display for Download {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "v{} for {} {}", self.version, self.board, self.mcu)
+    }
+}
+
+/// Contains information retrieved/computed at runtime
+#[derive(Debug, Clone, Default)]
+pub struct RuntimeInfo {
+    // One ROM releases retrieved from network
+    releases: Option<Releases>,
+
+    // Detected or selected hardware info
+    hw_info: Option<HardwareInfo>,
+
+    // Downloaded firmware image
+    firmware: Option<Vec<u8>>,
+
+    // Selected firmware
+    selected_firmware: Option<Release>,
+
+    // Download of the selected firmware
+    download: Option<Download>,
+
+    // Available configs
+    config_manifest: Option<ConfigManifest>,
+
+    // Selected config
+    selected_config: Option<SelectedConfig>,
+
+    // Built image
+    image: Option<Image>,
+
+    // Network state
+    network_state: NetworkState,
+}
+
+impl RuntimeInfo {
+    pub fn network_online(&mut self) {
+        if self.network_state.is_offline() {
+            info!("Network is online");
+        }
+        self.network_state = NetworkState::Online;
+    }
+
+    pub fn network_offline(&mut self) {
+        if !self.network_state.is_offline() {
+            warn!("Network is offline");
+        }
+        self.network_state = NetworkState::Offline;
+    }
+
+    pub fn is_offline(&self) -> bool {
+        self.network_state.is_offline()
+    }
+
+    pub fn releases(&self) -> Option<&Releases> {
+        self.releases.as_ref()
+    }
+
+    pub(crate) fn set_releases(&mut self, releases: Releases) {
+        self.releases = Some(releases);
+    }
+
+    fn set_configs(&mut self, configs: ConfigManifest) {
+        self.config_manifest = Some(configs);
+    }
+
+    pub fn hw_info(&self) -> Option<&HardwareInfo> {
+        self.hw_info.as_ref()
+    }
+
+    pub(crate) fn set_hw_info(&mut self, hw_info: Option<HardwareInfo>) {
+        self.hw_info = hw_info;
+    }
+
+    #[allow(dead_code)]
+    pub fn firmware(&self) -> Option<&Vec<u8>> {
+        self.firmware.as_ref()
+    }
+
+    pub fn firmware_len(&self) -> Option<usize> {
+        self.firmware.as_ref().map(|f| f.len())
+    }
+
+    fn set_firmware(&mut self, firmware: Vec<u8>) {
+        self.firmware = Some(firmware);
+    }
+
+    fn clear_firmware(&mut self) {
+        self.clear_selected_firmware();
+    }
+
+    pub fn firmware_selected(&self) -> bool {
+        self.selected_firmware.is_some()
+    }
+
+    pub fn selected_firmware(&self) -> Option<&Release> {
+        self.selected_firmware.as_ref()
+    }
+
+    fn set_selected_firmware(&mut self, release: Release, download: Download) {
+        self.selected_firmware = Some(release);
+        self.download = Some(download);
+    }
+
+    fn clear_selected_firmware(&mut self) {
+        self.selected_firmware = None;
+        self.download = None;
+        self.firmware = None;
+    }
+
+    pub fn config_manifest(&self) -> Option<&ConfigManifest> {
+        self.config_manifest.as_ref()
+    }
+
+    pub fn clear_config(&mut self) {
+        self.selected_config = None;
+    }
+
+    pub fn config_selected(&self) -> bool {
+        self.selected_config.is_some()
+    }
+
+    pub fn selected_config(&self) -> Option<&SelectedConfig> {
+        self.selected_config.as_ref()
+    }
+
+    pub fn set_selected_config(&mut self, selected: SelectedConfig) {
+        self.selected_config = Some(selected.clone());
+
+        if let Some(manifest) = &mut self.config_manifest {
+            if selected.config.is_file() {
+                // If the selected config is a local file, we need to ensure
+                // it's at the start of the manifest
+                manifest.update_local_file(selected.config);
+            } else {
+                // If the selected config is not a local file, clear out any
+                // local file
+                manifest.remove_local_file();
+            }
+        }
+
+        // Clear out any built image
+        self.image = None;
+    }
+
+    fn clear_selected_config(&mut self) {
+        self.selected_config = None;
+    }
+
+    /// Returns reference to image
+    pub fn image(&self) -> Option<&Image> {
+        self.image.as_ref()
+    }
+
+    pub fn built_firmware_len(&self) -> Option<usize> {
+        self.image().map(|imgs| imgs.firmware_len())
+    }
+
+    pub fn built_metadata_len(&self) -> Option<usize> {
+        self.image().map(|imgs| imgs.metadata_len())
+    }
+
+    pub fn built_roms_len(&self) -> Option<usize> {
+        self.image().map(|imgs| imgs.roms_len())
+    }
+
+    pub fn built_full_image_len(&self) -> Option<usize> {
+        self.image().map(|imgs| imgs.full_image_len())
+    }
+}
+
+/// Main application state
+#[derive(Debug, Default, Clone)]
+pub struct Studio {
+    active_tab: StudioTab,
+    runtime_info: RuntimeInfo,
+}
+
+impl Studio {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn active_tab(&self) -> &StudioTab {
+        &self.active_tab
+    }
+
+    pub fn runtime_info(&self) -> &RuntimeInfo {
+        &self.runtime_info
+    }
+
+    pub fn update(&mut self, message: Message) -> Task<AppMessage> {
+        match message {
+            Message::TabSelected(tab) => {
+                self.active_tab = tab;
+                Task::none()
+            }
+            Message::HardwareInfo(info) => {
+                self.runtime_info.set_hw_info(info);
+
+                // Share with Create
+                task_from_msg!(CreateMessage::DetectedHardwareInfo)
+            }
+            Message::FetchReleases => Task::future(Self::fetch_releases_async()),
+            Message::Releases(releases) => {
+                self.download_succeeded();
+                self.runtime_info.set_releases(releases.clone());
+                Task::done(CreateMessage::ReleasesUpdated.into())
+            }
+            Message::DownloadRelease(release, board, mcu) => {
+                self.download_release(release, board, mcu)
+            }
+            // Downloads aren't cancelled so a stale one can finish after the
+            // selected one
+            Message::ReleaseDownloaded(download, _) | Message::ReleaseDoesntExist(download)
+                if self.runtime_info.download != Some(download) =>
+            {
+                debug!("Dropping the download of {download}, which isn't the selected firmware");
+                Task::none()
+            }
+            Message::ReleaseDownloaded(_, result) => {
+                match &result {
+                    Ok(data) => {
+                        self.download_succeeded();
+                        self.runtime_info.set_firmware(data.clone());
+                    }
+                    Err(_) => {
+                        self.download_failed();
+                        self.runtime_info.clear_firmware();
+                    }
+                };
+                let result = result.map(drop);
+                task_from_msg!(CreateMessage::ReleaseDowloaded(result))
+            }
+            Message::ReleaseDoesntExist(_) => {
+                self.runtime_info.clear_firmware();
+                task_from_msg!(CreateMessage::ReleaseDowloaded(Err(
+                    "Requested firmware release does not exist".to_string()
+                )))
+            }
+            Message::ClearDownloadedRelease => {
+                self.download_succeeded();
+                self.runtime_info.clear_firmware();
+                Task::none()
+            }
+            Message::FetchConfigs => Task::future(Self::fetch_configs_async(
+                self.runtime_info.selected_config().cloned(),
+            )),
+            Message::ConfigManifest(configs) => {
+                self.download_succeeded();
+                self.runtime_info.set_configs(configs.clone());
+                Task::done(CreateMessage::ConfigsUpdated.into())
+            }
+            Message::LoadConfig(config) => self.load_config(config),
+            Message::ConfigLoaded(result) => {
+                let create_result = match result {
+                    Ok(selected) => {
+                        self.download_succeeded();
+                        self.runtime_info.set_selected_config(selected);
+                        Ok(())
+                    }
+                    Err(e) => {
+                        self.download_failed();
+                        self.runtime_info.clear_selected_config();
+                        Err(e)
+                    }
+                };
+                Task::done(CreateMessage::ConfigLoaded(create_result).into())
+            }
+            Message::ClearDownloadedConfig => {
+                self.runtime_info.clear_config();
+                Task::none()
+            }
+            Message::BuildImage {
+                hw_info,
+                size_detected,
+            } => Task::future(Self::build_image_async(
+                hw_info,
+                size_detected,
+                self.runtime_info.clone(),
+            )),
+            Message::BuildImageResult(result) => {
+                let msg = match result {
+                    Ok((image, desc)) => {
+                        self.runtime_info.image = Some(image);
+                        CreateMessage::BuildImageResult(Ok(desc))
+                    }
+                    Err(e) => {
+                        warn!("Failed to build image: {e}");
+                        CreateMessage::BuildImageResult(Err(e))
+                    }
+                };
+                Task::done(msg.into())
+            }
+            Message::HelpPressed => self.help_pressed(),
+            Message::DownloadFailed => {
+                self.download_failed();
+                Task::none()
+            }
+        }
+    }
+
+    fn download_failed(&mut self) {
+        self.runtime_info.network_offline()
+    }
+
+    fn download_succeeded(&mut self) {
+        self.runtime_info.network_online()
+    }
+
+    fn help_pressed(&self) -> Task<AppMessage> {
+        Task::none()
+    }
+
+    /// Builds an image.  `size_detected` is whether the board size was read
+    /// from a device.
+    async fn build_image_async(
+        hw_info: HardwareInfo,
+        size_detected: bool,
+        runtime_info: RuntimeInfo,
+    ) -> AppMessage {
+        // Check we have firmware and config
+        let firmware = if let Some(fw) = runtime_info.firmware() {
+            fw.clone()
+        } else {
+            warn!("No firmware downloaded, cannot build image");
+            return CreateMessage::BuildImageResult(Err("No firmware downloaded.\n  This is likely due to an internal error.  Please report it.".to_string()))
+                .into();
+        };
+
+        let config = if let Some(cfg) = runtime_info.selected_config() {
+            cfg.clone()
+        } else {
+            warn!("No config downloaded, cannot build image");
+            return CreateMessage::BuildImageResult(Err("No config downloaded.\n  This is likely due to an internal error.  Please report it.".to_string())).into();
+        };
+
+        // Turn config into string
+        let config_str = match String::from_utf8(config.data) {
+            Ok(s) => s,
+            Err(e) => {
+                warn!("Config is not valid UTF-8: {}", e);
+                return CreateMessage::BuildImageResult(Err(
+                    "The supplied config is not valid UTF-8.".to_string(),
+                ))
+                .into();
+            }
+        };
+
+        // Create image builder from config
+        let fw_ver = if let Some(release) = runtime_info.selected_firmware() {
+            if let Ok(fw) = release.firmware_version() {
+                fw
+            } else {
+                warn!("Cannot get firmware version from selected release, cannot build image");
+                return CreateMessage::BuildImageResult(Err(
+                    "Cannot get firmware version from selected release.\n  This is likely due to an internal error.  Please report it.".to_string(),
+                ))
+                .into();
+            }
+        } else {
+            warn!("Cannot get firmware version from hardware info, cannot build image");
+            return CreateMessage::BuildImageResult(Err(
+                "Cannot get firmware version from hardware info.\n  This is likely due to an internal error.  Please report it.".to_string(),
+            ))
+            .into();
+        };
+
+        // Check firmware build compatibility
+        let manifest = app_manifest();
+        let max_buildable = manifest.max_buildable_firmware();
+        #[allow(clippy::collapsible_if)]
+        if let Some(max) = max_buildable {
+            if fw_ver > *max {
+                warn!(
+                    "Firmware version {fw_ver} is too new for this app version to build (max buildable: {max})"
+                );
+                return CreateMessage::BuildImageResult(Err(
+                    format!("Firmware version {fw_ver} is too new for this app version to build.\nMaximum buildable firmware version: {max}\n  Update the app to build with newer firmware versions.")
+                ))
+                .into();
+            }
+        }
+
+        let (mcu_variant, mcu_fam) = if let Some(mcu) = hw_info.mcu_variant {
+            (mcu, mcu.family())
+        } else {
+            warn!("Cannot get MCU family from hardware info, cannot build image");
+            return CreateMessage::BuildImageResult(Err(
+                "Cannot get MCU family from hardware info.\n  This is likely due to an internal error.  Please report it.".to_string(),
+            ))
+            .into();
+        };
+
+        let mut builder = match Builder::from_json(fw_ver, mcu_fam, &config_str) {
+            Ok(b) => b,
+            Err(e) => {
+                warn!("Failed to create image builder from config: {e:?}");
+                return CreateMessage::BuildImageResult(Err(e.to_string())).into();
+            }
+        };
+
+        match resolve_config_plugins(&mut builder, &fw_ver, &CliFetch).await {
+            Ok(plugins) => {
+                for plugin in plugins {
+                    debug!(
+                        "Resolved plugin: {}/{} v{} ({})",
+                        plugin.plugin_type.short(),
+                        plugin.name,
+                        plugin.version,
+                        plugin.file()
+                    );
+                }
+            }
+            Err(e) => {
+                warn!("Failed to resolve plugin: {e}");
+                return CreateMessage::BuildImageResult(Err(e.to_string())).into();
+            }
+        }
+
+        // Get ROM files we need to download.  Cache them so that if we're asked to download the
+        // same file again (for example zip with multiple extracts) we don't redownload it.
+        //
+        // Should implement in fw::get_rom_files_async copying existing get_rom_files()
+        match get_rom_files_async(&mut builder).await {
+            Ok(()) => (),
+            Err(e) => {
+                warn!("Failed to get ROM files: {e:?}");
+                return CreateMessage::BuildImageResult(Err(e.to_string())).into();
+            }
+        }
+
+        // A plugin referred to by URL hasn't been checked against the images
+        // server's manifest. Its binary header contains only a minimum firmware
+        // version, so a plugin withdrawn for a newer firmware, which hard faults
+        // the device, is caught only here.
+        match check_config_plugins(&builder, &fw_ver, &CliFetch).await {
+            Ok(notes) => {
+                for note in notes {
+                    match note {
+                        PluginNote::Checked { name, version } => {
+                            debug!("Plugin '{name}' v{version} is compatible with firmware")
+                        }
+                        PluginNote::Unofficial { source } => {
+                            debug!("Plugin {source} is not an official plugin, cannot be checked")
+                        }
+                        PluginNote::Unchecked { source, error } => warn!(
+                            "Could not check plugin {source} for firmware compatibility: {error}"
+                        ),
+                    }
+                }
+            }
+            Err(e) => {
+                warn!("Plugin incompatible with selected firmware: {e}");
+                return CreateMessage::BuildImageResult(Err(e.to_string())).into();
+            }
+        }
+
+        // Get firmware version
+        let fw = match runtime_info.selected_firmware() {
+            Some(fw) => fw,
+            None => {
+                warn!("No selected firmware, cannot build image");
+                return CreateMessage::BuildImageResult(Err("No selected firmware.\n  This is likely due to an internal error.  Please report it.".to_string()))
+                    .into();
+            }
+        };
+
+        // Build the firmware properties
+        let props = match hw_info.firmware_properties(fw) {
+            Some(p) => p,
+            None => {
+                warn!("Cannot get firmware properties, cannot build image");
+                return CreateMessage::BuildImageResult(Err(
+                    "Cannot get firmware properties.\n  This is likely due to an internal error.  Please report it.".to_string()
+                ))
+                .into();
+            }
+        };
+
+        // Where a set doesn't fit and the size wasn't read from a device, a
+        // size with a second flash chip might hold it.
+        let advise_size = !size_detected
+            && hw_info.board.is_some_and(|board| {
+                FlashChips::new(mcu_variant, props.board_size())
+                    .second()
+                    .is_none()
+                    && second_chip_supported(board, fw_ver)
+            });
+
+        // Build the image
+        let (metadata, roms) = match builder.build(props) {
+            Ok((md, roms)) => (md, roms),
+            Err(e) => {
+                warn!("Failed to build image: {e:?}");
+                let mut text = e.to_string();
+                if advise_size && matches!(e, GenError::SlotDoesNotFit { .. }) {
+                    text += "\n  If the board size is larger than M, change Board Size.";
+                }
+                return CreateMessage::BuildImageResult(Err(text)).into();
+            }
+        };
+
+        let (fw_len, md_len, roms_len) = (firmware.len(), metadata.len(), roms.len());
+        let checked = match assemble_image(&props, firmware, metadata, roms).await {
+            Ok(checked) => checked,
+            Err(e) => {
+                warn!("Failed to assemble image: {e}");
+                return CreateMessage::BuildImageResult(Err(e.to_string())).into();
+            }
+        };
+        if let Some(problem) = checked.problems.first() {
+            warn!("Built image failed its check: {problem}");
+            return CreateMessage::BuildImageResult(Err(problem.to_string())).into();
+        }
+
+        // Store image
+        let image = Image {
+            data: checked.image,
+            firmware_len: fw_len,
+            metadata_len: md_len,
+            roms_len,
+            usb_run_capable: has_system_plugin(builder.config()),
+        };
+        let total_len = image.full_image_len();
+
+        // Get description
+        let desc = builder.description();
+
+        debug!(
+            "Built image: total={total_len} bytes, firmware={fw_len} bytes, metadata={md_len} bytes, roms={roms_len} bytes"
+        );
+
+        Message::BuildImageResult(Ok((image, desc))).into()
+    }
+
+    async fn fetch_releases_async() -> AppMessage {
+        let url = app_manifest()
+            .manifest_url(ManifestType::FirmwareRelease)
+            .to_string();
+        match Releases::from_network_async_url(&url).await {
+            Ok(releases) => AppMessage::Studio(Message::Releases(releases)),
+            Err(e) => {
+                warn!("Failed to fetch releases from network\n  - {e}");
+                Message::DownloadFailed.into()
+            }
+        }
+    }
+
+    async fn fetch_configs_async(selected: Option<SelectedConfig>) -> AppMessage {
+        match ConfigManifest::from_network_async(selected).await {
+            Ok(configs) => AppMessage::Studio(Message::ConfigManifest(configs)),
+            Err(e) => {
+                warn!("Failed to fetch configs from network\n  - {e}");
+                Message::DownloadFailed.into()
+            }
+        }
+    }
+
+    fn download_release(
+        &mut self,
+        release: Release,
+        board: Board,
+        mcu: McuVariant,
+    ) -> Task<AppMessage> {
+        self.runtime_info.clear_selected_firmware();
+
+        // Check we have Releases
+        let releases = if let Some(releases) = self.runtime_info.releases() {
+            releases.clone()
+        } else {
+            error!("No releases available in Studio, cannot download");
+            return Task::none();
+        };
+
+        // Get the firmware version
+        let Ok(fw_ver) = release.firmware_version() else {
+            warn!("No firmware version {release} found, cannot download");
+            return Task::none();
+        };
+
+        // Set the selected firmware
+        let download = Download {
+            version: fw_ver,
+            board,
+            mcu,
+        };
+        self.runtime_info
+            .set_selected_firmware(release.clone(), download);
+
+        // Download the firmware
+        Task::future(Self::download_release_async(releases, download))
+    }
+
+    fn load_config(&mut self, config: Config) -> Task<AppMessage> {
+        self.runtime_info.clear_selected_config();
+
+        let task = match &config {
+            Config::Network { .. } => Task::future(download_config_async(config.clone())),
+            Config::File { .. } => Task::done(load_config_file(config.clone())),
+            Config::SelectLocalFile => {
+                internal_error!("SelectLocalFile should be handled before Studio");
+                return Task::none();
+            }
+            Config::Build => {
+                internal_error!("Build should be handled before Studio");
+                return Task::none();
+            }
+            Config::Built { .. } => Task::done(generate_built_config(config.clone())),
+            Config::ReadBack { json, .. } => {
+                Task::done(Message::ConfigLoaded(Ok(config.clone().with_data(json.clone()))).into())
+            }
+        };
+
+        // Set the selected config
+        self.runtime_info.set_selected_config(config.into());
+
+        // Download the config
+        task
+    }
+
+    async fn download_release_async(releases: Releases, download: Download) -> AppMessage {
+        let Download {
+            version: fw_ver,
+            board,
+            mcu,
+        } = download;
+
+        // Download the firmware
+        let result = match releases
+            .download_firmware_async(&fw_ver, &board, &mcu)
+            .await
+        {
+            Ok(data) => Ok(data),
+            Err(onerom_fw::Error::ReleaseNotFound) => {
+                trace!("Release {fw_ver:?} does not exist for {board} {mcu}");
+                return Message::ReleaseDoesntExist(download).into();
+            }
+            Err(onerom_fw::Error::Http { url, status }) => {
+                info!(
+                    "Failed to download release {fw_ver:?} for {board} {mcu} from {url}: HTTP error {status}"
+                );
+                return Message::ReleaseDoesntExist(download).into();
+            }
+            Err(e) => {
+                let log = format!("Failed to download release {fw_ver} for {board} {mcu}:\n  {e}");
+                warn!("{log}");
+                Err(log)
+            }
+        };
+
+        Message::ReleaseDownloaded(download, result).into()
+    }
+
+    pub fn top_level_buttons(&self, serious_errors: bool) -> iced::Element<'_, AppMessage> {
+        StudioTab::buttons(self.active_tab(), serious_errors)
+    }
+
+    pub fn subscription(&self) -> Subscription<Message> {
+        let check_releases_duration = if self.runtime_info.releases().is_some() {
+            MANIFEST_RETRY_LONG
+        } else {
+            MANIFEST_RETRY_SHORT
+        };
+        let check_configs_duration = if self.runtime_info.config_manifest().is_some() {
+            MANIFEST_RETRY_LONG
+        } else {
+            MANIFEST_RETRY_SHORT
+        };
+
+        Subscription::batch(vec![
+            time::every(check_releases_duration).map(|_| Message::FetchReleases),
+            time::every(check_configs_duration).map(|_| Message::FetchConfigs),
+        ])
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// A download result for another release, or for the selected release
+    /// on other hardware, leaves the selected firmware in place.
+    #[test]
+    fn a_stale_download_is_dropped() {
+        let releases = Releases::from_json(
+            r#"{ "version": 1, "latest": "0.8.1", "releases": [
+                { "version": "0.8.1", "boards": [{ "name": "fire-24-f", "mcus": [{ "name": "rp2350" }] }] },
+                { "version": "0.8.0", "boards": [{ "name": "fire-24-f", "mcus": [{ "name": "rp2350" }] }] }
+            ] }"#,
+        )
+        .unwrap();
+        let mut studio = Studio::new();
+        studio.runtime_info.set_releases(releases.clone());
+        let release = releases.release_from_string("0.8.0").unwrap().clone();
+        let _ = studio.update(Message::DownloadRelease(
+            release,
+            Board::Fire24F,
+            McuVariant::RP2350,
+        ));
+
+        let selected = Download {
+            version: FirmwareVersion::new(0, 8, 0, 0),
+            board: Board::Fire24F,
+            mcu: McuVariant::RP2350,
+        };
+        let other_version = Download {
+            version: FirmwareVersion::new(0, 8, 1, 0),
+            ..selected
+        };
+        let other_board = Download {
+            board: Board::Fire40A,
+            ..selected
+        };
+        let _ = studio.update(Message::ReleaseDownloaded(selected, Ok(vec![0x80])));
+        for stale in [other_version, other_board] {
+            let _ = studio.update(Message::ReleaseDownloaded(stale, Ok(vec![0x81])));
+            let _ = studio.update(Message::ReleaseDoesntExist(stale));
+        }
+
+        assert_eq!(studio.runtime_info.firmware(), Some(&vec![0x80]));
+        let version = studio.runtime_info.selected_firmware().map(|r| &r.version);
+        assert_eq!(version.map(String::as_str), Some("0.8.0"));
+    }
+}

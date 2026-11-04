@@ -1,0 +1,2634 @@
+{
+  "version": "v0.5.6",
+  "hardware": {
+    "fire-24-a": {
+      "display": "Fire 24 A",
+      "description": "One ROM Fire 24 (rev A/A2)",
+      "usb_support": false
+    },
+    "fire-24-usb-b": {
+      "display": "Fire 24 B",
+      "description": "One ROM Fire 24 (rev B)",
+      "usb_support": true
+    },
+    "ice-24-f": {
+      "display": "Ice 24 F",
+      "description": "One ROM Ice 24 (rev F/F2)",
+      "usb_support": false
+    },
+    "ice-24-g": {
+      "display": "Ice 24 G",
+      "description": "One ROM Ice 24 (rev G)",
+      "usb_support": false
+    },
+    "ice-24-usb-h": {
+      "display": "Ice 24 H",
+      "description": "One ROM Ice 24 USB (rev H/H2)",
+      "usb_support": true
+    }
+  },
+  "models": {
+    "ice": {
+      "display": "Ice"
+    },
+    "fire": {
+      "display": "Fire"
+    }
+  },
+  "rom_configs": {
+    "28-1541ii": {
+      "description": "Contains stock 28-pin ROM images for a 1541-II\n\nImages:\n0 - 16KB firmware, 251968-03\n\nTo do: Add other ROMs"
+    },
+    "c64": {
+      "description": "Contains stock ROMs for a C64\n\nImages:\n0 - 8KB Kernal ROM, 901227-03\n1 - 8KB Basic ROM, 901226-01\n2 - 4KB Character ROM, 901225-01\n3 - 8KB Dead Test Kernal ($E000) ROM, 781220\n4 - 8KB DesTestMAX Kernal ($E000) ROM - https://factorofmatt.com/destestmax"
+    },
+    "set-vic20-pal": {
+      "description": "Serves a pair of stock ROMs for a PAL VIC20 - both kernal and basic ROMs.\nA single One ROM cannot serve the character ROM for the VIC20 at the same time as the KERNAL and BASIC ROMs, as it has a different data bus to the kernal and basic ROMs.\n\nThe VIC20 dead test kernal ROM is installed as set 1.\n\nInstructions:\n1. Install ROM in (kernal) socket\n2. Connect Basic ROM socket CS pin (20) to SDRR pin X1\n3. Use One ROM image select jumpers to select required set, 0 = all open\n\nImage details:\n\nSet 0:\na. Kernal ROM 901487-07\nb. Basic ROM 901486-01\n\nSet 1:\na. Dead Test Kernal ROM, V1.1.01\n\nNotes:\n- Requires HW_REV=f"
+    },
+    "set-c64": {
+      "description": "Serves a set of stock ROMs for a C64 - all of kernal, basic and character ROMs - when installed in the kernal socket.\n\nThe Dead Test Kernal ROM 781220 is installed as set 1.\n\nInstructions:\n1. Install ROM in (kernal) socket\n2. Connect Basic ROM socket CS pin (20) to SDRR pin X1\n3. Connect Character ROM socket CS1 pin (20) to SDRR pin X2\n4. Use SDRR image select jumpers to select required set, 0 = all open\n\nImage details:\n\nSet 0:\na. Kernal ROM 901227-03\nb. Basic ROM 901226-01\nc. Character ROM 901225-01\n\nSet 1:\na. Dead Test Kernal ROM 781220\nb. Character ROM 901225-01\n\nSet 2:\na. Kernal ROM 901227-03, Basic ROM, 901\nb. Basic ROM 901226-01\n\nNotes:\n- Character ROM CS2 is set to `ignore` as is it tied to 5V within the C64, so always active \n- Requires HW_REV=f"
+    },
+    "atari800xl": {
+      "description": "Contains stock BASIC ROM for an Atari 800XL\n\nThe OS ROM is a 28-pin 16KB ROM, which is not currently supported by One ROM.\n\nImages:\n0 - 8KB BASIC ROM, CO24947A-01"
+    },
+    "28-c64c": {
+      "description": "Contains stock 28-pin ROM images for a C64C\n\nImages:\n0 - 16KB BASIC+Kernal ROM, 251913-01"
+    },
+    "set-1541": {
+      "description": "Contains stock ROMs sets for 1540/1541 drives which use 8KB (2364) ROMs\n\nSets:\n0:\n- 1541/1540 $C000 8KB ROM, 325302-01\n- 1541 $E000 8KB ROM, 901229-06AA\n1:\n- 1541/1540 $C000 8KB ROM, 325302-01\n- 1541 $E000 8KB ROM, 901229-05\n2:\n- 1540 $E000 8KB ROM, 325303-01\n- 1541/1540 $C000 8KB ROM, 325302-01\n\nNotes:\n- The _lower_ ROM ($C000) is the first image in the set.  This means you must install SDRR in the $C000 ROM slot (UB3), and connect X1 to pin 20 of the $E000 ROM slot (UB4)."
+    },
+    "blank": {
+      "description": "Blank config file\n\nIncluded by the Makefile if no other config is specified.\n\nRather than modify this config file, create a new file in the same directory and include it like this:\n\nCONFIG=configs/your_config.mk make"
+    },
+    "c64-no-destestmax": {
+      "description": "Contains stock ROMs for a C64, without DesTestMAX (as that requires accepting a licence)\n\nImages:\n0 - 8KB Kernal ROM, 901227-03\n1 - 8KB Basic ROM, 901226-01\n2 - 4KB Character ROM, 901225-01\n3 - 8KB Dead Test Kernal ($E000) ROM, 781220"
+    },
+    "bank-1541": {
+      "description": "Contains stock dynamically bank switchable upper ($E000) kernal ROMs for the 1540/1541 drives which use 8KB (2364) ROMs\n\nThe second set contains just a single image - the lower ($C000) ROM \n\nImages:\nSet 0 - Bank 0 - 1541 $E000 8KB ROM, 901229-06AA\nSet 0 - Bank 1 - 1541 $E000 8KB ROM, 901229-05\nSet 0 - Bank 2 - 1541 $E000 8KB ROM, 325303-01\nSet 1 - 1541/1540 $C000 8KB ROM, 325302-01"
+    },
+    "third-party-ti994a": {
+      "description": "Contains stock ROMs for a TI-99 4/a\n\nImages:\n0 - 4KB HB System ROM\n1 - 4KB LB System ROM"
+    },
+    "third-party-coco2": {
+      "description": "Contains stock ROMs for a Tandy Color Computer 2\n\nImages:\n0 - 8KB Color Basic 1.3\n1 - 8KB Extended Color Basic 1.1\n2 - 8KB Color Basic 1.2"
+    },
+    "bank-c64-char-fun": {
+      "description": "Contains a variety of C64 character sets\n\nImages:\nSet 0, Bank 0 - Original C64 character ROM\nSet 0, Bank 1 - VIC-20 character ROM\nSet 0, Bank 2 - Custom Apple II character ROM\nSet 0, Bank 3 - Custom ZX Spectrum character ROM\nSet 1, Bank 0 - Original C64 character ROM\nSet 1, Bank 1 - Custom Aniron character ROM (Tolkein inspired)\nSet 1, Bank 2 - Custom Aurebesh character ROM (Star Wars inspired)\nSet 1, Bank 3 - Custom Minecraft character ROM\nSet 2, Bank 0 - Custom Comic Sans character ROM\nSet 2, Bank 1 - Custom Kirby Forgotten Land character ROM\nSet 2, Bank 2 - Custom Hachicro character ROM (Futuristic)\nSet 2, Bank 3 - Custom Kauno character ROM (Caligraphic)"
+    },
+    "4040": {
+      "description": "Contains stock ROMs for DOS2 4040 (and 2040/3040) IEEE disk drives\n\nImages:\n0 - $F000 4KB ROM, 901468-16\n1 - $E000 4KB ROM, 901468-15\n2 - $D000 4KB ROM, 901468-14\n3 - $F000 4KB ROM, 901468-13\n4 - $E000 4KB ROM, 901468-12\n5 - $D000 4KB ROM, 901468-11"
+    },
+    "vic20-ntsc": {
+      "description": "Contains stock ROMs for an NTSC VIC-20\n\nImages:\n0 - 8KB Kernal ROM, 901486-06\n1 - 8KB Basic ROM, 901486-01\n2 - 4KB Character ROM, 901460-03\n3 - 8KB Dead Test Kernal ROM (NTSC), V1.1.01"
+    },
+    "bank-vic20-char-fun": {
+      "description": "Contains a variety of C64 character sets, but with VIC-20 character ROM CS settings\n\nImages:\nSet 0, Bank 0 - Original VIC-20 character ROM\nSet 0, Bank 1 - Original C64 character ROM\nSet 0, Bank 2 - Custom Apple II character ROM\nSet 0, Bank 3 - Custom ZX Spectrum character ROM\nSet 1, Bank 0 - Original VIC-20 character ROM\nSet 1, Bank 1 - Custom Aniron character ROM (Tolkein inspired)\nSet 1, Bank 2 - Custom Aurebesh character ROM (Star Wars inspired)\nSet 1, Bank 3 - Custom Minecraft character ROM\nSet 2, Bank 0 - Custom Comic Sans character ROM\nSet 2, Bank 1 - Custom Kirby Forgotten Land character ROM\nSet 2, Bank 2 - Custom Hachicro character ROM (Futuristic)\nSet 2, Bank 3 - Custom Kauno character ROM (Caligraphic)"
+    },
+    "ieee-diag": {
+      "description": "Contains IEEE-488 disk drive diagnostics ROMs from:\nhttps://github.com/piersfinlayson/cbm-ieee-disk-diag-rom\n\nCurrently contains diagnostics ROM v0.2.1.\n\nImages:\n0 - 2040/3040/4040 $F000 4KB diagnostics ROM\n1 - 2040/3040/4040 $D000 4KB diagnostics ROM\n2 - 8050/8250 $E000 8KB diagnostics ROM"
+    },
+    "1541": {
+      "description": "Contains stock ROMs for 1540/1541 drives which use 8KB (2364) ROMs\n\nImages:\n0 - 1541 $E000 8KB ROM, 901229-06AA\n1 - 1541 $E000 8KB ROM, 901229-05\n2 - 1541/1540 $C000 8KB ROM, 325302-01\n3 - 1540 $E000 8KB ROM, 325303-01"
+    },
+    "test-sdrr-0": {
+      "description": "Contains various ROM images to enable testing the One ROM firmware and build process.\n\nImages:\n0 - 8KB ROM filled with 0x00\n1 - 8KB ROM filled with repeating 0x00-0x3F\n2 - 4KB ROM filled with repeating 0x00-0x3F, CS2 active high\n3 - 4KB ROM filled with repeating 0x00-0x3F, CS2 active low\n4 - 2KB ROM filled with repeating 0x00-0x3F, CS2/CS3 active high\n5 - 4KB ROM containing a simple PET test program, can be located at any address, CS2 active high, SYS <START ADDRESS> to run"
+    },
+    "bank-c64-char": {
+      "description": "Contains dynamically bank switchable C64 character sets\n\nImages:\nSet 0, Bank 0 - 4KB Character ROM, English, 901225-01\nSet 0, Bank 1 - 4KB Character ROM, Swedish, 325018-02\nSet 0, Bank 2 - 4KB Character ROM, Spanish, 325056-03\nSet 0, Bank 3 - 4KB Character ROM, Danish, 901225-01-DK\nSet 1, Bank 0 - 4KB Character ROM, English, 901225-01\nSet 1, Bank 1 - 4KB Character ROM, Turkish\nSet 1, Bank 2 - 4KB Character ROM, Croatian\nSet 1, Bank 3 - 4KB Character ROM, Japanese, 906143-02"
+    },
+    "2040": {
+      "description": "Contains stock ROMs for DOS1 2040 and 3040 IEEE disk drives\n\nImages:\n0 - $F000 4KB ROM, 901468-07\n1 - $E000 4KB ROM, 901468-06 "
+    },
+    "bank-vic20-char": {
+      "description": "Contains dynamically bank switchable VIC-20 character sets\n\nImages:\nSet 0, Bank 0 - 4KB Character ROM, English, 901486-01\nSet 0, Bank 1 - 4KB Character ROM, Swedish/Finnish, NEC P22101-207\nSet 0, Bank 2 - 4KB Character ROM, Danish, 901460-03\nSet 0, Bank 3 - 4KB Character ROM, Japanese, 901460-02"
+    },
+    "vic20-pal": {
+      "description": "Contains stock ROMs for a PAL VIC-20\n\nImages:\n0 - 8KB Kernal ROM, 901486-07\n1 - 8KB Basic ROM, 901486-01\n2 - 4KB Character ROM, 901460-03\n3 - 8KB Dead Test Kernal ROM (PAL), V1.1.01"
+    },
+    "pet-4-40-50": {
+      "description": "Contains stock ROMs for a BASIC 4 PET 40 column 50 Hz version\n\nImages:\n0 - $F000 4KB Kernal ROM, 901465-22\n1 - $E000 4KB Edit ROM, 901498-01 (2 copies)\n2 - $D000 4KB Basic ROM, 901465-21\n3 - $C000 4KB Basic ROM, 901465-20\n4 - $B000 4KB Basic ROM, 901465-19\n5 - 4KB Character ROM, 901447-10 (2 copies)\n6 - $F000 4KB Diagnostics ROM\n7 - Simple PET test program, can be loaded to any address - if loaded to $9000 execute like this `SYS 36864`"
+    }
+  },
+  "artifacts": [
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "bank-vic20-char",
+      "filename": "onerom-fire-24-a-rp2350-bank-vic20-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-bank-vic20-char.bin",
+      "sha256": "e2f443cb71664fdd0014f47c776207d4ab82cdfffa498910332a18a2919a2847"
+    },
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "set-1541",
+      "filename": "onerom-fire-24-a-rp2350-set-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-set-1541.bin",
+      "sha256": "707fdcdf29a4c1c474975d1e839366653354d18c47134f857a87dd369257287a"
+    },
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "bank-vic20-char-fun",
+      "filename": "onerom-fire-24-a-rp2350-bank-vic20-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-bank-vic20-char-fun.bin",
+      "sha256": "df28c07fc783e00ee2830d71ef546e9a854759bc010b23c38b00b17c9bfaecaa"
+    },
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "vic20-pal",
+      "filename": "onerom-fire-24-a-rp2350-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-vic20-pal.bin",
+      "sha256": "ad9b8f9e4d6c1a8d0ff373c0c6a47e91f75a012283e6100b4ea89be4b690b3fe"
+    },
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "1541",
+      "filename": "onerom-fire-24-a-rp2350-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-1541.bin",
+      "sha256": "8b2e375b4c00dd04537a456ee65c9da1fb44c626cda6c681117000956b4eb16a"
+    },
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "set-c64",
+      "filename": "onerom-fire-24-a-rp2350-set-c64.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-set-c64.bin",
+      "sha256": "f877a1691f31189c159168b51f22db44c09ffc619a8f3752a176845e46bbe4d1"
+    },
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "test-sdrr-0",
+      "filename": "onerom-fire-24-a-rp2350-test-sdrr-0.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-test-sdrr-0.bin",
+      "sha256": "9ec314f9b988dd722a02994f0d058155da5b124573d46e0f0f9f70168707ec45"
+    },
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "2040",
+      "filename": "onerom-fire-24-a-rp2350-2040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-2040.bin",
+      "sha256": "8a90370eacd445bbc35400f280b27f3426a0dc86ddb0f18533aaff04519074c8"
+    },
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "set-vic20-pal",
+      "filename": "onerom-fire-24-a-rp2350-set-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-set-vic20-pal.bin",
+      "sha256": "9c9bed40b955ae45ef5a34a8aa6e8a5e002f67598b4441abe0ff8618a1f174f8"
+    },
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "c64-no-destestmax",
+      "filename": "onerom-fire-24-a-rp2350-c64-no-destestmax.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-c64-no-destestmax.bin",
+      "sha256": "20980580819cbbebfe85fad13997aa1277f1d2fc7e3f1f0f88d446f0cfbf824a"
+    },
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "bank-c64-char",
+      "filename": "onerom-fire-24-a-rp2350-bank-c64-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-bank-c64-char.bin",
+      "sha256": "73e42bddbf272dd2a4dc72936a4cf4775d8d8512bb9bd8b9b9900ed34ab18fe2"
+    },
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "ieee-diag",
+      "filename": "onerom-fire-24-a-rp2350-ieee-diag.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-ieee-diag.bin",
+      "sha256": "121944adabd1aec61ddfbbe401e39776dc9c007ab034ced374c0cbd199df0d58"
+    },
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "vic20-ntsc",
+      "filename": "onerom-fire-24-a-rp2350-vic20-ntsc.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-vic20-ntsc.bin",
+      "sha256": "2f72d7d7020d2ee45acc81f62cd5307c0b596b06a30af8b17ec19a6dc6137b74"
+    },
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "third-party-ti994a",
+      "filename": "onerom-fire-24-a-rp2350-third-party-ti994a.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-third-party-ti994a.bin",
+      "sha256": "fba3612db3fe48667c7d596c01ef6fa22a04be57f7616f237dc805affa820591"
+    },
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "third-party-coco2",
+      "filename": "onerom-fire-24-a-rp2350-third-party-coco2.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-third-party-coco2.bin",
+      "sha256": "4d09f1d1af3a8bcc2db198a016551557178768d7cefcd2850be362f78b668501"
+    },
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "pet-4-40-50",
+      "filename": "onerom-fire-24-a-rp2350-pet-4-40-50.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-pet-4-40-50.bin",
+      "sha256": "811377119e2278c798bc6f600386a196314b1231069caccbf354a430c119c440"
+    },
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "bank-1541",
+      "filename": "onerom-fire-24-a-rp2350-bank-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-bank-1541.bin",
+      "sha256": "4930114fb8c8632d195b0e659df8c34eae3de7de0d8a523d1aef3baaa0d3ac04"
+    },
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "bank-c64-char-fun",
+      "filename": "onerom-fire-24-a-rp2350-bank-c64-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-bank-c64-char-fun.bin",
+      "sha256": "98175d1d35017ea21622d24a249204a70fd068c3296e785e189c3ee04a36fa6f"
+    },
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "4040",
+      "filename": "onerom-fire-24-a-rp2350-4040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-4040.bin",
+      "sha256": "bc8944c219f142a23065b98870db5d79282db6b9ae69110a0c0e3c2dc190434b"
+    },
+    {
+      "hw_rev": "fire-24-a",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "atari800xl",
+      "filename": "onerom-fire-24-a-rp2350-atari800xl.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-a-rp2350-atari800xl.bin",
+      "sha256": "cda2d0378dc97629be1bcb9ee3f9a66fc698b18640fac6fe4ff6c89eb8840562"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "bank-vic20-char",
+      "filename": "onerom-fire-24-usb-b-rp2350-bank-vic20-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-bank-vic20-char.bin",
+      "sha256": "9688e57f369d5387e78b0bf7406a83a989008f1facfa8739f7dfeb0e521f593f"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "set-1541",
+      "filename": "onerom-fire-24-usb-b-rp2350-set-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-set-1541.bin",
+      "sha256": "c57bac172af5ac65237b314774e067c399e2a7e01c4018730d4dab782118fc4c"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "bank-vic20-char-fun",
+      "filename": "onerom-fire-24-usb-b-rp2350-bank-vic20-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-bank-vic20-char-fun.bin",
+      "sha256": "480319b6b9707e7c769f626aa78caf0c2c3f489b000372f3d6916556a2a2833e"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "vic20-pal",
+      "filename": "onerom-fire-24-usb-b-rp2350-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-vic20-pal.bin",
+      "sha256": "1c9e563e4ce31fbd095077e5e8531f9bd413df96bb18d963e74a0805a1646cac"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "1541",
+      "filename": "onerom-fire-24-usb-b-rp2350-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-1541.bin",
+      "sha256": "02eaa180b18dcb0728bb34620f2b2e2eb03ef6db0a2bcbee69c1b43bc86d70d4"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "set-c64",
+      "filename": "onerom-fire-24-usb-b-rp2350-set-c64.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-set-c64.bin",
+      "sha256": "a2170d2bbde5c383c3a7ce7479c1c4f8c4eb8076078dffa07afbddce2130ddd3"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "test-sdrr-0",
+      "filename": "onerom-fire-24-usb-b-rp2350-test-sdrr-0.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-test-sdrr-0.bin",
+      "sha256": "932f8f8966edda46dea5eb4587cecd281923d91e977087e84f11d9c68cb369df"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "2040",
+      "filename": "onerom-fire-24-usb-b-rp2350-2040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-2040.bin",
+      "sha256": "a1b71d83ddce30a7b0cb1fced727e592b56b48bd7e1d93f56b2b7c7b0ddbb599"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "set-vic20-pal",
+      "filename": "onerom-fire-24-usb-b-rp2350-set-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-set-vic20-pal.bin",
+      "sha256": "59c3a88413398155f14acb18e38eb69aafd251649e6c6246e9ec3d424b2522b9"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "c64-no-destestmax",
+      "filename": "onerom-fire-24-usb-b-rp2350-c64-no-destestmax.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-c64-no-destestmax.bin",
+      "sha256": "34e49ee445da1b7c4812fe1b265d4cd754dd1d6c27b65dcfa7e08cfd9f020472"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "bank-c64-char",
+      "filename": "onerom-fire-24-usb-b-rp2350-bank-c64-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-bank-c64-char.bin",
+      "sha256": "0485a3954a78bbc2816d951d360d401d45b0403dc87eb722a74b8411726b54b2"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "ieee-diag",
+      "filename": "onerom-fire-24-usb-b-rp2350-ieee-diag.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-ieee-diag.bin",
+      "sha256": "c3c64d546188fa7a3a709bf0cee95b9f92c90d3f30f48624a0ac14125d561fb0"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "vic20-ntsc",
+      "filename": "onerom-fire-24-usb-b-rp2350-vic20-ntsc.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-vic20-ntsc.bin",
+      "sha256": "31b7e9deb0cd68f86fa89df71afc19606a0d4dc9c11fbbc1f12c5491dc737d25"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "third-party-ti994a",
+      "filename": "onerom-fire-24-usb-b-rp2350-third-party-ti994a.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-third-party-ti994a.bin",
+      "sha256": "22e532526edbd3bbf3a33c344a9e9d72d4aca1c7803f15520dacd7229e0e7acf"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "third-party-coco2",
+      "filename": "onerom-fire-24-usb-b-rp2350-third-party-coco2.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-third-party-coco2.bin",
+      "sha256": "003c03a45770cb8d917b07753ec1d52448ba11abd8b792a355bcb8661d1213f1"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "pet-4-40-50",
+      "filename": "onerom-fire-24-usb-b-rp2350-pet-4-40-50.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-pet-4-40-50.bin",
+      "sha256": "9422c5fc4d100496639dff17703e7194a26db52b3bc4775e143141ddc4df603a"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "bank-1541",
+      "filename": "onerom-fire-24-usb-b-rp2350-bank-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-bank-1541.bin",
+      "sha256": "e123a4ea30d712d8f3686eb0ae9f8671b7baed871a0bb9a8f5695124b43aaf2b"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "bank-c64-char-fun",
+      "filename": "onerom-fire-24-usb-b-rp2350-bank-c64-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-bank-c64-char-fun.bin",
+      "sha256": "ab3bd98d869d6be5e3a1d5baa70865980988ac52fa14eea9af5ab7520db28ea5"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "4040",
+      "filename": "onerom-fire-24-usb-b-rp2350-4040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-4040.bin",
+      "sha256": "d4989c5327ab2fbd43cb0b8e40e78c52c4ad823f3742d1ee091a698cf4df0b16"
+    },
+    {
+      "hw_rev": "fire-24-usb-b",
+      "mcu": "rp2350",
+      "model": "fire",
+      "rom_config": "atari800xl",
+      "filename": "onerom-fire-24-usb-b-rp2350-atari800xl.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-fire-24-usb-b-rp2350-atari800xl.bin",
+      "sha256": "d20d61ae9c84fb820b4e72a385af255d333176dcdcd5ecec26b0db8e3e97d57a"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "bank-vic20-char",
+      "filename": "onerom-ice-24-f-f401re-bank-vic20-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-bank-vic20-char.bin",
+      "sha256": "8ecae014c1f04ffe2ac181ebc9778ab041f8d34b0f128985928cd0ca0162b961"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "set-1541",
+      "filename": "onerom-ice-24-f-f401re-set-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-set-1541.bin",
+      "sha256": "f2e2c42b895232c34453e0815091ddf09d343635276d31c74227acceece8fb80"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "bank-vic20-char-fun",
+      "filename": "onerom-ice-24-f-f401re-bank-vic20-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-bank-vic20-char-fun.bin",
+      "sha256": "8e358f4d31edbb9de4be4c4559ca7d9d6188f3cf27f1c884acf70e8d81e007a9"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "vic20-pal",
+      "filename": "onerom-ice-24-f-f401re-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-vic20-pal.bin",
+      "sha256": "39020640221b2612215c847001f139dd1e09a1458861d34586aa8617c008b672"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "1541",
+      "filename": "onerom-ice-24-f-f401re-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-1541.bin",
+      "sha256": "f971d76691d84b11166acb0878e5d3f20921d07566180e80ac91e523bc67d885"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "set-c64",
+      "filename": "onerom-ice-24-f-f401re-set-c64.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-set-c64.bin",
+      "sha256": "d35028d9555a7a51d994e1f20aa4ae7a1f41e5c1890e3565279095771991b416"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "test-sdrr-0",
+      "filename": "onerom-ice-24-f-f401re-test-sdrr-0.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-test-sdrr-0.bin",
+      "sha256": "4cdeaf491db32223e6cbe5a6f187241ecc76ed03885432a52ec2ccea1ba77b4c"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "2040",
+      "filename": "onerom-ice-24-f-f401re-2040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-2040.bin",
+      "sha256": "630e786cda6aa043697a0cb09fb4ee828f7cadedb3298ccb846e887efa10e137"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "set-vic20-pal",
+      "filename": "onerom-ice-24-f-f401re-set-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-set-vic20-pal.bin",
+      "sha256": "110fb1f9433fde5700b6ba6a23a79bf07bcb07918151600b2432bb73724ab45c"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "c64-no-destestmax",
+      "filename": "onerom-ice-24-f-f401re-c64-no-destestmax.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-c64-no-destestmax.bin",
+      "sha256": "a7e081409582057f3b0b009e800f642992bae63e9430066ff3c503d99b40a24a"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "bank-c64-char",
+      "filename": "onerom-ice-24-f-f401re-bank-c64-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-bank-c64-char.bin",
+      "sha256": "16e2b71244ceaca9008b8cd45ed992ae175dd2dd5778eea35413db29c136f5a9"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "ieee-diag",
+      "filename": "onerom-ice-24-f-f401re-ieee-diag.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-ieee-diag.bin",
+      "sha256": "dd204f5996017f2cb0e0824d27143ff424125ddfe7097661a13bb5ee7b0289af"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "vic20-ntsc",
+      "filename": "onerom-ice-24-f-f401re-vic20-ntsc.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-vic20-ntsc.bin",
+      "sha256": "467825e261c6ff23f21cf63531e984667cd744c4fcd25faa8108e9d49b5c8fb7"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "third-party-ti994a",
+      "filename": "onerom-ice-24-f-f401re-third-party-ti994a.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-third-party-ti994a.bin",
+      "sha256": "ac39544e7e8ab4d5044fcde12b37452d88b9642951f0a8bc1d69ce77615301d2"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "third-party-coco2",
+      "filename": "onerom-ice-24-f-f401re-third-party-coco2.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-third-party-coco2.bin",
+      "sha256": "193274bdafb2e6dbdb401aa67a96a4bb7d7ca9a868b73eb7baebcf0d12426093"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "pet-4-40-50",
+      "filename": "onerom-ice-24-f-f401re-pet-4-40-50.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-pet-4-40-50.bin",
+      "sha256": "6179f0d155eab0cf3eef0ef3b8e8f2db570b5edee383d65296c82f0c3a087f25"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "bank-1541",
+      "filename": "onerom-ice-24-f-f401re-bank-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-bank-1541.bin",
+      "sha256": "76fb0677ee150fe5bf0e2c9210490c041a91b7638e450b6dabbb42859e670d5f"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "bank-c64-char-fun",
+      "filename": "onerom-ice-24-f-f401re-bank-c64-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-bank-c64-char-fun.bin",
+      "sha256": "a18a9ad62bf3c5a3d32cf64c82677e7bf4d0e31b9a57dfbf9fcd09d2e3c6fd3b"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "4040",
+      "filename": "onerom-ice-24-f-f401re-4040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-4040.bin",
+      "sha256": "4a2a8970abd3f10ab7e77816553bc965ecb27c8cd1fd6e7abb0bc2d1910a707d"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "atari800xl",
+      "filename": "onerom-ice-24-f-f401re-atari800xl.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f401re-atari800xl.bin",
+      "sha256": "ac660978f657a0d43c70f2717d42168f3ae50249b240de01fc0b13db42847645"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "bank-vic20-char",
+      "filename": "onerom-ice-24-f-f405rg-bank-vic20-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-bank-vic20-char.bin",
+      "sha256": "db57ed86ee5f349c907d97bfab93e8aa98da1d1151fe34a339c425ef32c5fbb2"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "set-1541",
+      "filename": "onerom-ice-24-f-f405rg-set-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-set-1541.bin",
+      "sha256": "f7c1daafa53787e66067f3bf4500762eef4f8f59ebdb5b169c1f1075f772bace"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "bank-vic20-char-fun",
+      "filename": "onerom-ice-24-f-f405rg-bank-vic20-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-bank-vic20-char-fun.bin",
+      "sha256": "69a52bcbabcba6333e809c82229ac90594195e8443d5136efdbf4079683adf3b"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "vic20-pal",
+      "filename": "onerom-ice-24-f-f405rg-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-vic20-pal.bin",
+      "sha256": "d86edfa6d549174b03d497359b37c7914401a27f1df2d4568584e01d3149b006"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "1541",
+      "filename": "onerom-ice-24-f-f405rg-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-1541.bin",
+      "sha256": "39e2c0bf7bed547b51bf5a33edcdf98940ac2c190334eb000e64e5b094f4b126"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "set-c64",
+      "filename": "onerom-ice-24-f-f405rg-set-c64.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-set-c64.bin",
+      "sha256": "013690d2ba0848e7d9244793379a2f4100fb60cd4b8cde1a01f42cfee4ab8190"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "test-sdrr-0",
+      "filename": "onerom-ice-24-f-f405rg-test-sdrr-0.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-test-sdrr-0.bin",
+      "sha256": "edf4083e9fb7690602f6a281df9b45d27bd3e6ff2305400e58e78266d9f693b7"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "2040",
+      "filename": "onerom-ice-24-f-f405rg-2040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-2040.bin",
+      "sha256": "45bc2949560a1a3591f706615f6f78ba0b367bdb807d204b4a14d9108956ee59"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "set-vic20-pal",
+      "filename": "onerom-ice-24-f-f405rg-set-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-set-vic20-pal.bin",
+      "sha256": "06a5b7ca65d4554ea75d2a4af6a120e62facf6965e6b54886b441e6f8595101e"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "c64-no-destestmax",
+      "filename": "onerom-ice-24-f-f405rg-c64-no-destestmax.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-c64-no-destestmax.bin",
+      "sha256": "5556c51b244fea26ff46d35cf256315eb8423190f4d4c835fb73f8c874bf86b9"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "bank-c64-char",
+      "filename": "onerom-ice-24-f-f405rg-bank-c64-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-bank-c64-char.bin",
+      "sha256": "d7f1d7dc850ec24de6f69a118228b05a01acffe33adb66720a4567e2a6c1d4ea"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "ieee-diag",
+      "filename": "onerom-ice-24-f-f405rg-ieee-diag.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-ieee-diag.bin",
+      "sha256": "c40864064718e577f38b7f8e1e1c68e4ab9f88cbf37fad8ebace144f5793aa0d"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "vic20-ntsc",
+      "filename": "onerom-ice-24-f-f405rg-vic20-ntsc.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-vic20-ntsc.bin",
+      "sha256": "d580d761383419b8936043eb6f825f57afccc37c7196314e0df6eedadd4e04de"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "third-party-ti994a",
+      "filename": "onerom-ice-24-f-f405rg-third-party-ti994a.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-third-party-ti994a.bin",
+      "sha256": "2bfa3dcc5e8f76b56ed0b295bd6c34007e289e4202e704993a83802742e58a53"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "third-party-coco2",
+      "filename": "onerom-ice-24-f-f405rg-third-party-coco2.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-third-party-coco2.bin",
+      "sha256": "96da8ae56df56bd7f104a853df0a915483a5f77defac26d50ecd0c2219e4c67e"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "pet-4-40-50",
+      "filename": "onerom-ice-24-f-f405rg-pet-4-40-50.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-pet-4-40-50.bin",
+      "sha256": "7ed93f623d48eb3f0ef4d69d042ccbada35aa3a1d695360c4853c77a5055097b"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "bank-1541",
+      "filename": "onerom-ice-24-f-f405rg-bank-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-bank-1541.bin",
+      "sha256": "f7b2401a28f374a2716954a02b613fb23a9d8cff439dd2274029118b79b83e42"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "bank-c64-char-fun",
+      "filename": "onerom-ice-24-f-f405rg-bank-c64-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-bank-c64-char-fun.bin",
+      "sha256": "b196dd240eaac6b5e7a186cf9696c0cdc1976595b93c93b73c2c08fc1295a1a1"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "4040",
+      "filename": "onerom-ice-24-f-f405rg-4040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-4040.bin",
+      "sha256": "12d3f62cf18100242fa594f76d82824d81d21245c42700293afafafae2d0bb7a"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "atari800xl",
+      "filename": "onerom-ice-24-f-f405rg-atari800xl.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f405rg-atari800xl.bin",
+      "sha256": "cf6bb5fd1aa5345800ae60ad6a65db3decd4ca6be90c9876e8aed4cddca27490"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "bank-vic20-char",
+      "filename": "onerom-ice-24-f-f411re-bank-vic20-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-bank-vic20-char.bin",
+      "sha256": "33cdaabab2e28e4e227a017b3de717a9f6336a5b773511c3b117d8d3738cb8d8"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "set-1541",
+      "filename": "onerom-ice-24-f-f411re-set-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-set-1541.bin",
+      "sha256": "73b269ce20ed4287f655c547dca4ecae88efab07bc336b8f814f89512d8f613b"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "bank-vic20-char-fun",
+      "filename": "onerom-ice-24-f-f411re-bank-vic20-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-bank-vic20-char-fun.bin",
+      "sha256": "c0c5a42c7d6b9fd891a1720c7cc436009e0119c731daf8e69aa246c815b5edd8"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "vic20-pal",
+      "filename": "onerom-ice-24-f-f411re-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-vic20-pal.bin",
+      "sha256": "6187cf182c95c3ba0b84f9011ef207414dfffecc6a9ad5405cfdeefa5e8a8c3f"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "1541",
+      "filename": "onerom-ice-24-f-f411re-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-1541.bin",
+      "sha256": "b51adf0243c22e866ea300454db577f391096cd56c8d47da2e29b4861138e84e"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "set-c64",
+      "filename": "onerom-ice-24-f-f411re-set-c64.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-set-c64.bin",
+      "sha256": "6325ac9cd2120658410a2bfbf9e2924113347a6e67a5d7dcfa59a7b581fcc2e3"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "test-sdrr-0",
+      "filename": "onerom-ice-24-f-f411re-test-sdrr-0.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-test-sdrr-0.bin",
+      "sha256": "df79b0fe18c2e4449803522092110e6976b7e0cdb1a7591956478352db1cbbad"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "2040",
+      "filename": "onerom-ice-24-f-f411re-2040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-2040.bin",
+      "sha256": "2f4cfc66fd46a98be11a96e64003fb5469808f48e2af28bd9c9af499233fb558"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "set-vic20-pal",
+      "filename": "onerom-ice-24-f-f411re-set-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-set-vic20-pal.bin",
+      "sha256": "a04ca731083948230547c029e78575fe44c3e4cec08e4eea9083f5a7f73189fa"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "c64-no-destestmax",
+      "filename": "onerom-ice-24-f-f411re-c64-no-destestmax.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-c64-no-destestmax.bin",
+      "sha256": "cdeb9d7e191049912529210dad89f758fa1413ba6c62e3defd98df6621925a72"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "bank-c64-char",
+      "filename": "onerom-ice-24-f-f411re-bank-c64-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-bank-c64-char.bin",
+      "sha256": "ed7d7cba41bd370034c850d3aaf177bc5161768dbbcfc3465362de913e06739c"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "ieee-diag",
+      "filename": "onerom-ice-24-f-f411re-ieee-diag.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-ieee-diag.bin",
+      "sha256": "b48147244b021e3d817c0719606ab7a90f2e2d38074be4ae6fa201e0cc11db50"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "vic20-ntsc",
+      "filename": "onerom-ice-24-f-f411re-vic20-ntsc.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-vic20-ntsc.bin",
+      "sha256": "6db74813862a5a3a7c4b708abae7d9cdc95b4e45a9b6d1b36b7bab1a03e966be"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "third-party-ti994a",
+      "filename": "onerom-ice-24-f-f411re-third-party-ti994a.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-third-party-ti994a.bin",
+      "sha256": "62796214789b65adf307e448911099c1938ebfda4662fd2a17ab66b78cf15be3"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "third-party-coco2",
+      "filename": "onerom-ice-24-f-f411re-third-party-coco2.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-third-party-coco2.bin",
+      "sha256": "87572e0fed71321fdaa5a739c4580f2f880d94bd436de3ce877baa93461e86d6"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "pet-4-40-50",
+      "filename": "onerom-ice-24-f-f411re-pet-4-40-50.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-pet-4-40-50.bin",
+      "sha256": "e3eda0c695118003cd5f6f558f04f3ff94df8bafbe6f7ec7433d53ab4428959b"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "bank-1541",
+      "filename": "onerom-ice-24-f-f411re-bank-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-bank-1541.bin",
+      "sha256": "1f0ed7a3459b4d6b76518512d1e272dda2b6d3682443c84f77f6446b0056568c"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "bank-c64-char-fun",
+      "filename": "onerom-ice-24-f-f411re-bank-c64-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-bank-c64-char-fun.bin",
+      "sha256": "01cbfb287679bf4609f0c7922b94e96b00f7883a84d4dceab2c66ad1d5608cf6"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "4040",
+      "filename": "onerom-ice-24-f-f411re-4040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-4040.bin",
+      "sha256": "827c97991a7c28e22d5a0acd531c3cbc70fce3ec64b2239a5659f3aab4047d49"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "atari800xl",
+      "filename": "onerom-ice-24-f-f411re-atari800xl.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f411re-atari800xl.bin",
+      "sha256": "2c9a976b1dac355afcacb7768a144cdc83039e22f7e6d75ac60a0e8489eeac60"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "bank-vic20-char",
+      "filename": "onerom-ice-24-f-f446re-bank-vic20-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-bank-vic20-char.bin",
+      "sha256": "e2dfcd7ca0241a8fdaca9d9383e31a0a5b9d408633265cdb85b4e2a3b1b66f6c"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "set-1541",
+      "filename": "onerom-ice-24-f-f446re-set-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-set-1541.bin",
+      "sha256": "d29c3c6b0b67d0aa24038c18dfc1b8ed83d94f673b48b3176ad84bacd28ab1f8"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "bank-vic20-char-fun",
+      "filename": "onerom-ice-24-f-f446re-bank-vic20-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-bank-vic20-char-fun.bin",
+      "sha256": "ecfb567f1c40322506517a5ea5639d452e940bfa5d2bcd8f2cd768a4595506e7"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "vic20-pal",
+      "filename": "onerom-ice-24-f-f446re-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-vic20-pal.bin",
+      "sha256": "bca3a5e937f1c0915baf4d0931d81bddb620f5fe183f6dc8b663515fb5e8eb5f"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "1541",
+      "filename": "onerom-ice-24-f-f446re-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-1541.bin",
+      "sha256": "d9f76855eaf5012194d53d3fcdfd1070649f460058eec516a7152506a15a6664"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "set-c64",
+      "filename": "onerom-ice-24-f-f446re-set-c64.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-set-c64.bin",
+      "sha256": "71f1b28cfe48801c298539c12412f6164a6681ad69e5d66b0dea7ca222503f60"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "test-sdrr-0",
+      "filename": "onerom-ice-24-f-f446re-test-sdrr-0.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-test-sdrr-0.bin",
+      "sha256": "6b441129b01c05229cefe25b3d48ab3a5d550de1ba8d5fba4b3e5f7bbc4b00f5"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "2040",
+      "filename": "onerom-ice-24-f-f446re-2040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-2040.bin",
+      "sha256": "842239994f01f20af33f24adc3e7dfdba16c44227f35d85bc721d7895fea04cc"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "set-vic20-pal",
+      "filename": "onerom-ice-24-f-f446re-set-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-set-vic20-pal.bin",
+      "sha256": "ee1ad52f2060e37af0a85fdaec1471cf1d32ab22c7c9e8cdf110a1d70fc1ed18"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "c64-no-destestmax",
+      "filename": "onerom-ice-24-f-f446re-c64-no-destestmax.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-c64-no-destestmax.bin",
+      "sha256": "82551e2d0106edd1317c2d5ee44c73cbb97c929d45e5ea2f4dcac7a86bc52db9"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "bank-c64-char",
+      "filename": "onerom-ice-24-f-f446re-bank-c64-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-bank-c64-char.bin",
+      "sha256": "972d9f65706003d88fd3a1965bd273ca600c8bd0a56dc621dd21a35c03b5c4c4"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "ieee-diag",
+      "filename": "onerom-ice-24-f-f446re-ieee-diag.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-ieee-diag.bin",
+      "sha256": "dacda5798722720bc8e64ebb8024f58bc2921dc4ff2ba42944628d6cb5617403"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "vic20-ntsc",
+      "filename": "onerom-ice-24-f-f446re-vic20-ntsc.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-vic20-ntsc.bin",
+      "sha256": "990d21c8fc1695975a45d82f41d08ddf7e46d2e1ee44d7c41301fa0db9c73af0"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "third-party-ti994a",
+      "filename": "onerom-ice-24-f-f446re-third-party-ti994a.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-third-party-ti994a.bin",
+      "sha256": "292f4be704ead7715e11e6b4aa8dada2456dc84527f84e1f53e9d2bf3f7fd38f"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "third-party-coco2",
+      "filename": "onerom-ice-24-f-f446re-third-party-coco2.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-third-party-coco2.bin",
+      "sha256": "199a3342f2045d52bb75a6453ec4f0f129627566c877060f4ac60461cfc692e4"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "pet-4-40-50",
+      "filename": "onerom-ice-24-f-f446re-pet-4-40-50.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-pet-4-40-50.bin",
+      "sha256": "d1643668a77db422af2786ceb28574974c7cfea36e914bcfeed05d8e5491962c"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "bank-1541",
+      "filename": "onerom-ice-24-f-f446re-bank-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-bank-1541.bin",
+      "sha256": "c44562f484a3bd83ba692c87f17ea02430dc16cdc4bc7b5baf0d3d9423adcebb"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "bank-c64-char-fun",
+      "filename": "onerom-ice-24-f-f446re-bank-c64-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-bank-c64-char-fun.bin",
+      "sha256": "bd566a1e7f4db70a968742bcaa33f57366db7b6f85c74565a63a3bae1df3e68e"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "4040",
+      "filename": "onerom-ice-24-f-f446re-4040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-4040.bin",
+      "sha256": "f5422fea8cf3d4f74376636d263f4fcc1244fbd69828ddc6e258d0f0ddafa5a4"
+    },
+    {
+      "hw_rev": "ice-24-f",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "atari800xl",
+      "filename": "onerom-ice-24-f-f446re-atari800xl.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-f-f446re-atari800xl.bin",
+      "sha256": "dabc828032e50b47012199f145bbbf5655f1d22ab54f484a6e34f1d072bac820"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "bank-vic20-char",
+      "filename": "onerom-ice-24-g-f401re-bank-vic20-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-bank-vic20-char.bin",
+      "sha256": "5038f7a5b466dd2ef966335c355e745b414061d38384d65a6958ba7d6e9d49d0"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "set-1541",
+      "filename": "onerom-ice-24-g-f401re-set-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-set-1541.bin",
+      "sha256": "da5644d445b7caa360611f922e8b26236f6b7d3fc1f53a02ed00910220345e1d"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "bank-vic20-char-fun",
+      "filename": "onerom-ice-24-g-f401re-bank-vic20-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-bank-vic20-char-fun.bin",
+      "sha256": "b467ca7e3805717c04900baae5685c2e8013d66939d8af7acfe2aa95371523c7"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "vic20-pal",
+      "filename": "onerom-ice-24-g-f401re-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-vic20-pal.bin",
+      "sha256": "7a1c45f37fd3f21fbd6c914944b84f63990bfbaccb74020a8709593509155151"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "1541",
+      "filename": "onerom-ice-24-g-f401re-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-1541.bin",
+      "sha256": "d79763963f38fed0245f3179665440f24340bc7c7a3c5cfa8ab145523d08e21e"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "set-c64",
+      "filename": "onerom-ice-24-g-f401re-set-c64.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-set-c64.bin",
+      "sha256": "56d4ee46365f89d8d00eee3dce6838f5e548cab6b8d0529339987da34b60b247"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "test-sdrr-0",
+      "filename": "onerom-ice-24-g-f401re-test-sdrr-0.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-test-sdrr-0.bin",
+      "sha256": "0d7b789ba13b627d0be1bf189746c7356fb92e997a829a0e0436536684af4b9a"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "2040",
+      "filename": "onerom-ice-24-g-f401re-2040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-2040.bin",
+      "sha256": "ce30f9d3d45fd5a8b4547ec21e18457960facf868673a45fa09aa102c2fd8cd4"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "set-vic20-pal",
+      "filename": "onerom-ice-24-g-f401re-set-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-set-vic20-pal.bin",
+      "sha256": "f51656f4735c336b94bfa4b3db3fb265094dd5a8d3acc67ac6c931c01c11d9cf"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "c64-no-destestmax",
+      "filename": "onerom-ice-24-g-f401re-c64-no-destestmax.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-c64-no-destestmax.bin",
+      "sha256": "3be98771101c88e2de3faa897034dbf8640bb990a622927d41ca3e19b520dfe5"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "bank-c64-char",
+      "filename": "onerom-ice-24-g-f401re-bank-c64-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-bank-c64-char.bin",
+      "sha256": "ede2a3140f47c22b0bc2f008390192277bc866c4a701fe202581467d8ab777ea"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "ieee-diag",
+      "filename": "onerom-ice-24-g-f401re-ieee-diag.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-ieee-diag.bin",
+      "sha256": "c545856c2fb06d1845d577b17834efa0165cbee4e4359c05c16abe622e6b48d3"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "vic20-ntsc",
+      "filename": "onerom-ice-24-g-f401re-vic20-ntsc.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-vic20-ntsc.bin",
+      "sha256": "96eef1d4a8d2d8240d116e83bddeaccff1f2cf82e2c775470300b503c29d8ea0"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "third-party-ti994a",
+      "filename": "onerom-ice-24-g-f401re-third-party-ti994a.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-third-party-ti994a.bin",
+      "sha256": "75811991b2f1cb57c2494940f3a2aea8cf83afe647c1679150cc4466a3df20e3"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "third-party-coco2",
+      "filename": "onerom-ice-24-g-f401re-third-party-coco2.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-third-party-coco2.bin",
+      "sha256": "5aafcaf97036125b945aecad7dc747926bc3f03088ae4ce9a88990bb5784a904"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "pet-4-40-50",
+      "filename": "onerom-ice-24-g-f401re-pet-4-40-50.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-pet-4-40-50.bin",
+      "sha256": "c0fe66522ca50b049dc402ca09c09b928cfe060cb57bb2d645afc1a620b52f45"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "bank-1541",
+      "filename": "onerom-ice-24-g-f401re-bank-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-bank-1541.bin",
+      "sha256": "dd700146171c5e0973f09e8831b39bf0ca28fc86ea852aa5a3a682c8c333a07b"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "bank-c64-char-fun",
+      "filename": "onerom-ice-24-g-f401re-bank-c64-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-bank-c64-char-fun.bin",
+      "sha256": "b98241e1a07d1f742f2622e4a04e8ef0d70e1eac6b2eaf4d46668b5ffc562353"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "4040",
+      "filename": "onerom-ice-24-g-f401re-4040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-4040.bin",
+      "sha256": "fe747156bf80c6008d558642d03b039f12504271ad25faff25acdaea0b35dd33"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "atari800xl",
+      "filename": "onerom-ice-24-g-f401re-atari800xl.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f401re-atari800xl.bin",
+      "sha256": "bca1e3dd6342905cd9cd36023acfd9e524e407461f42ca62f82f61e85d3ac923"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "bank-vic20-char",
+      "filename": "onerom-ice-24-g-f405rg-bank-vic20-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-bank-vic20-char.bin",
+      "sha256": "c8caffb2ea2780cfbcfabcbb3095891bd220bd7306ed82b9b16b0c946bc0cbb0"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "set-1541",
+      "filename": "onerom-ice-24-g-f405rg-set-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-set-1541.bin",
+      "sha256": "e3eefcbe3733641f8a3eb037cc608f34c7c44b68290563d36faab6e23cbc29fe"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "bank-vic20-char-fun",
+      "filename": "onerom-ice-24-g-f405rg-bank-vic20-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-bank-vic20-char-fun.bin",
+      "sha256": "b211016f6dafdcd1ab302ed0026cdf879544bb99ebd350a2ecdd55a556af6c48"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "vic20-pal",
+      "filename": "onerom-ice-24-g-f405rg-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-vic20-pal.bin",
+      "sha256": "b2e9a1206c23540128fbc6283fc4be5eec6da6c165fa7f3f9b737743eac7a5a4"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "1541",
+      "filename": "onerom-ice-24-g-f405rg-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-1541.bin",
+      "sha256": "b194b6c2c730b7ba77f3199c520916458f008b52b1f91ab9cfb6ad8cf546fc52"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "set-c64",
+      "filename": "onerom-ice-24-g-f405rg-set-c64.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-set-c64.bin",
+      "sha256": "d00b7e41833d54ed4097e0b60452ec1e68d682763b6281d8cee8f7ce94d50f53"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "test-sdrr-0",
+      "filename": "onerom-ice-24-g-f405rg-test-sdrr-0.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-test-sdrr-0.bin",
+      "sha256": "f2ef9ecbd15f36ae06eaf2bbbe460c90d34abd9252522bd808e2c52a9383cb47"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "2040",
+      "filename": "onerom-ice-24-g-f405rg-2040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-2040.bin",
+      "sha256": "e6258d7f32e0c62966ad5df5958c1405df132efab8a3ce623229162f53816d09"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "set-vic20-pal",
+      "filename": "onerom-ice-24-g-f405rg-set-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-set-vic20-pal.bin",
+      "sha256": "7cbdc0993d6d111cb12576f0bc88c5423537091e44741b6f84d062fb8bb05f53"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "c64-no-destestmax",
+      "filename": "onerom-ice-24-g-f405rg-c64-no-destestmax.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-c64-no-destestmax.bin",
+      "sha256": "d2b1e84a14e032b435db13822e91bb6919c834737bd9a9cf4ea70c6a19042c60"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "bank-c64-char",
+      "filename": "onerom-ice-24-g-f405rg-bank-c64-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-bank-c64-char.bin",
+      "sha256": "0a0c48cf219b4e5314ccdfea376644736d1a09f5a6628beed5beb0a057cafb40"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "ieee-diag",
+      "filename": "onerom-ice-24-g-f405rg-ieee-diag.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-ieee-diag.bin",
+      "sha256": "fd9492bf304cb4d614de39cbd0994a9a07092e188f9a687aac4ea98ba025d764"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "vic20-ntsc",
+      "filename": "onerom-ice-24-g-f405rg-vic20-ntsc.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-vic20-ntsc.bin",
+      "sha256": "9436ab78ba92b5a02da9c8447582862f74dc462a42071caca91b865ca91eba12"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "third-party-ti994a",
+      "filename": "onerom-ice-24-g-f405rg-third-party-ti994a.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-third-party-ti994a.bin",
+      "sha256": "a1dee83719c8f3d178c57453f8075af8b77bf16ad933a02f9638bdb411a16ace"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "third-party-coco2",
+      "filename": "onerom-ice-24-g-f405rg-third-party-coco2.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-third-party-coco2.bin",
+      "sha256": "27e2be57ccf08491ca06d482cb369c0192d57fda088b0d18ed930da35ce290e8"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "pet-4-40-50",
+      "filename": "onerom-ice-24-g-f405rg-pet-4-40-50.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-pet-4-40-50.bin",
+      "sha256": "ce121fdea12a362debc040059977cd5552110e5e1afe5804436a8b07f8cdf64f"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "bank-1541",
+      "filename": "onerom-ice-24-g-f405rg-bank-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-bank-1541.bin",
+      "sha256": "06a71fed7c54ed04b93da13e74e113dc4599087a48c37fc99702ea5bed4a0063"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "bank-c64-char-fun",
+      "filename": "onerom-ice-24-g-f405rg-bank-c64-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-bank-c64-char-fun.bin",
+      "sha256": "446f9af76b6ae14a4228774dc8612184ba5c60fe130001ab07a3c201f6fbc703"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "4040",
+      "filename": "onerom-ice-24-g-f405rg-4040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-4040.bin",
+      "sha256": "c4db441899a722f6dc758ca2c49751135b124cac7cb5d419dad180ba5b79eba4"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "atari800xl",
+      "filename": "onerom-ice-24-g-f405rg-atari800xl.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f405rg-atari800xl.bin",
+      "sha256": "4f8af2951c11ba471766f79bf4f418d378340babecd32bc836e85030477239c6"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "bank-vic20-char",
+      "filename": "onerom-ice-24-g-f411re-bank-vic20-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-bank-vic20-char.bin",
+      "sha256": "ff6f6e3e0b99e72431fe1f03f95cbf3a74df5655d9fca01388181d6dc694e1d2"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "set-1541",
+      "filename": "onerom-ice-24-g-f411re-set-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-set-1541.bin",
+      "sha256": "aed7b971aadb9e56bab2661704b9fff6693569f6d75ab46ab2b3be9e9b2cd386"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "bank-vic20-char-fun",
+      "filename": "onerom-ice-24-g-f411re-bank-vic20-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-bank-vic20-char-fun.bin",
+      "sha256": "53faeedcfd3ab48a5edda0e30284356121313fff046f4f59b17f8704a5f6c647"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "vic20-pal",
+      "filename": "onerom-ice-24-g-f411re-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-vic20-pal.bin",
+      "sha256": "9f784180a177595f900cfa52c230fc731486e12dfbc3098fbadf6096a122914e"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "1541",
+      "filename": "onerom-ice-24-g-f411re-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-1541.bin",
+      "sha256": "3cf7b5b6479daf6c3eead75b125e97d8e71a4d8e224c13f4ce1509b39a4b3668"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "set-c64",
+      "filename": "onerom-ice-24-g-f411re-set-c64.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-set-c64.bin",
+      "sha256": "cc32fcdf73ef9e97af85b9b9816c807075db543c15cff07899073ae107a3de6d"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "test-sdrr-0",
+      "filename": "onerom-ice-24-g-f411re-test-sdrr-0.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-test-sdrr-0.bin",
+      "sha256": "eaf57d7727f329f6d82963ea0d7320b82703c132c67998f7480176fc3a3f1753"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "2040",
+      "filename": "onerom-ice-24-g-f411re-2040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-2040.bin",
+      "sha256": "2023dbf76fb8257dacd3fa518a51ffb5e2ccd6d3c7221b840efa029ce0831a63"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "set-vic20-pal",
+      "filename": "onerom-ice-24-g-f411re-set-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-set-vic20-pal.bin",
+      "sha256": "a21ef8ccfeb0c6a76142a53d46ee97fafde9cebc81186ecc8669244802b819f6"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "c64-no-destestmax",
+      "filename": "onerom-ice-24-g-f411re-c64-no-destestmax.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-c64-no-destestmax.bin",
+      "sha256": "0164347d3711bfd0d78234a9edd3fa890fa0f909592a8e4dc5637321a9d03d72"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "bank-c64-char",
+      "filename": "onerom-ice-24-g-f411re-bank-c64-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-bank-c64-char.bin",
+      "sha256": "5e00c0172d98b928c3db4434a060c1ebb5d94c23963235d6362acf8ae27e1e2f"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "ieee-diag",
+      "filename": "onerom-ice-24-g-f411re-ieee-diag.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-ieee-diag.bin",
+      "sha256": "36138787311c2f5018439147c7780fbcd0821312032d62cbfcd983c553424559"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "vic20-ntsc",
+      "filename": "onerom-ice-24-g-f411re-vic20-ntsc.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-vic20-ntsc.bin",
+      "sha256": "918a53c2af409b22a182633d7216bd5fb1f7fe551109ae48c351f058ecf9a248"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "third-party-ti994a",
+      "filename": "onerom-ice-24-g-f411re-third-party-ti994a.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-third-party-ti994a.bin",
+      "sha256": "e2846ab0cebfb236a5cc916966f9d33110253e76651629126fd233d01ad0037c"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "third-party-coco2",
+      "filename": "onerom-ice-24-g-f411re-third-party-coco2.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-third-party-coco2.bin",
+      "sha256": "5f394cbd10a0fa1627835ed5f43034eea93e15b4b9d33e8074f11b11e4f202bb"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "pet-4-40-50",
+      "filename": "onerom-ice-24-g-f411re-pet-4-40-50.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-pet-4-40-50.bin",
+      "sha256": "594c37691e3c8cb8f6de699a1bb891e72fb9ffc3203c15bf8fddf9339c9a253c"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "bank-1541",
+      "filename": "onerom-ice-24-g-f411re-bank-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-bank-1541.bin",
+      "sha256": "4cbabd839a844faa393e3f0e5a1b4fcc1a1b1e2326a06ab82182dc2fc715d1e7"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "bank-c64-char-fun",
+      "filename": "onerom-ice-24-g-f411re-bank-c64-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-bank-c64-char-fun.bin",
+      "sha256": "89c53d280be5c20ae3d152e20bfb215fcad6f89fd9a20aba068ccfb8d929c5cc"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "4040",
+      "filename": "onerom-ice-24-g-f411re-4040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-4040.bin",
+      "sha256": "e1ef92a1fa01e3dd2d28c5bf6d1170bbe0276abe81e05878c0f5779a8cf7e7d7"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "atari800xl",
+      "filename": "onerom-ice-24-g-f411re-atari800xl.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f411re-atari800xl.bin",
+      "sha256": "5b8140865c907d795fda442d1237a2582d29a8f8acca1f46b97686f1a80f4d90"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "bank-vic20-char",
+      "filename": "onerom-ice-24-g-f446re-bank-vic20-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-bank-vic20-char.bin",
+      "sha256": "9556a743bf191b400573ef9fee83ca8e77672b99cdb6de67960c7b2fc1e3e77d"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "set-1541",
+      "filename": "onerom-ice-24-g-f446re-set-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-set-1541.bin",
+      "sha256": "f1b266906c85c45155e8bbc5528cbd930fb210d4f88b49b0021b49c0ce30a7ae"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "bank-vic20-char-fun",
+      "filename": "onerom-ice-24-g-f446re-bank-vic20-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-bank-vic20-char-fun.bin",
+      "sha256": "b11aec42bf1d51335acc1d1a0516772622d4e02603b9748c8198bba28c75a3be"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "vic20-pal",
+      "filename": "onerom-ice-24-g-f446re-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-vic20-pal.bin",
+      "sha256": "24fe205ea2e2055ee72c4fd70cff57446596a8b835de0bb95bd67abc1f903a7b"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "1541",
+      "filename": "onerom-ice-24-g-f446re-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-1541.bin",
+      "sha256": "f8fa84a379d7e9bd231ec53f3322b647f25e1ea98dc296f5656c808d3b51479d"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "set-c64",
+      "filename": "onerom-ice-24-g-f446re-set-c64.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-set-c64.bin",
+      "sha256": "2afbdcb8cccaafe7035ce9fc6b95c91c1bd099c8a8c54bce595f677db63d24eb"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "test-sdrr-0",
+      "filename": "onerom-ice-24-g-f446re-test-sdrr-0.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-test-sdrr-0.bin",
+      "sha256": "6d56842e3c6a0d61a146aacaa870de7e238db7a87aac230fa41ceab1bb91424d"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "2040",
+      "filename": "onerom-ice-24-g-f446re-2040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-2040.bin",
+      "sha256": "c9dab708d08b18280145f8022d8869d926b95296e12c6581603c2240ad8d2a71"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "set-vic20-pal",
+      "filename": "onerom-ice-24-g-f446re-set-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-set-vic20-pal.bin",
+      "sha256": "4ca7b806e85e44a63e1b6b8cd17c7c13f1afd53c76b0b89a663822d87604a283"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "c64-no-destestmax",
+      "filename": "onerom-ice-24-g-f446re-c64-no-destestmax.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-c64-no-destestmax.bin",
+      "sha256": "89c511104130196284025cb1eb5fc62605f04d1537e36e93e26fd91a47125705"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "bank-c64-char",
+      "filename": "onerom-ice-24-g-f446re-bank-c64-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-bank-c64-char.bin",
+      "sha256": "b30e689c472c9f7d9301d473621ba9eed2e2596c94acf436e2b2e024eecc56ca"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "ieee-diag",
+      "filename": "onerom-ice-24-g-f446re-ieee-diag.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-ieee-diag.bin",
+      "sha256": "5551bceef6f82a46c66228c13ab27f84e9bc64c621a4be1a7cffcbe37b92e90a"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "vic20-ntsc",
+      "filename": "onerom-ice-24-g-f446re-vic20-ntsc.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-vic20-ntsc.bin",
+      "sha256": "053ef44c778f591ab1d1a9cd6fbec51491c88db5123976f420818b04ce996a87"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "third-party-ti994a",
+      "filename": "onerom-ice-24-g-f446re-third-party-ti994a.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-third-party-ti994a.bin",
+      "sha256": "1f90f2cb0e826ebab5b19b394fcf2716c7394c1f075776302dd4a16a297a194a"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "third-party-coco2",
+      "filename": "onerom-ice-24-g-f446re-third-party-coco2.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-third-party-coco2.bin",
+      "sha256": "d67919b076c94899eaf55e3c181caadc0b8ccbf8231ad41f092753d6d70dd944"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "pet-4-40-50",
+      "filename": "onerom-ice-24-g-f446re-pet-4-40-50.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-pet-4-40-50.bin",
+      "sha256": "0814b4435dd241dc5e59662b348587638082fec20829b0b1621ba42aeb2b3f46"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "bank-1541",
+      "filename": "onerom-ice-24-g-f446re-bank-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-bank-1541.bin",
+      "sha256": "348e39a18bb5e38fd6c4a155d8788df0bf9d550892340b30f12904bba52f8e3a"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "bank-c64-char-fun",
+      "filename": "onerom-ice-24-g-f446re-bank-c64-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-bank-c64-char-fun.bin",
+      "sha256": "b43d0ebcd0879e7642eb0c528516daab3f9e861936e1a42a8b8a0fa8c4064720"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "4040",
+      "filename": "onerom-ice-24-g-f446re-4040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-4040.bin",
+      "sha256": "70634ddec26456228dfc554400c25270569a0f8e05ab374f13f547c7cc0e3933"
+    },
+    {
+      "hw_rev": "ice-24-g",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "atari800xl",
+      "filename": "onerom-ice-24-g-f446re-atari800xl.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-g-f446re-atari800xl.bin",
+      "sha256": "f0aa55e94faf4209916ea90f0563bf76318f8293f8155902e0d8a4b4fdbbe3c7"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "bank-vic20-char",
+      "filename": "onerom-ice-24-usb-h-f401re-bank-vic20-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-bank-vic20-char.bin",
+      "sha256": "62a83703820b1b1624f73d1291b9f33b4cbccd4cb5fcb6c348a0aa02fb21fb80"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "set-1541",
+      "filename": "onerom-ice-24-usb-h-f401re-set-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-set-1541.bin",
+      "sha256": "7cdf863749c8c06d1aa271d59e1f0ced0d370e44e8094d7a548ad13fad7bfcf6"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "bank-vic20-char-fun",
+      "filename": "onerom-ice-24-usb-h-f401re-bank-vic20-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-bank-vic20-char-fun.bin",
+      "sha256": "50262fa070e42aa9f05245a3284dda8ba7ff5083999341e7f5e9832320bebf21"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "vic20-pal",
+      "filename": "onerom-ice-24-usb-h-f401re-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-vic20-pal.bin",
+      "sha256": "13e070ad1136f8fc1dcc50efbcf411d936c2e7693e9f5765fb52810ec20ae8f6"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "1541",
+      "filename": "onerom-ice-24-usb-h-f401re-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-1541.bin",
+      "sha256": "71222052d26c6360cbb4495fac5e26c0abf55af74cf9ae8397ece4128e2b0770"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "set-c64",
+      "filename": "onerom-ice-24-usb-h-f401re-set-c64.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-set-c64.bin",
+      "sha256": "532a24952edfc2416e4a4b5175ad673c5ed2494c57cc3807df5304870fa44e1c"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "test-sdrr-0",
+      "filename": "onerom-ice-24-usb-h-f401re-test-sdrr-0.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-test-sdrr-0.bin",
+      "sha256": "f5a67728c9fbd4fa93446c89d5b5c5c0dc43123dcd7966a78d8a395d1f12a14e"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "2040",
+      "filename": "onerom-ice-24-usb-h-f401re-2040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-2040.bin",
+      "sha256": "b5b083f46e3f15d1872c517e76516aafdb6f276cb8f15ca7e2a041a34743f0a7"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "set-vic20-pal",
+      "filename": "onerom-ice-24-usb-h-f401re-set-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-set-vic20-pal.bin",
+      "sha256": "b6797d13a6fbc0d4ed0b5dccf8001582f46ba6c925ea095791faea56f20718ba"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "c64-no-destestmax",
+      "filename": "onerom-ice-24-usb-h-f401re-c64-no-destestmax.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-c64-no-destestmax.bin",
+      "sha256": "8631c9ff24c6d85f31fea8f97ff81e92438fc968b923305f07f1e0139f20f22d"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "bank-c64-char",
+      "filename": "onerom-ice-24-usb-h-f401re-bank-c64-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-bank-c64-char.bin",
+      "sha256": "416114f22c9f276c3b61aa330720f1b884f380136a6bf5efa5a7cbc9912c24b2"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "ieee-diag",
+      "filename": "onerom-ice-24-usb-h-f401re-ieee-diag.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-ieee-diag.bin",
+      "sha256": "0ddcdf65e3afac3a12f599dcd2c71c35968bcd2c0c7aa17483accec017221916"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "vic20-ntsc",
+      "filename": "onerom-ice-24-usb-h-f401re-vic20-ntsc.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-vic20-ntsc.bin",
+      "sha256": "75f8d21e540b6a4cb1a8af0d939cc96abaf5d26fa87caf5076578dad47b689bc"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "third-party-ti994a",
+      "filename": "onerom-ice-24-usb-h-f401re-third-party-ti994a.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-third-party-ti994a.bin",
+      "sha256": "87da9edb325aaf41810bd18b5cab1e8e48516d2c020c168e98819eb90da3e810"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "third-party-coco2",
+      "filename": "onerom-ice-24-usb-h-f401re-third-party-coco2.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-third-party-coco2.bin",
+      "sha256": "400c5179d922216ae2291232b4e205015d46c46166f32827b27202015f3d188d"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "pet-4-40-50",
+      "filename": "onerom-ice-24-usb-h-f401re-pet-4-40-50.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-pet-4-40-50.bin",
+      "sha256": "8651514fc48f861bca9839952a551ffd3a798606c99204c4b56ec2426f570ba3"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "bank-1541",
+      "filename": "onerom-ice-24-usb-h-f401re-bank-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-bank-1541.bin",
+      "sha256": "0bed5709cfadcf2ef6810def48663afeb4d8a826b73e69ed2577026f05ed5178"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "bank-c64-char-fun",
+      "filename": "onerom-ice-24-usb-h-f401re-bank-c64-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-bank-c64-char-fun.bin",
+      "sha256": "83be61c7e90fbe0df395d062cc34df1afa5a8364fa3ab24c690b16d316550481"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "4040",
+      "filename": "onerom-ice-24-usb-h-f401re-4040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-4040.bin",
+      "sha256": "d6a96596181c6130af6b4429310e0c87376733ba00bf879168206a5ea146b6f0"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f401re",
+      "model": "ice",
+      "rom_config": "atari800xl",
+      "filename": "onerom-ice-24-usb-h-f401re-atari800xl.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f401re-atari800xl.bin",
+      "sha256": "a586109504dcc18f9b021991b885a69ff83bbec7c509c4c2b3affbed1d3f2ca2"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "bank-vic20-char",
+      "filename": "onerom-ice-24-usb-h-f405rg-bank-vic20-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-bank-vic20-char.bin",
+      "sha256": "20aa1e8f2d64a02c3860feadb6a87d79bfcaa0fbb79a8b08afeb37b2c9c258ed"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "set-1541",
+      "filename": "onerom-ice-24-usb-h-f405rg-set-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-set-1541.bin",
+      "sha256": "8530819167be1d199609859ef2535f9dfcfe97ddebfabf7937ad7055459cfc39"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "bank-vic20-char-fun",
+      "filename": "onerom-ice-24-usb-h-f405rg-bank-vic20-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-bank-vic20-char-fun.bin",
+      "sha256": "65d999d0d06cd6e4f12b2db38f5052e2c41caeb4800c84ba8ba70cbd2cf4d2fc"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "vic20-pal",
+      "filename": "onerom-ice-24-usb-h-f405rg-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-vic20-pal.bin",
+      "sha256": "0f6cc31fbfc4a56a758c404179d543ebd8a5a5fc2711d21115203d5c2170d73e"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "1541",
+      "filename": "onerom-ice-24-usb-h-f405rg-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-1541.bin",
+      "sha256": "232fabd8b3eec1cc07ada7df9837530997ff3d70470459151025961e94b83607"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "set-c64",
+      "filename": "onerom-ice-24-usb-h-f405rg-set-c64.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-set-c64.bin",
+      "sha256": "63aa2c6330d81c015bb01be0ffa2eed623ddfd06a4ddfb31ef3d960bf3006493"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "test-sdrr-0",
+      "filename": "onerom-ice-24-usb-h-f405rg-test-sdrr-0.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-test-sdrr-0.bin",
+      "sha256": "ad7bcd389b1f1c411aac1d738e1c1ce9d3b8dd5d0b2fbfa068b9784e25cadb7a"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "2040",
+      "filename": "onerom-ice-24-usb-h-f405rg-2040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-2040.bin",
+      "sha256": "50120dbcf8b18ab0dc483d92a23ec94bbec89d2af55e3c53bd17aadb2c90adcb"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "set-vic20-pal",
+      "filename": "onerom-ice-24-usb-h-f405rg-set-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-set-vic20-pal.bin",
+      "sha256": "a5e66a466902fc187a1f8a58dab6c64403fcf8f2c9990785b8cd438533a7ad4f"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "c64-no-destestmax",
+      "filename": "onerom-ice-24-usb-h-f405rg-c64-no-destestmax.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-c64-no-destestmax.bin",
+      "sha256": "a86e5d79df58920815267a0d22943261b75bea4b87732de2991f26c6e8f9cc9e"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "bank-c64-char",
+      "filename": "onerom-ice-24-usb-h-f405rg-bank-c64-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-bank-c64-char.bin",
+      "sha256": "514c484229cf726e4c86af2438ad8ed538bd7a4fd89839cf4cb58412565bd074"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "ieee-diag",
+      "filename": "onerom-ice-24-usb-h-f405rg-ieee-diag.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-ieee-diag.bin",
+      "sha256": "2d2806cefd5624f4ce4d70782e12d17619d621cea31605b9a8a9a5825da0da85"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "vic20-ntsc",
+      "filename": "onerom-ice-24-usb-h-f405rg-vic20-ntsc.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-vic20-ntsc.bin",
+      "sha256": "b69d015af14f2e0548cdd1acc137a740129532c52a06bc242eb7c861c14f3f68"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "third-party-ti994a",
+      "filename": "onerom-ice-24-usb-h-f405rg-third-party-ti994a.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-third-party-ti994a.bin",
+      "sha256": "c868c143e765097a38cbdd40a2ea941f780ceca1907432c30fdfa72cd243c64e"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "third-party-coco2",
+      "filename": "onerom-ice-24-usb-h-f405rg-third-party-coco2.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-third-party-coco2.bin",
+      "sha256": "c6e0a6b4b5d7dc5704d1ed928cd3f204da0b34e38d4b2ba5740d3ed0602df874"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "pet-4-40-50",
+      "filename": "onerom-ice-24-usb-h-f405rg-pet-4-40-50.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-pet-4-40-50.bin",
+      "sha256": "c13330aa10b3cd29ceba8c93e08ac63ccb9fac6d407b46e74811638a9c0d43d1"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "bank-1541",
+      "filename": "onerom-ice-24-usb-h-f405rg-bank-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-bank-1541.bin",
+      "sha256": "47ed1133ef29b4f82bd0c45e108ecab8fdd41695d53ec6a3052692c90cd75a44"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "bank-c64-char-fun",
+      "filename": "onerom-ice-24-usb-h-f405rg-bank-c64-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-bank-c64-char-fun.bin",
+      "sha256": "e3ada9d533bf4378a0ba66c1ed99e014c7f61a5ef9d3ada30326b47ba09ddb0a"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "4040",
+      "filename": "onerom-ice-24-usb-h-f405rg-4040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-4040.bin",
+      "sha256": "be292ed0ee92e4b1be4ce787be6082ee7c39756d23fe7cfedddf3ec902c48aec"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f405rg",
+      "model": "ice",
+      "rom_config": "atari800xl",
+      "filename": "onerom-ice-24-usb-h-f405rg-atari800xl.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f405rg-atari800xl.bin",
+      "sha256": "84224d0ed839a9c5f4057e45f78c5de9d1c712cd7109fa3c2539645b4b56bf0f"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "bank-vic20-char",
+      "filename": "onerom-ice-24-usb-h-f411re-bank-vic20-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-bank-vic20-char.bin",
+      "sha256": "619553d0cad8769dfc5cbf1916f973519f43a053f42d91107cbd262454a5dc5d"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "set-1541",
+      "filename": "onerom-ice-24-usb-h-f411re-set-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-set-1541.bin",
+      "sha256": "793b352463c3c977ec11b6af3dfd188ef74bee43bc650c49a41ca1499abe755d"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "bank-vic20-char-fun",
+      "filename": "onerom-ice-24-usb-h-f411re-bank-vic20-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-bank-vic20-char-fun.bin",
+      "sha256": "185a6d1db97ce4455bb544e60a5038eabb3d1b8e873453b54aa39573b2194bcf"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "vic20-pal",
+      "filename": "onerom-ice-24-usb-h-f411re-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-vic20-pal.bin",
+      "sha256": "95f91fbf2cdf410db18dd783265e53ddbaf294c972616fbda8eb47ba8b90d30b"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "1541",
+      "filename": "onerom-ice-24-usb-h-f411re-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-1541.bin",
+      "sha256": "dfeab71cafcd831aec7bf8feca73ba5f0c281d75288802650f01ed90633b76dc"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "set-c64",
+      "filename": "onerom-ice-24-usb-h-f411re-set-c64.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-set-c64.bin",
+      "sha256": "83aedbd30282245ce577c195aa63e2f63856a267aef28dfb673341e8a401a176"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "test-sdrr-0",
+      "filename": "onerom-ice-24-usb-h-f411re-test-sdrr-0.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-test-sdrr-0.bin",
+      "sha256": "257ea821e7971a4af2304a4bb86ea46a105b9705fd440d2243841f4cb3983e83"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "2040",
+      "filename": "onerom-ice-24-usb-h-f411re-2040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-2040.bin",
+      "sha256": "bda6b9adb3b0ab25aff2bc33abfe9774e88ee693c745dfd89ad54d71c60cb1d8"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "set-vic20-pal",
+      "filename": "onerom-ice-24-usb-h-f411re-set-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-set-vic20-pal.bin",
+      "sha256": "f75bf4e61e9bbe84d3b9f09293c7d896e927d04f4fd3304898b431cf6f052f4f"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "c64-no-destestmax",
+      "filename": "onerom-ice-24-usb-h-f411re-c64-no-destestmax.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-c64-no-destestmax.bin",
+      "sha256": "55e1700498db865aaf50be3dfdc77308419479599106401d94dbdddffe808516"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "bank-c64-char",
+      "filename": "onerom-ice-24-usb-h-f411re-bank-c64-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-bank-c64-char.bin",
+      "sha256": "c4abc59c89cf4142bc32a2371b7f203e5c929e2c98a035ef6ed009648bd44c2d"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "ieee-diag",
+      "filename": "onerom-ice-24-usb-h-f411re-ieee-diag.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-ieee-diag.bin",
+      "sha256": "2da9505b5f80534de59b8b33fab49b34be9ff3e197f1d2bb0d8d93918a16c86c"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "vic20-ntsc",
+      "filename": "onerom-ice-24-usb-h-f411re-vic20-ntsc.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-vic20-ntsc.bin",
+      "sha256": "56574a1977d2a8c3a92f3889bc36d8841c135aeeb4e6f9f7f8ce1d89a0aa4f80"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "third-party-ti994a",
+      "filename": "onerom-ice-24-usb-h-f411re-third-party-ti994a.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-third-party-ti994a.bin",
+      "sha256": "5f3b798582790469616ae6cb2d47092d366f564b6cd9f41f0b1a86f96f3ad1b4"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "third-party-coco2",
+      "filename": "onerom-ice-24-usb-h-f411re-third-party-coco2.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-third-party-coco2.bin",
+      "sha256": "82087238c40696d3968ebdbbbbcb2c657db0a2bcc5939a5800d0b80005375e65"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "pet-4-40-50",
+      "filename": "onerom-ice-24-usb-h-f411re-pet-4-40-50.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-pet-4-40-50.bin",
+      "sha256": "43879aff8d5264a0b8ca25aca513d8f541c7ccbcd9933a7d66a4a1f22feaa734"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "bank-1541",
+      "filename": "onerom-ice-24-usb-h-f411re-bank-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-bank-1541.bin",
+      "sha256": "57a7f71387b533a653ea48248702bd349a3b55192fbf4ed2362752d88e45bb8b"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "bank-c64-char-fun",
+      "filename": "onerom-ice-24-usb-h-f411re-bank-c64-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-bank-c64-char-fun.bin",
+      "sha256": "820aa4d7f88614bf4dffa84dcaf47c68bd70c6a031102d092dba21958c703dc0"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "4040",
+      "filename": "onerom-ice-24-usb-h-f411re-4040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-4040.bin",
+      "sha256": "34410dcac2434db1f8ca85201671b43904b9c52d439ebc8d3da344ace36ed132"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f411re",
+      "model": "ice",
+      "rom_config": "atari800xl",
+      "filename": "onerom-ice-24-usb-h-f411re-atari800xl.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f411re-atari800xl.bin",
+      "sha256": "6a6153ea57c14f219c4ea2bf3eb6a8d0c512a9cabbe54d84f9488df58034f48c"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "bank-vic20-char",
+      "filename": "onerom-ice-24-usb-h-f446re-bank-vic20-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-bank-vic20-char.bin",
+      "sha256": "20f3d082377207b1de5c732d5a1930df464cf95f3f0183004db183b62f0a2335"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "set-1541",
+      "filename": "onerom-ice-24-usb-h-f446re-set-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-set-1541.bin",
+      "sha256": "3161f7133dd60fbbdab686eb96e8148587cff53c4419654512245fb9385ba15c"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "bank-vic20-char-fun",
+      "filename": "onerom-ice-24-usb-h-f446re-bank-vic20-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-bank-vic20-char-fun.bin",
+      "sha256": "da4fea934a2614f2f11d34c9ce7b701cacf7b5c7b6a3e9b00b2ed73c1887ac1d"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "vic20-pal",
+      "filename": "onerom-ice-24-usb-h-f446re-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-vic20-pal.bin",
+      "sha256": "576984599363965de1b2bc619b062a4e5ea53e5d2d6097ea0b93e5d2d47acd28"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "1541",
+      "filename": "onerom-ice-24-usb-h-f446re-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-1541.bin",
+      "sha256": "97a1b95d3627a1bb7a7d2c3891a3eaabee11ba0a659ff46e23d8e28d142918b6"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "set-c64",
+      "filename": "onerom-ice-24-usb-h-f446re-set-c64.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-set-c64.bin",
+      "sha256": "7d2575a0d58a8a290fb07964096af6539edec0a23df2462b0b6834cb12114bb3"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "test-sdrr-0",
+      "filename": "onerom-ice-24-usb-h-f446re-test-sdrr-0.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-test-sdrr-0.bin",
+      "sha256": "f2057ef607fd1c4a3cdf51ecad13330a29f97faa3a76b40a0946223a68e2a8cf"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "2040",
+      "filename": "onerom-ice-24-usb-h-f446re-2040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-2040.bin",
+      "sha256": "ef2caf40805ce5ce4d76e7c47d2c60beaea085cf58fb293caf7cda652d9b7cc6"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "set-vic20-pal",
+      "filename": "onerom-ice-24-usb-h-f446re-set-vic20-pal.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-set-vic20-pal.bin",
+      "sha256": "a3dc82bc021eddab0aeeb2a84361ea5a48a0868ef09070595a1cd64f646c65a2"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "c64-no-destestmax",
+      "filename": "onerom-ice-24-usb-h-f446re-c64-no-destestmax.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-c64-no-destestmax.bin",
+      "sha256": "42bb45d20cf1bf9df973f632cd1120d65a2cd40161ed81c2d40f1e74c10f6276"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "bank-c64-char",
+      "filename": "onerom-ice-24-usb-h-f446re-bank-c64-char.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-bank-c64-char.bin",
+      "sha256": "91829c0ece96fc96e98d82748dd766f81ad512b7f3dd5decf90e1631a1b312b1"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "ieee-diag",
+      "filename": "onerom-ice-24-usb-h-f446re-ieee-diag.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-ieee-diag.bin",
+      "sha256": "ef9046d908116a4440be7d4418b9dd3c7528dd32d8dda7957a737e966cf70788"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "vic20-ntsc",
+      "filename": "onerom-ice-24-usb-h-f446re-vic20-ntsc.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-vic20-ntsc.bin",
+      "sha256": "16e324a9fa53d2a846ec53411e8d994c35a7022dbe46fe90c43c0d4eaca7dedd"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "third-party-ti994a",
+      "filename": "onerom-ice-24-usb-h-f446re-third-party-ti994a.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-third-party-ti994a.bin",
+      "sha256": "e7496e746a870c2394be259b0032622747c79deef601d94992d56763fbdac3e9"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "third-party-coco2",
+      "filename": "onerom-ice-24-usb-h-f446re-third-party-coco2.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-third-party-coco2.bin",
+      "sha256": "4c3b8378c23c81e27098e6d767d5b122f8becbf97a71e8c53832afc91c49f82a"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "pet-4-40-50",
+      "filename": "onerom-ice-24-usb-h-f446re-pet-4-40-50.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-pet-4-40-50.bin",
+      "sha256": "3b1536679815c85abb081666cd89261f3416b9b19c0463af5d563fc300360816"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "bank-1541",
+      "filename": "onerom-ice-24-usb-h-f446re-bank-1541.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-bank-1541.bin",
+      "sha256": "7475c14eef69d5557a13feff503efab4ddee309258e98c8a7be3373415b5efe1"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "bank-c64-char-fun",
+      "filename": "onerom-ice-24-usb-h-f446re-bank-c64-char-fun.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-bank-c64-char-fun.bin",
+      "sha256": "3cfd10c29b910c571b976a74d6eb5faff1fb9aa3387f172cf3690d91e003c9c8"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "4040",
+      "filename": "onerom-ice-24-usb-h-f446re-4040.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-4040.bin",
+      "sha256": "d2154ac3ff7e9db169604b8952e33b9eb11a1d3e3db487500b7d147eb9763421"
+    },
+    {
+      "hw_rev": "ice-24-usb-h",
+      "mcu": "f446re",
+      "model": "ice",
+      "rom_config": "atari800xl",
+      "filename": "onerom-ice-24-usb-h-f446re-atari800xl.bin",
+      "url": "https://github.com/piersfinlayson/one-rom/releases/download/v0.5.6/onerom-ice-24-usb-h-f446re-atari800xl.bin",
+      "sha256": "b5816d054707d2cbfa4193a782b0da60cd3210fb4620213eb12043232e0f6afd"
+    }
+  ]
+}

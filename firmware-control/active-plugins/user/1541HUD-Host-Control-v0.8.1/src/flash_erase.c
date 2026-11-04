@@ -1,0 +1,60 @@
+// Copyright (C) 2026 Piers Finlayson <piers@piers.rocks>
+//
+// MIT License
+//
+// Flash erase and program critical section for NV storage support.
+//
+// MUST be compiled with -fPIC -fno-plt.  The function is copied into a RAM
+// slot at runtime and called via function pointer, so that it can execute
+// while XIP is disabled during the erase and program sequence.
+//
+// Self-contained by design: no globals, no static data, no external calls
+// beyond those passed as parameters.  Verify with objdump that no absolute
+// addresses appear in the output.
+
+#include <stdint.h>
+
+#include <plugin.h>
+
+#include "flash_erase.h"
+
+// RP2350 flash geometry
+#define FLASH_BLOCK_SIZE      (65536u) // 64KB — largest erase granularity
+#define FLASH_BLOCK_ERASE_CMD (0xD8u)  // SPI block erase command
+
+// The erase and the program both run between the one exit from XIP and the one
+// restore of it.  The bootrom's program function needs the flash in serial
+// command mode exactly as the erase does, so a program issued after XIP came
+// back is issued into a flash that is no longer listening for commands.
+//
+// The sequence must not be interrupted while flash is unreadable, because
+// every handler this core would run lives there.  A host build has no
+// cpsid/cpsie, so the masking goes to the harness instead of compiling away —
+// see flash_irq_disable().  Everything else — the call order, the erase
+// granularity, the command byte, the divisor handed back to the XIP restore —
+// is the logic under test, and runs on a host unchanged.
+//
+// Erase and program take separate addresses and sizes.  An erase covers whole
+// 4KB sectors, a program whole 256-byte pages.
+ORA_SECTION(".flash_erase_fn") __attribute__((noinline))
+void flash_erase_critical(
+    flash_exit_xip_fn_t             exit_xip,
+    flash_range_erase_fn_t          range_erase,
+    flash_range_program_fn_t        range_program,
+    flash_flush_cache_fn_t          flush_cache,
+    flash_select_xip_read_mode_fn_t select_xip,
+    uint32_t                        erase_offs,
+    uint32_t                        program_offs,
+    const uint8_t                  *data,
+    uint32_t                        erase_size,
+    uint32_t                        program_size,
+    uint8_t                         clkdiv
+) {
+    uint32_t primask = flash_irq_disable();
+    exit_xip();
+    range_erase(erase_offs, erase_size, FLASH_BLOCK_SIZE, FLASH_BLOCK_ERASE_CMD);
+    range_program(program_offs, data, program_size);
+    select_xip(3u, clkdiv);
+    flush_cache();
+    flash_irq_restore(primask);
+}

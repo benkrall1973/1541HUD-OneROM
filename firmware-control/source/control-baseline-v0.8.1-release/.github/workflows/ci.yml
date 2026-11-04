@@ -1,0 +1,623 @@
+name: CI Build
+
+permissions:
+  contents: write
+  actions: read
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['**']
+    paths:
+      - 'Makefile'
+      - 'ci/**'
+      - '!ci/docker/**'
+      - 'firmware/**'
+      - 'plugins/**'
+      - 'rust/**'
+      - 'old-config/**'
+      - 'onerom-config/**'
+      - '.github/**'
+      - '!.github/workflows/release.yml'
+      - '!.github/workflows/lab-release.yml'
+      - '!**.md'
+      - '!docs/**'
+      # A document under docs/ can carry a fragment region, whose text belongs
+      # to another file.  ci/rust-tests.sh refills every region and fails where
+      # one differs from what is committed, so the edit that can leave a region
+      # stale has to reach CI.
+      - 'docs/**.md'
+      # The renderer's own inputs, so the docs-pdf job runs for a change to the
+      # thing it tests.
+      - 'docs/pdf/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'Makefile'
+      - 'ci/**'
+      - '!ci/docker/**'
+      - 'firmware/**'
+      - 'plugins/**'
+      - 'rust/**'
+      - 'old-config/**'
+      - 'onerom-config/**'
+      - '.github/**'
+      - '!.github/workflows/release.yml'
+      - '!.github/workflows/lab-release.yml'
+      - '!**.md'
+      - '!docs/**'
+      # A document under docs/ can carry a fragment region, whose text belongs
+      # to another file.  ci/rust-tests.sh refills every region and fails where
+      # one differs from what is committed, so the edit that can leave a region
+      # stale has to reach CI.
+      - 'docs/**.md'
+      # The renderer's own inputs, so the docs-pdf job runs for a change to the
+      # thing it tests.
+      - 'docs/pdf/**'
+
+# The work is split across jobs rather than run as one sequence.  Each job gets
+# its own runner and, more to the point, its own 6 hour timeout: as one job the
+# suite reached 5h49m and was being cancelled outright.
+#
+# Every job installs the Arm GNU toolchain pinned in ci/arm-toolchain-version -
+# the same one the build container and a developer's machine install - so the
+# firmware is always compiled by the same compiler wherever it is built.  It is
+# installed everywhere rather than only where it looks needed: the CLI's
+# integration tests build real firmware, which is not obvious from the job name.
+#
+# libclang-dev is installed everywhere for the same reason: onerom-fw-emulator's
+# build script runs bindgen over the firmware headers, and three crates depend on
+# it (onerom-fw-tester, onerom-rbcp-tester, onerom-lens), so which jobs pull it
+# in is not apparent from the job names either.  It is named explicitly rather
+# than relied on: the GitHub runner image happens to ship libclang, leaner
+# self-hosted runners do not, and there the bindgen build script panics.
+#
+# xz-utils and python3 are named for that same reason - both are present on the
+# GitHub image and may not be on a self-hosted one.  ci/install-arm-toolchain.sh
+# unpacks a .tar.xz, so every job needs xz-utils; only the two jobs that install
+# the Emscripten SDK need python3, which emsdk itself runs on.
+#
+# Every Linux job runs on ubuntu-24.04 rather than ubuntu-latest, to match the
+# build container (ci/docker/Dockerfile).  The coverage floors come from CI's
+# figures and the container reproduces them, so both must install the same
+# build of the pinned compiler.  Move the two together.
+#
+# The Linux packages jobs are the exception to all of this.  The build job
+# installs only what rust/cli/scripts/build-linux.sh and
+# rust/studio/scripts/build-linux.sh install, as the release build machine
+# does, and the test job runs the packages in a container.
+
+jobs:
+  lint:
+    name: Lint (rustfmt + clippy)
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libclang-dev libcurl4-openssl-dev libjson-c-dev \
+                                libzip-dev make xz-utils python3
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+
+    - name: Cache Arm GNU toolchain
+      uses: actions/cache@v6
+      with:
+        path: ~/arm-gnu-toolchain
+        key: arm-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/arm-toolchain-version') }}
+
+    - name: Install Arm GNU toolchain
+      run: echo "TOOLCHAIN=$(ci/install-arm-toolchain.sh)" >> "$GITHUB_ENV"
+
+    - name: Cache Emscripten SDK
+      uses: actions/cache@v6
+      with:
+        path: ~/emsdk
+        key: emsdk-${{ runner.os }}-${{ hashFiles('ci/install-emscripten.sh', 'ci/emscripten-version') }}
+
+    - name: Install Emscripten (for One ROM Lens)
+      run: |
+        ci/install-emscripten.sh "$HOME/emsdk"
+        source "$HOME/emsdk/emsdk_env.sh"
+        # Record the version in the log.  An emscripten release has broken this
+        # build before (6.0.6), and working out which version a past run used
+        # meant inferring it from release timestamps.
+        emcc --version | head -1
+        # Persist emcc/emar (and EMSDK) for subsequent steps.
+        echo "PATH=$PATH" >> "$GITHUB_ENV"
+        echo "EMSDK=$EMSDK" >> "$GITHUB_ENV"
+
+    - name: Install wasm target
+      run: rustup target add wasm32-unknown-emscripten
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: rust
+
+    - name: Run Rust lint (rustfmt + clippy)
+      run: ci/rust-lint.sh
+
+  rust-tests:
+    name: Rust tests
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libclang-dev libcurl4-openssl-dev libjson-c-dev \
+                                libzip-dev make xz-utils
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Arm GNU toolchain
+      uses: actions/cache@v6
+      with:
+        path: ~/arm-gnu-toolchain
+        key: arm-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/arm-toolchain-version') }}
+
+    - name: Install Arm GNU toolchain
+      run: echo "TOOLCHAIN=$(ci/install-arm-toolchain.sh)" >> "$GITHUB_ENV"
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: rust
+
+    - name: Run various Rust tests
+      run: ci/rust-tests.sh
+
+  docs-pdf:
+    name: Documentation PDFs
+    runs-on: ubuntu-24.04
+    # The PDFs are rendered from the committed markdown, and rust-tests is what
+    # proves the generated documents (COMPATIBILITY.md, CHIP-TYPES.md) match a
+    # fresh regeneration.  Building before that gate could publish a PDF that
+    # disagrees with the repository.
+    needs: rust-tests
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0
+
+    - name: Cache documentation toolchain
+      uses: actions/cache@v6
+      with:
+        path: ~/onerom-doc-tools
+        key: doc-tools-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/pandoc-version', 'ci/weasyprint-version') }}
+
+    - name: Install documentation toolchain
+      run: echo "$(ci/install-doc-tools.sh)" >> "$GITHUB_PATH"
+
+    # A gate only.  The PDFs are published from a local release build, via
+    # ci/build-docs.sh - this job exists so that a document which breaks the
+    # renderer fails on the push rather than on release day.
+    - name: Build documentation PDFs
+      run: ci/build-docs.sh
+
+    - name: Upload documentation PDFs
+      uses: actions/upload-artifact@v7
+      with:
+        name: docs-pdf
+        path: docs/pdf/build/*.pdf
+
+  c-tests:
+    name: C tests
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v7
+
+    # These compile firmware C for the host, so they need neither Rust nor the
+    # Arm toolchain.  They do need the host compiler pinned in
+    # ci/c-compiler-version: the runner's default cc is GCC 13, which predates
+    # the -std=gnu23 these are built as.  ci/c-tests.sh defaults $CC to the
+    # pinned one, so nothing here names a version.
+    - name: Install host compiler
+      run: ci/install-c-compiler.sh
+
+    - name: Check log format strings
+      run: ci/check-log-formats.sh
+
+    - name: Run host C tests
+      run: ci/c-tests.sh
+
+  rust-docs:
+    name: Rust docs
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libclang-dev libcurl4-openssl-dev libjson-c-dev \
+                                libzip-dev make xz-utils
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Arm GNU toolchain
+      uses: actions/cache@v6
+      with:
+        path: ~/arm-gnu-toolchain
+        key: arm-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/arm-toolchain-version') }}
+
+    - name: Install Arm GNU toolchain
+      run: echo "TOOLCHAIN=$(ci/install-arm-toolchain.sh)" >> "$GITHUB_ENV"
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: rust
+
+    - name: Build Rust docs
+      run: ci/rust-docs.sh
+
+  emulator-tests:
+    # One job per socket size, and two each for the 24 and 28 pin groups.  Every
+    # test in a group targets boards of that one size, so the groups are
+    # independent.  The 24 and 28 pin groups are the largest, so each runs as
+    # two halves of about equal time.
+    name: Emulator tests (${{ matrix.name }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - group: 24-1
+            name: 24 pin, part 1
+          - group: 24-2
+            name: 24 pin, part 2
+          - group: 28-1
+            name: 28 pin, part 1
+          - group: 28-2
+            name: 28 pin, part 2
+          - group: 32
+            name: 32 pin
+          - group: 40
+            name: 40 pin
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libclang-dev libcurl4-openssl-dev libjson-c-dev \
+                                libzip-dev make xz-utils
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Arm GNU toolchain
+      uses: actions/cache@v6
+      with:
+        path: ~/arm-gnu-toolchain
+        key: arm-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/arm-toolchain-version') }}
+
+    - name: Install Arm GNU toolchain
+      run: echo "TOOLCHAIN=$(ci/install-arm-toolchain.sh)" >> "$GITHUB_ENV"
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: rust
+        # Every job builds the same dependency graph, so they share one cache
+        # entry rather than populating near-identical ones.
+        shared-key: emulator-tests
+
+    - name: Run One ROM emulator tests
+      run: ci/test-emu.sh ${{ matrix.group }}
+
+  coverage:
+    # The coverage campaign - ci/coverage-campaign.txt - and the per-file floor
+    # gate.  Runs alongside the other jobs rather than gating them.
+    #
+    # One job, not a matrix, because the floors belong to the campaign as a
+    # whole: ci/coverage-report.sh refuses unless every tracefile the campaign
+    # names is present, and splitting would mean uploading them and merging in
+    # a further job.  If the wall-clock becomes a problem that split is the
+    # answer, not dropping runs from the campaign - fewer runs reach fewer
+    # lines, and the floors would have to come down to match.
+    name: Coverage
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libclang-dev libcurl4-openssl-dev libjson-c-dev \
+                                libzip-dev make xz-utils \
+                                perl libcapture-tiny-perl libdatetime-perl \
+                                libjson-xs-perl
+
+    # Not the packaged lcov: Ubuntu's is 2.0, which reads
+    # LCOV_UNREACHABLE_START as an ordinary comment rather than checking the
+    # claim it makes.  ci/lcov-version pins the version, shared with the
+    # container and a developer's machine.
+    - name: Install lcov
+      run: echo "$(ci/install-lcov.sh)" >> "$GITHUB_PATH"
+
+    # The compiler the figures are measured with, pinned in
+    # ci/c-compiler-version and shared with the C tests job and the container.
+    # ci/coverage-run.sh picks it up from the pin, along with its gcov.
+    - name: Install host compiler
+      run: ci/install-c-compiler.sh
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: rust
+        shared-key: coverage
+
+    - name: Run the coverage campaign
+      run: ci/coverage-campaign.sh
+
+    # tee, so the figures reach the job summary as well as the log.  pipefail
+    # or tee's exit status hides a failing gate.
+    - name: Coverage figures
+      run: |
+        set -o pipefail
+        ci/coverage-report.sh | tee coverage-figures.txt
+
+    - name: Check the floors
+      run: |
+        set -o pipefail
+        ci/coverage-report.sh --check | tee coverage-check.txt
+
+    # The three badges on README.md read these files.  Only from main, and
+    # only once the floors have passed - a badge is a published number, so it
+    # comes from a run that met the gate.
+    - name: Publish the coverage badges
+      if: github.ref == 'refs/heads/main'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        ci/coverage-report.sh --badges
+        git clone --depth 1 --branch badges \
+          "https://x-access-token:$GH_TOKEN@github.com/${{ github.repository }}" badges-branch
+        # Clear the branch first.  A component whose id changes leaves its old
+        # JSON behind otherwise, and shields would serve that figure for good.
+        # Gone, its badge 404s and reads as broken.
+        rm -f badges-branch/*.json
+        cp build/coverage/badges/*.json badges-branch/
+        cd badges-branch
+        git config user.name  "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add -A
+        git diff --cached --quiet || git commit -m "Coverage badges for ${{ github.sha }}"
+        git push origin badges
+
+    # The numbers are the point of the job, and a log needs an account to read.
+    # This puts them on the run page instead, readable by anyone who can see
+    # the repo.  always(), so a failed gate is shown rather than hidden.
+    - name: Figures in the job summary
+      if: always()
+      run: |
+        {
+          echo '## Coverage'
+          echo
+          echo '```'
+          cat coverage-figures.txt 2>/dev/null || echo "(the campaign did not complete)"
+          echo '```'
+          echo
+          echo '### Floors'
+          echo
+          echo '```'
+          cat coverage-check.txt 2>/dev/null || echo "(the check did not run)"
+          echo '```'
+        } >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Upload tracefiles
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: coverage-tracefiles
+        path: build/coverage/*.info
+
+  firmware:
+    name: Firmware and plugins
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libclang-dev libcurl4-openssl-dev libjson-c-dev \
+                                libzip-dev make xz-utils
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Arm GNU toolchain
+      uses: actions/cache@v6
+      with:
+        path: ~/arm-gnu-toolchain
+        key: arm-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/arm-toolchain-version') }}
+
+    - name: Install Arm GNU toolchain
+      run: echo "TOOLCHAIN=$(ci/install-arm-toolchain.sh)" >> "$GITHUB_ENV"
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: rust
+
+    - name: Build firmware
+      run: ci/build.sh ci
+
+    - name: Build plugins
+      run: |
+        make clean
+        make
+        make -C plugins/system/usb
+        make -C plugins/user/activity
+        make -C plugins/user/blink
+        make -C plugins/user/ext-flash
+        make -C plugins/user/host-control
+        make -C plugins/user/rgb
+        make -C firmware/ora/examples
+
+  tools:
+    name: Tools (One ROM Lab)
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libclang-dev libcurl4-openssl-dev libjson-c-dev \
+                                libzip-dev make xz-utils
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    # Lab builds with the nightly pinned in rust/lab/rust-toolchain.toml rather
+    # than the stable toolchain above.  Installing it here puts its version in
+    # the log.
+    - name: Install Lab's pinned Rust toolchain
+      working-directory: rust/lab
+      run: |
+        rustup toolchain install --no-self-update
+        rustc --version
+
+    - name: Cache Arm GNU toolchain
+      uses: actions/cache@v6
+      with:
+        path: ~/arm-gnu-toolchain
+        key: arm-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/arm-toolchain-version') }}
+
+    - name: Install Arm GNU toolchain
+      run: echo "TOOLCHAIN=$(ci/install-arm-toolchain.sh)" >> "$GITHUB_ENV"
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: rust
+
+    - name: Build tools
+      run: ci/rust-tools.sh
+
+  linux-packages:
+    # The CLI and Studio Linux packages, built by the scripts the release build
+    # runs, on the release build machine's Ubuntu release and architecture.
+    # Studio's file dialogs use the XDG portal, so no GTK.
+    name: Linux packages (CLI and Studio)
+    runs-on: ubuntu-26.04-arm
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache zig and cargo-zigbuild
+      uses: actions/cache@v6
+      with:
+        path: ~/zig-toolchain
+        key: zig-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/zig-version', 'ci/cargo-zigbuild-version') }}
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: rust
+        # zig compiles the C dependencies, and cargo doesn't rebuild them when
+        # zig changes
+        key: zig-${{ hashFiles('ci/zig-version') }}
+
+    - name: Build CLI packages
+      working-directory: rust/cli
+      run: scripts/build-linux.sh noclean
+
+    - name: Build Studio packages
+      working-directory: rust/studio
+      run: scripts/build-linux.sh noclean
+
+    - name: Upload packages
+      uses: actions/upload-artifact@v7
+      with:
+        name: linux-packages
+        path: |
+          rust/cli/dist/*.deb
+          rust/studio/dist/*.deb
+
+  linux-packages-test:
+    name: Linux packages (${{ matrix.arch }} on Ubuntu 22.04)
+    needs: linux-packages
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-26.04
+          - arch: arm64
+            runner: ubuntu-26.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+    - uses: actions/checkout@v7
+
+    - uses: actions/download-artifact@v8
+      with:
+        name: linux-packages
+        path: linux-packages
+
+    - name: Test packages
+      run: ci/test-linux-debs.sh ${{ matrix.arch }} linux-packages/cli/dist linux-packages/studio/dist
+
+  lens:
+    name: One ROM Lens (wasm)
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libclang-dev libcurl4-openssl-dev libjson-c-dev \
+                                libzip-dev make xz-utils python3
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Arm GNU toolchain
+      uses: actions/cache@v6
+      with:
+        path: ~/arm-gnu-toolchain
+        key: arm-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/arm-toolchain-version') }}
+
+    - name: Install Arm GNU toolchain
+      run: echo "TOOLCHAIN=$(ci/install-arm-toolchain.sh)" >> "$GITHUB_ENV"
+
+    - name: Cache Emscripten SDK
+      uses: actions/cache@v6
+      with:
+        path: ~/emsdk
+        key: emsdk-${{ runner.os }}-${{ hashFiles('ci/install-emscripten.sh', 'ci/emscripten-version') }}
+
+    - name: Install Emscripten (for One ROM Lens)
+      run: |
+        ci/install-emscripten.sh "$HOME/emsdk"
+        source "$HOME/emsdk/emsdk_env.sh"
+        # Record the version in the log.  An emscripten release has broken this
+        # build before (6.0.6), and working out which version a past run used
+        # meant inferring it from release timestamps.
+        emcc --version | head -1
+        # Persist emcc/emar (and EMSDK) for subsequent steps.
+        echo "PATH=$PATH" >> "$GITHUB_ENV"
+        echo "EMSDK=$EMSDK" >> "$GITHUB_ENV"
+
+    - name: Install wasm target
+      run: rustup target add wasm32-unknown-emscripten
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: rust
+
+    - name: Build One ROM Lens (wasm)
+      run: ci/build-lens.sh

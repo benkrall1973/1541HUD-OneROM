@@ -1,0 +1,151 @@
+// Copyright (C) 2026 Piers Finlayson <piers@piers.rocks>
+//
+// MIT License
+
+//! Shared, transport-free logic for One ROM applications.
+//!
+//! `onerom-app` holds the logic that every One ROM *application* needs but that
+//! is not specific to any one of them: the CLI, Studio, the web tool (via
+//! WASM), and embedded programmers such as Airfrog. It is deliberately
+//! `no_std` (with `alloc`) and performs **no I/O of its own** - all network and
+//! filesystem access is delegated to the host through the [`Fetch`] trait.
+//!
+//! # Design
+//!
+//! The crate separates two concerns that different hosts combine differently:
+//!
+//! - **Decisions** are pure and synchronous: parsing manifests, selecting a
+//!   compatible release, verifying a binary, generating a chip-set config.
+//!   These never touch the network and return [`PluginError`] directly.
+//! - **Fetching** is asynchronous and host-specific. The crate never fetches;
+//!   it asks the host to, via [`Fetch`], and threads the host's own error type
+//!   back out through [`Error`].
+//!
+//! This split is what lets the same logic serve a `reqwest`-based CLI, a
+//! JS-`fetch`-based WASM build, and an SWD-based embedded programmer without
+//! any of them sharing a transport.
+//!
+//! # Membership
+//!
+//! Code belongs in `onerom-app` only if it is **shared across One ROM
+//! applications** *and* buildable under `no_std`. Logic specific to a single
+//! application (for example the CLI's `--slot` string grammar, or its
+//! interactive confirmation prompting) stays in that application. The `no_std`
+//! constraint is enforced by a CI job that builds the crate for a bare-metal
+//! target with `--no-default-features`.
+
+#![no_std]
+#![forbid(unsafe_code)]
+#![warn(missing_docs)]
+
+extern crate alloc;
+
+mod commission;
+mod error;
+mod fetch;
+mod flash;
+pub mod identity;
+mod image;
+mod otp;
+mod plugin;
+mod read_back;
+mod signers;
+mod size;
+
+// Commissioning a board and setting its size.
+pub use commission::{
+    CommissionError, Plan, PlannedWrite, Prepared, Request, RequestDate, RowValue, Step, StepKind,
+    plan_size, prepare,
+};
+pub use error::{Error, PluginError};
+// Fetch abstraction (host-implemented). `trait_variant` generates the `Send`
+// variant `Fetch` from the base `LocalFetch`.
+pub use fetch::{Fetch, LocalFetch};
+// The flash operations that program an image file.
+pub use flash::{FlashPlan, FlashPlanError, FlashStep};
+// Assembling an image file from a build, and checking an image file before it
+// is programmed.
+pub use image::{
+    CheckedImage, ImagePart, ImageProblem, ImageTooLarge, assemble_image, check_image,
+    image_file_text,
+};
+// A board's size. onerom-config declares it because firmware properties
+// contain one.
+pub use onerom_config::hw::{BoardSize, BoardSizeError};
+// A device's board size, from runtime info or OTP.
+pub use size::{device_board_size, known_board_size};
+// OTP access (host-implemented) and the readers built on it. `trait_variant`
+// generates the `Send` variant `OtpAccess` from the base `LocalOtpAccess`.
+// `MemoryOtp` stands in for a chip in tests. The constant describes the lock
+// word commissioning writes.
+pub use otp::{
+    EccRow, Interruption, LOCK1_READ_ONLY, LocalOtpAccess, MemoryOtp, OtpAccess, OtpError,
+    OtpReport, PageLock, board_size_text, escape_controls, format_date, read_board_size,
+    read_chip_id, read_commissioning, read_report,
+};
+// FLASH_DEVINFO's fields. The schema declares them, and these are the names the
+// CLI uses.
+pub use onerom_metadata::{
+    OTP_FLASH_DEVINFO_CS0_SIZE_SHIFT as FLASH_DEVINFO_CS0_SIZE_SHIFT,
+    OTP_FLASH_DEVINFO_CS1_GPIO as FLASH_DEVINFO_CS1_GPIO,
+    OTP_FLASH_DEVINFO_CS1_SIZE_SHIFT as FLASH_DEVINFO_CS1_SIZE_SHIFT,
+    OTP_FLASH_DEVINFO_D8H_ERASE_SUPPORTED as FLASH_DEVINFO_D8H_ERASE_SUPPORTED,
+    OTP_FLASH_DEVINFO_SIZE_BITS as FLASH_DEVINFO_SIZE_BITS,
+};
+pub use plugin::{
+    // Catalogue and core types.
+    Catalogue,
+    // The newest release that supports a firmware, carried by the two
+    // incompatibility errors.
+    CompatibleRelease,
+    Plugin,
+    // Display of a device's plugin slot, resolved from its recorded image
+    // source (manifest-backed or local).
+    PluginDisplay,
+    // Non-fatal outcome of checking the plugins a config names.
+    PluginNote,
+    PluginOrigin,
+    // Plugin specifications (parsed `--plugin` style inputs).
+    PluginSpec,
+    PluginType,
+    PluginVerification,
+    PluginVersion,
+    Release,
+    ResolvedPlugin,
+    ResolvedSource,
+    // Verification target selector and result.
+    VerifyTarget,
+    // Check the plugins a built config names (delegates fetching).
+    check_config_plugins,
+    compatible_releases,
+    // Async resolution (delegate fetching to `Fetch`).
+    fetch_releases,
+    newest_compatible,
+    // Pure decision logic.
+    parse_plugin,
+    parse_plugins,
+    plugin_to_chip_set_config,
+    // Resolve the plugins a config refers to by name (delegates fetching).
+    resolve_config_plugins,
+    resolve_plugin,
+    // Resolve a device plugin slot to a PluginDisplay (delegates fetching).
+    resolve_plugin_display,
+    resolve_plugins,
+    validate_resolved_plugin_types,
+    verify_binary,
+};
+// Reading a One ROM or an image file back into the config that builds it.
+pub use read_back::{
+    ReadBack, ReadBackError, ReadBackFile, RecordedPlugin, published_plugins, read_back,
+    read_back_file, read_slot_roms, read_slot_roms_file,
+};
+// A setting a read back's config couldn't recover.
+pub use onerom_gen::RecoveryProblem;
+// The signing keys and the check of a commissioning instance's signature
+// against them.
+pub use signers::{Signer, SignerError, SignerTable, Verdict, verdict_text, verify_instance};
+
+/// Returns the version of this crate, as set in `Cargo.toml`.
+pub fn crate_version() -> &'static str {
+    env!("CARGO_PKG_VERSION")
+}
