@@ -31,13 +31,13 @@
         {
           "label": "1541 ONEROM BOOTLOADER",
           "description": "Upper E000 8KB ROM",
-          "file": "build-kits/ub4-monitor-v08003-gcc14/inputs/1541-OneROM-Bootloader-Universal-v1.1.0.bin",
+          "file": "inputs/1541-OneROM-Bootloader-Universal-v1.1.0.bin",
           "type": "2364",
           "cs1": "active_low"
         },
         {
           "description": "Lower C000 8KB ROM",
-          "file": "build-kits/ub4-monitor-v08003-gcc14/inputs/1541-c000.325302-01.bin",
+          "file": "inputs/1541-c000.325302-01.bin",
           "type": "2364",
           "cs1": "active_low"
         }

@@ -13,7 +13,6 @@ $core = Join-Path $repoRoot 'source\one-rom-v0.8.1'
 $systemPlugin = Join-Path $monitorRoot 'active-plugins\system\1541HUD-Monitor-USB'
 $userPlugin = Join-Path $monitorRoot 'active-plugins\user\1541HUD-Monitor'
 $tools = Join-Path $repoRoot 'tools'
-$dependencyKit = Join-Path $monitorRoot 'build-kits\ub4-monitor-v08003-gcc14\third_party'
 
 # Tool locations are explicit overrides.  Otherwise use the caller's PATH.
 # Nothing in this script refers to an operator-specific Desktop or ChatGPT
@@ -47,19 +46,13 @@ foreach ($required in @(
     if (-not (Test-Path -LiteralPath $required)) { throw "Required build input not found: $required" }
 }
 
-# The upstream source intentionally does not vendor these dependencies, but the
-# monitored build kit does, at the exact revisions its Makefiles pin.  Stage
-# those local snapshots before Make can fall back to a live network clone.
+# The public snapshot vendors the exact dependency sources required by the
+# upstream Makefiles.  Do not let Make fall back to an unpinned network clone.
 $coreDependencies = Join-Path $core 'third_party'
 foreach ($dependency in @('tinyusb', 'picobootx', 'pico-sdkless')) {
-    $source = Join-Path $dependencyKit $dependency
     $destination = Join-Path $coreDependencies $dependency
     if (-not (Test-Path -LiteralPath $destination)) {
-        if (-not (Test-Path -LiteralPath $source)) {
-            throw "Pinned Monitor dependency is missing from the root source and local kit: $source"
-        }
-        New-Item -ItemType Directory -Force -Path $coreDependencies | Out-Null
-        Copy-Item -LiteralPath $source -Destination $coreDependencies -Recurse -Force
+        throw "Pinned Monitor dependency is missing from the public source snapshot: $destination"
     }
 }
 

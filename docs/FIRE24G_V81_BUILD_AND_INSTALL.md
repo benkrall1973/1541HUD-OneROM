@@ -63,6 +63,22 @@ the Control USB and Host-Control plugins before composing the owner-supplied
 manifest. The Monitor build uses the pinned core directly and must use the passive core define
 `HUD1541_PASSIVE_UB4`; do not build its plugins with a normal ROM-serving core.
 
+### UB4 Monitor pinned inputs
+
+The public UB4 Monitor composition is self-contained.  Its exact pinned source
+dependencies live in `source/one-rom-v0.8.1/firmware/third_party/`:
+`tinyusb`, `picobootx`, and `pico-sdkless`.  The Monitor manifest also uses
+the two checked-in 8 KiB baseline inputs below; these are the non-DOS inputs
+used to produce the supplied Monitor release image.
+
+| File | SHA-256 |
+| --- | --- |
+| `firmware-monitor/inputs/1541-OneROM-Bootloader-Universal-v1.1.0.bin` | `7313B07F26FCC3778664B0C53F1AFF46AF883ED8B0A3CBF525EFC9BB40432B0E` |
+| `firmware-monitor/inputs/1541-c000.325302-01.bin` | `6FA7B07AFF92DA66B0A28A52BB3C82FFE310AB0FAD2CC473B40137A8D299C7E5` |
+
+No third-party DOS ROM is used by this UB4 Monitor image.  Keep owner-supplied
+DOS pages for UB3 Control private under `private-roms/`.
+
 ### Supported source-build host: WSL2 or Linux
 
 The qualified source-build route is **WSL2/Linux** with GNU Make, ARM GNU
