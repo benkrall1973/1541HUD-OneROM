@@ -48,12 +48,18 @@ This is a documented modification for a 1541 long board, not a universal
 drop-in firmware update. Read the [verified wiring guide](docs/FIRE24G-VERIFIED-WIRING.md)
 before connecting a board to the drive. In particular:
 
+- **Control and Monitor are roles, not different Fire-24G hardware.** The same
+  Fire-24G board can be flashed with either image, but a **UB3 Control**
+  installation serves the drive ROM and controls ROM selection, IEC address,
+  reset, and optional write protect; a **UB4 Monitor** installation is wired
+  only for passive telemetry. Flash the image that matches the intended role
+  and its wiring. Do not use a Monitor image where the Control image is
+  required, or vice versa.
 - For a standard two-ROM 1541 with **no 74LS138**, `X1` **must** drive pin 20
   (`/CS`) of the empty ROM socket. For the usual lower-socket installation,
   fit OneROM in the `$C000` **UB3 socket** and wire `X1` to pin 20 of the
   `$E000` **UB4 socket**. Those are main-PCB socket references, not the
   optional UB4 Monitor board.
-- UB3 and UB4 run different images and are not interchangeable.
 - The supplied UB3 stock image supports IEC **8/9**, 350 ms active-low drive
   reset, and optional write-protect control.
 - The verified reset circuit uses UB3 `SEL_B` through a **1 kOhm** resistor to
