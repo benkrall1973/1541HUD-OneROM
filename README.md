@@ -48,6 +48,11 @@ This is a documented modification for a 1541 long board, not a universal
 drop-in firmware update. Read the [verified wiring guide](docs/FIRE24G-VERIFIED-WIRING.md)
 before connecting a board to the drive. In particular:
 
+- For a standard two-ROM 1541 with **no 74LS138**, `X1` **must** drive pin 20
+  (`/CS`) of the empty ROM socket. For the usual lower-socket installation,
+  fit OneROM in the `$C000` **UB3 socket** and wire `X1` to pin 20 of the
+  `$E000` **UB4 socket**. Those are main-PCB socket references, not the
+  optional UB4 Monitor board.
 - UB3 and UB4 run different images and are not interchangeable.
 - The supplied UB3 stock image supports IEC **8/9**, 350 ms active-low drive
   reset, and optional write-protect control.
@@ -62,11 +67,6 @@ before connecting a board to the drive. In particular:
   through **22 kOhm** to `SEL_D`, and fit a second **22 kOhm** resistor from
   `SEL_D` to ground. `SEL_D` is input-only for this purpose; never connect P6
   pin 12 directly to a OneROM GPIO.
-- For a standard two-ROM 1541 with **no 74LS138**, `X1` drives pin 20 (`/CS`)
-  of the empty ROM socket. For the usual lower-socket installation, fit OneROM
-  in the `$C000` **UB3 socket** and wire `X1` to pin 20 of the `$E000` **UB4
-  socket**. Those are main-PCB socket references, not the optional UB4 Monitor
-  board.
 - UB4 is a passive monitor only. It must not be used to control write protect
   or serve the drive ROM.
 - Use a **data-only / VBUS-blocked USB cable** (or an inline USB power blocker)
