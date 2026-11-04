@@ -15,14 +15,25 @@ The current Fire-24G baseline provides several paths:
   write-protect control, and LED policy.
 - Add a second, passive **UB4 Monitor** board for live telemetry on motor
   activity, full- and half-track position, stepping activity, write status,
-  disk density, headers, RPM, and SYNC activity.
+  disk density, headers, RPM, and SYNC activity. Unlike a simple activity
+  light, the passive monitor can decode checksum-validated physical GCR
+  headers, show sector coverage and recent header order, estimate disk identity,
+  correlate density with SYNC-per-revolution, and expose capture-health/drop
+  counters alongside the drive's observed mechanical state.
 - Compose custom Lower, Upper, or C/A/E ROM layouts from lawful ROM pages with
-  the included templates and build documentation.
+  the included templates and build documentation. A RAMBoard-capable C/A/E
+  installation can support owner-supplied SpeedDOS, JiffyDOS, and DolphinDOS
+  2.0 ROM sets where the required hardware and lawful ROM pages are present.
 
 The project is designed to work as a practical Windows-based tool today and
 can also support a small Raspberry Pi touchscreen display mounted with the
 drive. Firmware, setup guides, source, and testing material are available in
 this repository: [github.com/benkrall1973/1541HUD-OneROM](https://github.com/benkrall1973/1541HUD-OneROM).
+
+The goal is a useful baseline that the community can build on: additional
+qualified ROM layouts, monitor cards, diagnostics, display options, and
+hardware profiles can be proposed, tested, documented, and contributed over
+time.
 
 > **Project note:** This is a community builder/tester project. I use AI as a
 > practical development partner for research, coding, documentation, test
