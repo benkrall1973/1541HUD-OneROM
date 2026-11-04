@@ -31,11 +31,18 @@ $required = @(
     'consolidation/scripts/build-control-v0.8.1.sh',
     'firmware-monitor/Build-Monitor-Fire24G-V0.8.1.ps1',
     'firmware-monitor/Build-Monitor-Fire24G-V0.8.1.sh',
+    'firmware-monitor/COMPOSE_UB4_MONITOR_FIRE24G_V081.json',
+    'firmware-monitor/inputs/1541-OneROM-Bootloader-Universal-v1.1.0.bin',
+    'firmware-monitor/inputs/1541-c000.325302-01.bin',
     'firmware-control/active-plugins/system/1541HUD-USB-v0.8.1',
     'firmware-control/active-plugins/user/1541HUD-Host-Control-v0.8.1',
     'firmware-monitor/active-plugins/system/1541HUD-Monitor-USB',
     'firmware-monitor/active-plugins/user/1541HUD-Monitor',
     'firmware-monitor/shared/1541hud_mailbox.h',
+    'source/one-rom-v0.8.1/firmware/apio/include/apio.h',
+    'source/one-rom-v0.8.1/firmware/third_party/tinyusb/src/tusb.h',
+    'source/one-rom-v0.8.1/firmware/third_party/picobootx/include/picobootx.h',
+    'source/one-rom-v0.8.1/firmware/third_party/pico-sdkless/include/pico.h',
     '1541hud/source/1541HUD_V0.8.0.51.py',
     '1541hud/tests/test_onerom_usb.py',
     'utilities/rom-pages/Split-1541-RomPages.ps1',
@@ -63,10 +70,25 @@ $forbiddenPath = '(?i)(s-jiffy|sjiffydos|jiffydos|dolphindos|speeddos|\.bin$|\.u
 $badPaths = Get-ChildItem -LiteralPath $PackageRoot -Recurse -Force -File |
     Where-Object {
         $relative = $_.FullName.Substring($PackageRoot.Length + 1).Replace('\', '/')
-        $relative -notmatch '^(private-roms/(UB3-Control-DolphinDOS-CAE|UB3-Control-Lower-Socket|UB3-Control-Upper-Socket|monitor-compose)\.json|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0\.8\.1\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.28\.bin|tools/onerom-v0\.5\.0\.exe)$' -and $relative -match $forbiddenPath
+        $relative -notmatch '^(private-roms/(UB3-Control-DolphinDOS-CAE|UB3-Control-Lower-Socket|UB3-Control-Upper-Socket|monitor-compose)\.json|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0\.8\.1\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.28\.bin|tools/onerom-v0\.5\.0\.exe|firmware-monitor/inputs/(1541-OneROM-Bootloader-Universal-v1\.1\.0|1541-c000\.325302-01)\.bin)$' -and $relative -match $forbiddenPath
     }
 if ($badPaths) {
     throw "Forbidden payload/history file(s) in public package:`n$($badPaths.FullName -join "`n")"
+}
+
+$expectedMonitorInputs = @{
+    'firmware-monitor/inputs/1541-OneROM-Bootloader-Universal-v1.1.0.bin' = '7313B07F26FCC3778664B0C53F1AFF46AF883ED8B0A3CBF525EFC9BB40432B0E'
+    'firmware-monitor/inputs/1541-c000.325302-01.bin' = '6FA7B07AFF92DA66B0A28A52BB3C82FFE310AB0FAD2CC473B40137A8D299C7E5'
+}
+foreach ($relative in $expectedMonitorInputs.Keys) {
+    $input = Join-Path $PackageRoot $relative
+    if ((Get-Item -LiteralPath $input).Length -ne 8192) {
+        throw "Monitor input is not 8192 bytes: $relative"
+    }
+    $actual = (Get-FileHash -LiteralPath $input -Algorithm SHA256).Hash
+    if ($actual -ne $expectedMonitorInputs[$relative]) {
+        throw "Monitor input hash mismatch: $relative"
+    }
 }
 
 $textExtensions = @('.md', '.ps1', '.cmd', '.json', '.py', '.h', '.c', '.txt', '.yml', '.yaml')
