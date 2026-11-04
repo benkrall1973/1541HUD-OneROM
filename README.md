@@ -1,5 +1,34 @@
 # 1541HUD / OneROM Fire-24G
 
+## Project introduction
+
+1541HUD is a OneROM community project for Commodore 1541 owners who want
+easier ROM switching, USB control, and optional live drive-status monitoring.
+It begins with one compatible **UB3 Control** OneROM board and a Windows
+interface, using the drive ROMs that you are entitled to use. From there, the
+installation can grow at your own pace.
+
+The current Fire-24G baseline provides several paths:
+
+- Flash the supplied stock UB3 image for a safe Control/USB starting point.
+- Use 1541HUD on Windows for ROM selection, IEC device 8/9 selection, reset,
+  write-protect control, and LED policy.
+- Add a second, passive **UB4 Monitor** board for live telemetry on motor
+  activity, full- and half-track position, stepping activity, write status,
+  disk density, headers, RPM, and SYNC activity.
+- Compose custom Lower, Upper, or C/A/E ROM layouts from lawful ROM pages with
+  the included templates and build documentation.
+
+The project is designed to work as a practical Windows-based tool today and
+can also support a small Raspberry Pi touchscreen display mounted with the
+drive. Firmware, setup guides, source, and testing material are available in
+this repository: [github.com/benkrall1973/1541HUD-OneROM](https://github.com/benkrall1973/1541HUD-OneROM).
+
+> **Project note:** This is a community builder/tester project. I use AI as a
+> practical development partner for research, coding, documentation, test
+> ideas, and troubleshooting, while learning and validating the hardware as I
+> go.
+
 1541HUD is a touchscreen/desktop companion for a Commodore 1541 fitted with
 two OneROM Fire-24G boards:
 
