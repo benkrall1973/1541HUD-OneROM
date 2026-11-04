@@ -56,6 +56,14 @@ before connecting a board to the drive. In particular:
   pin 40.
 - UB4 is a passive monitor only. It must not be used to control write protect
   or serve the drive ROM.
+- Use a **data-only / VBUS-blocked USB cable** (or an inline USB power blocker)
+  for installed boards. USB +5 V must not back-power UB3 or UB4 when the 1541
+  is powered down; otherwise a drive power cycle may leave a OneROM running
+  instead of giving it a true cold boot. In particular, UB3 reloads its saved
+  NV configuration only during that real boot, including the selected ROM and
+  IEC device address. This applies to UB3 as well as UB4.
+  A purpose-made cable/blocker is preferred; do not blindly modify a USB-C
+  cable. The UB3 350 ms drive-reset pulse is separate from this power rule.
 
 ## What is included
 

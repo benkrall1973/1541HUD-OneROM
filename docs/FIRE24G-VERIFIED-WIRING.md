@@ -19,6 +19,24 @@ board using the Fire-24G OneROM image on the public `v8.1.0-fire24g` branch
 existing installation uses SEL_B only as an active-low, open-drain-style reset
 control: firmware never drives it HIGH.
 
+## USB VBUS isolation
+
+For the verified installed-drive arrangement, use a **data-only / VBUS-blocked
+USB cable** or an inline USB power blocker for both UB3 and UB4. USB data and
+ground remain connected; USB +5 V (VBUS) must not back-power either OneROM.
+Otherwise the host computer can keep a board alive when 1541 power is removed,
+preventing the board from receiving the intended cold boot with the drive. For
+UB3, that boot is when the saved NV configuration is re-read, including the
+selected ROM and IEC device address; a USB-back-powered UB3 can therefore come
+back with stale running state instead of the saved configuration.
+
+This is a power-cycle requirement, not a substitute for the UB3 C46 reset
+pulse below. `ROMRESET` asserts SEL_B for 350 ms while the drive remains
+powered; the firmware's controlled OneROM reboot is a separate action. Prefer
+a purpose-made cable/blocker. On a conventional USB-A/USB-B USB 2 cable the
+red conductor is normally VBUS, but do not assume color conventions or modify
+a USB-C cable without verifying its wiring.
+
 ## C46 reset path
 
 Connect Fire-24G `SEL_B` to 1541 **C46 positive** (or the equivalent CR7
