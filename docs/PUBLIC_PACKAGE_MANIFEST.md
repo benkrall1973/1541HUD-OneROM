@@ -8,7 +8,7 @@ the qualified private release.
 
 | Area | Reason |
 | --- | --- |
-| `streamlining/` | Upstream pin, overlay generator, ROM-free exporter, package validator, and public-boundary records. |
+| `templates/`, `tools/maintenance/`, and this manifest | ROM-free templates, package validator, and public-boundary records. |
 | `firmware-control` V8.1 core delta and active `1541HUD-USB-v0.8.1` / `1541HUD-Host-Control-v0.8.1` source | UB3 integration source. The core itself is recreated from the pinned upstream checkout and the generated overlay. |
 | `firmware-monitor` V8.1 core delta, active Monitor plugins, and `shared/1541hud_mailbox.h` | UB4 passive-monitor integration source. The core itself is recreated from the pinned upstream checkout and the generated overlay. |
 | ROM-free private-input instructions and the UB3 CLI composition guide | Explain the two standard C/E socket layouts and the optional C/A/E DolphinDOS-style layout without distributing ROM bytes; users create a private composition manifest locally. |

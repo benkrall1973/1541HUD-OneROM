@@ -21,13 +21,12 @@ $required = @(
     'docs/UB3_CONTROL_CLI_COMPOSITION_GUIDE.md',
     'docs/THIRD_PARTY_DOS_PAGE_PREPARATION.md',
     'docs/PUBLIC_FIRE24G_RELEASES.md',
-    'streamlining/PUBLIC_PACKAGE_MANIFEST.md',
-    'streamlining/scripts/Generate-Fire24G-V81-Overlay.ps1',
-    'streamlining/scripts/Test-Public-Package.ps1',
-    'streamlining/public-template/control-compose.template.json',
-    'streamlining/public-template/UB3-Control-Lower-Socket.template.json',
-    'streamlining/public-template/UB3-Control-Upper-Socket.template.json',
-    'streamlining/public-template/monitor-compose.template.json',
+    'docs/PUBLIC_PACKAGE_MANIFEST.md',
+    'tools/maintenance/Test-Public-Package.ps1',
+    'templates/control-compose.template.json',
+    'templates/UB3-Control-Lower-Socket.template.json',
+    'templates/UB3-Control-Upper-Socket.template.json',
+    'templates/monitor-compose.template.json',
     'consolidation/scripts/Build-Control-V8.1-Clean.ps1',
     'consolidation/scripts/build-control-v0.8.1.sh',
     'firmware-monitor/Build-Monitor-Fire24G-V0.8.1.ps1',
@@ -77,7 +76,7 @@ $textExtensions = @('.md', '.ps1', '.cmd', '.json', '.py', '.h', '.c', '.txt', '
 $forbiddenText = '(?i)(C:\\Users\\A[d]min\\|/Users/A[d]min/|8FAEB3DEC304ADCF|77920CCCA13D0FC9)'
 $textHits = foreach ($file in Get-ChildItem -LiteralPath $PackageRoot -Recurse -Force -File) {
     $relative = $file.FullName.Substring($PackageRoot.Length + 1).Replace('\', '/')
-    if ($relative -eq 'streamlining/scripts/Test-Public-Package.ps1') { continue }
+    if ($relative -eq 'tools/maintenance/Test-Public-Package.ps1') { continue }
     if ($textExtensions -notcontains $file.Extension) { continue }
     Select-String -LiteralPath $file.FullName -Pattern $forbiddenText | ForEach-Object {
         "$($file.FullName.Substring($PackageRoot.Length + 1)):$($_.LineNumber):$($_.Line.Trim())"

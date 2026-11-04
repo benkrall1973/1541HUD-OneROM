@@ -26,5 +26,5 @@ For custom drive DOS images, supply your own lawful ROM inputs under
 Start technical/background reading with
 `docs/FIRE24G_V81_ENGINEERING_DOSSIER.md`.
 
-Run `streamlining/scripts/Test-Public-Package.ps1 -PackageRoot .` before
+Run `tools/maintenance/Test-Public-Package.ps1 -PackageRoot .` before
 initializing or publishing the resulting repository.

@@ -60,7 +60,7 @@ private-roms/
 ```
 
 For the C/A/E layout, copy
-`streamlining/public-template/control-compose.template.json` to
+`templates/control-compose.template.json` to
 `private-roms/UB3-Control-DolphinDOS-CAE.json`, then edit only its local labels
 and ROM file paths. Add additional complete C/A/E groups locally for more DOS
 profiles. Never publish that finished JSON file or the referenced ROM files.
