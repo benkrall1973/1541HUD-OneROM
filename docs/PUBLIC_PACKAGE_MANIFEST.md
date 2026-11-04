@@ -9,8 +9,9 @@ the qualified private release.
 | Area | Reason |
 | --- | --- |
 | `templates/`, `tools/maintenance/`, and this manifest | ROM-free templates, package validator, and public-boundary records. |
-| `firmware-control` V8.1 core delta and active `1541HUD-USB-v0.8.1` / `1541HUD-Host-Control-v0.8.1` source | UB3 integration source. The core itself is recreated from the pinned upstream checkout and the generated overlay. |
-| `firmware-monitor` V8.1 core delta, active Monitor plugins, and `shared/1541hud_mailbox.h` | UB4 passive-monitor integration source. The core itself is recreated from the pinned upstream checkout and the generated overlay. |
+| `source/one-rom-v0.8.1` | Single pinned, unreleased upstream V8.1 development snapshot used by both roles. |
+| `firmware-control/overlays/control-core-v0.8.1.patch` and active `1541HUD-USB-v0.8.1` / `1541HUD-Host-Control-v0.8.1` source | UB3 integration source. The wrapper applies the tracked Control-core delta to the pinned source in an ignored work tree. |
+| `firmware-monitor` active Monitor plugins and `shared/1541hud_mailbox.h` | UB4 passive-monitor integration source. The wrapper builds directly from the pinned source with the passive-core flag. |
 | ROM-free private-input instructions and the UB3 CLI composition guide | Explain the two standard C/E socket layouts and the optional C/A/E DolphinDOS-style layout without distributing ROM bytes; users create a private composition manifest locally. |
 | `1541hud/source/1541HUD_V0.8.0.51.py`, launcher, tests, and current HUD documentation | The qualified desktop operator tool. |
 | `docs/FIRE24G_V81_BUILD_AND_INSTALL.md`, `docs/FIRE24G_V81_ENGINEERING_DOSSIER.md`, and sanitized wiring/build documentation | Hardware integration, prerequisites, flash/recovery, GPIO, LED and acceptance contract. |

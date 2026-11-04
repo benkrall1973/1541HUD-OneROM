@@ -9,7 +9,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $monitorRoot = $PSScriptRoot
 $repoRoot = Split-Path -Parent $monitorRoot
-$core = Join-Path $monitorRoot 'source\monitor-baseline-v0.8.1-upstream'
+$core = Join-Path $repoRoot 'source\one-rom-v0.8.1'
 $systemPlugin = Join-Path $monitorRoot 'active-plugins\system\1541HUD-Monitor-USB'
 $userPlugin = Join-Path $monitorRoot 'active-plugins\user\1541HUD-Monitor'
 $tools = Join-Path $repoRoot 'tools'

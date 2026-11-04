@@ -1,4 +1,0 @@
-generated.rs
-mod.rs
-# Transient temp files written by config/build/fmt.rs (write-format-rename)
-*.tmp.rs

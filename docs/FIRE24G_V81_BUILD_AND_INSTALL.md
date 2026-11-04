@@ -56,8 +56,11 @@ are intentionally not committed; install the pinned tool prerequisites below.
 | UB3 Control, WSL2/Linux source build | `bash consolidation/scripts/build-control-v0.8.1.sh private-roms/<your-config>.json output/onerom-ub3-control-fire24g.bin` | `output/onerom-ub3-control-fire24g.bin` |
 | UB4 Monitor, WSL2/Linux source build | `TOOLCHAIN=/path/to/bin ONEROM_CLI=onerom bash firmware-monitor/Build-Monitor-Fire24G-V0.8.1.sh` | `firmware-monitor/releases/v8.1/candidates/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.28.bin` |
 
-The Control wrapper builds the local patched V8.1 base, Control USB plugin and
-Host-Control plugin before composing the owner-supplied manifest. The Monitor build must use the passive core define
+Both wrappers use the root-level pinned source tree at `source/one-rom-v0.8.1`.
+The Control wrapper recreates its qualified V8.1 core in an ignored work tree
+by applying `firmware-control/overlays/control-core-v0.8.1.patch`, then builds
+the Control USB and Host-Control plugins before composing the owner-supplied
+manifest. The Monitor build uses the pinned core directly and must use the passive core define
 `HUD1541_PASSIVE_UB4`; do not build its plugins with a normal ROM-serving core.
 
 ### Supported build host: native Windows

@@ -3,7 +3,7 @@
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-core="$root/firmware-monitor/source/monitor-baseline-v0.8.1-upstream"
+core="$root/source/one-rom-v0.8.1"
 usb="$root/firmware-monitor/active-plugins/system/1541HUD-Monitor-USB"
 monitor="$root/firmware-monitor/active-plugins/user/1541HUD-Monitor"
 output="${OUTPUT_PATH:-$root/firmware-monitor/releases/v8.1/candidates/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.28.bin}"

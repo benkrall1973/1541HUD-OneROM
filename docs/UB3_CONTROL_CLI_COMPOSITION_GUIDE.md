@@ -94,7 +94,7 @@ private manifest path:
 onerom firmware build `
   --config private-roms/UB3-Control-DolphinDOS-CAE.json `
   --board fire-24-g `
-  --base-firmware firmware-control/source/control-baseline-v0.8.1-release/firmware/build/onerom-rp235x.bin `
+  --base-firmware firmware-control/.work/control-core-v0.8.1/firmware-control/source/control-baseline-v0.8.1-release/firmware/build/onerom-rp235x.bin `
   --output output/onerom-ub3-control-fire24g.bin `
   --force
 ```

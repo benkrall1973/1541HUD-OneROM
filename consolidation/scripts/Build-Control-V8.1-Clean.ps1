@@ -25,7 +25,7 @@ function Invoke-OneRom {
 $RepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 $Cli = (Resolve-Path -LiteralPath $Cli).Path
 $Config = (Resolve-Path -LiteralPath $Config).Path
-$base = Join-Path $RepoRoot 'firmware-control\source\control-baseline-v0.8.1-release\firmware\build\onerom-rp235x.bin'
+$base = Join-Path $RepoRoot 'firmware-control\.work\control-core-v0.8.1\firmware-control\source\control-baseline-v0.8.1-release\firmware\build\onerom-rp235x.bin'
 if (-not $Output) { $Output = Join-Path $RepoRoot 'output\onerom-ub3-control-fire24g.bin' }
 $outputParent = Split-Path -Parent $Output
 New-Item -ItemType Directory -Force -Path $outputParent | Out-Null

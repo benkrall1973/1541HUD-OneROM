@@ -12,8 +12,11 @@ From this directory, run:
 make TOOLCHAIN=/usr/bin
 ```
 
-Without `ONEROM_ROOT`, the Makefile defaults to
-`firmware-control/source/control-baseline-v0.8.1-release`. The output is:
+Set `ONEROM_ROOT` to the Control work tree created by the supported Control
+wrapper:
+`firmware-control/.work/control-core-v0.8.1/firmware-control/source/control-baseline-v0.8.1-release`.
+The wrapper reconstructs that work tree from the root-level pinned V8.1 source
+and the tracked Control core overlay. The output is:
 
 ```text
 build/1541-OneROM-1541HUD-USB-v0.8.1.10.bin
