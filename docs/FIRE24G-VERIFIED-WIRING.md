@@ -58,6 +58,19 @@ The final firmware behavior is:
 During a manual reset the 1541 red LED and motor can be active for the
 350 ms reset hold. That is expected.
 
+## Optional write-protect override
+
+The UB3 write-protect override is not a direct GPIO connection. Connect
+Fire-24G `SEL_C` (GPIO25) through a **5.1 kOhm** resistor to the base of a
+**KSC2383YTA NPN** transistor. Connect the transistor emitter to 1541 ground
+and collector to **P6 pin 12**. The transistor pulls that write-protect node
+low only when `ROMWP=ON`; firmware otherwise drives `SEL_C` LOW, leaving the
+override off after startup. Never connect a OneROM GPIO directly to P6 pin 12.
+
+Optional write-protect sensing is separate: feed P6 pin 12 through a 22 kOhm
+resistor to `SEL_D` (GPIO24), with another 22 kOhm resistor from `SEL_D` to
+ground. UB4 has no write-protect wiring or authority.
+
 ## Reset electrical estimate
 
 C46 is 100 uF. With the verified 1 kOhm resistor, the initial capacitor

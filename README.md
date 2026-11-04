@@ -54,6 +54,10 @@ before connecting a board to the drive. In particular:
 - The verified reset circuit uses UB3 `SEL_B` through a **1 kOhm** resistor to
   the C46-positive/CR7-anode reset node. Do not connect it directly to UC4
   pin 40.
+- Optional write-protect override uses `SEL_C` through a **5.1 kOhm** resistor
+  to the base of a **KSC2383YTA NPN** transistor; connect its emitter to 1541
+  ground and its collector to **P6 pin 12**. This transistor is required:
+  never wire a OneROM GPIO directly to P6 pin 12.
 - UB4 is a passive monitor only. It must not be used to control write protect
   or serve the drive ROM.
 - Use a **data-only / VBUS-blocked USB cable** (or an inline USB power blocker)
