@@ -58,6 +58,10 @@ before connecting a board to the drive. In particular:
   to the base of a **KSC2383YTA NPN** transistor; connect its emitter to 1541
   ground and its collector to **P6 pin 12**. This transistor is required:
   never wire a OneROM GPIO directly to P6 pin 12.
+- Optional physical write-protect sensing is separate: route **P6 pin 12**
+  through **22 kOhm** to `SEL_D`, and fit a second **22 kOhm** resistor from
+  `SEL_D` to ground. `SEL_D` is input-only for this purpose; never connect P6
+  pin 12 directly to a OneROM GPIO.
 - UB4 is a passive monitor only. It must not be used to control write protect
   or serve the drive ROM.
 - Use a **data-only / VBUS-blocked USB cable** (or an inline USB power blocker)
