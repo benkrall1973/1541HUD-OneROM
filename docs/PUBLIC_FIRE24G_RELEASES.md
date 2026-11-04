@@ -27,10 +27,14 @@ X1 to UC4 pin 34, and X2 to UC4 pin 39. It does not control write protect.
 
 ## Flashing
 
+The repository bundles upstream OneROM CLI 0.5.0 at
+`tools/onerom-v0.5.0.exe`. No separate CLI download is required for the
+release-image workflow.
+
 1. Close 1541HUD so it releases the board CDC ports.
 2. Put only the intended board into BOOTSEL.
-3. Verify the board serial/type with OneROM CLI before programming.
-4. Program with verification, reboot normally, then verify USB enumeration.
+3. In PowerShell, run `./tools/onerom-v0.5.0.exe --unrecognised --board fire-24-g scan` and record the target serial.
+4. Program with `./tools/onerom-v0.5.0.exe --serial <SERIAL> program --firmware ./releases/<IMAGE>.bin --verify`, then reboot normally and verify USB enumeration.
 5. Test UB3 before installing UB4: IEC 8/9, reset, then an immediate directory
    read. Test UB4 only after UB3 is confirmed healthy.
 

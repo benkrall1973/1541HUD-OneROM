@@ -82,7 +82,9 @@ the baseline procedure and must not be represented as tested merely because
 
 - ARM GNU Toolchain 14.2 or compatible `arm-none-eabi-gcc` on `PATH`.
 - GNU Make and a POSIX shell (`sh`) in WSL2/Linux.
-- OneROM CLI 0.5.0 or compatible `onerom` executable on `PATH`.
+- OneROM CLI 0.5.0 or compatible `onerom` executable. The validated Windows
+  executable is included at `tools/onerom-v0.5.0.exe`; place it on `PATH` or
+  pass its path to the build wrapper where needed.
 - Rust/Cargo where the Control source build requests it.
 
 The Monitor PowerShell entry point also accepts `-Toolchain`, `-Make`, and
