@@ -53,12 +53,11 @@ are intentionally not committed; install the pinned tool prerequisites below.
 
 | Component | Build command | Expected output |
 | --- | --- | --- |
-| UB3 Control, Windows clean composition | `consolidation/scripts/Build-Control-V8.1-Clean.cmd` | `firmware-control/releases/v8.1/reset-integration/onerom-1541HUD-Control-UB3-74LS138-8-ROM-fire-24-g-c46reset350-v0.8.1.bin` |
-| UB3 Control, Linux/WSL full source build | `bash consolidation/scripts/build-control-v0.8.1.sh` | same Control image |
+| UB3 Control, WSL2/Linux source build | `bash consolidation/scripts/build-control-v0.8.1.sh private-roms/<your-config>.json output/onerom-ub3-control-fire24g.bin` | `output/onerom-ub3-control-fire24g.bin` |
 | UB4 Monitor, WSL2/Linux source build | `TOOLCHAIN=/path/to/bin ONEROM_CLI=onerom bash firmware-monitor/Build-Monitor-Fire24G-V0.8.1.sh` | `firmware-monitor/releases/v8.1/candidates/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.28.bin` |
 
-The Control build must use the local patched V8.1 base, Control USB plugin and
-Host-Control plugin. The Monitor build must use the passive core define
+The Control wrapper builds the local patched V8.1 base, Control USB plugin and
+Host-Control plugin before composing the owner-supplied manifest. The Monitor build must use the passive core define
 `HUD1541_PASSIVE_UB4`; do not build its plugins with a normal ROM-serving core.
 
 ### Supported build host: WSL2 on Windows
@@ -91,8 +90,9 @@ The Monitor PowerShell entry point also accepts `-Toolchain`, `-Make`, and
 `-OneRomCli` arguments for an installed-but-not-on-PATH toolchain. This keeps
 the repository portable instead of baking in somebody's Desktop path, because
 that sort of thing is how "reproducible" builds become performance art.
-For the Control Windows source build, set `ONEROM_TOOLCHAIN`, `ONEROM_MAKE`,
-`ONEROM_SHELL`, and `ONEROM_CLI` when those executables are not on `PATH`.
+`Build-Control-V8.1-Clean.cmd` remains an optional native Windows composition
+helper for an already-built core and plugins. It is not the supported fresh
+public source-build path.
 
 ## Flash and acceptance procedure
 

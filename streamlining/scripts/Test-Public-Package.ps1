@@ -29,6 +29,7 @@ $required = @(
     'streamlining/public-template/UB3-Control-Upper-Socket.template.json',
     'streamlining/public-template/monitor-compose.template.json',
     'consolidation/scripts/Build-Control-V8.1-Clean.ps1',
+    'consolidation/scripts/build-control-v0.8.1.sh',
     'firmware-monitor/Build-Monitor-Fire24G-V0.8.1.ps1',
     'firmware-monitor/Build-Monitor-Fire24G-V0.8.1.sh',
     'firmware-control/active-plugins/system/1541HUD-USB-v0.8.1',

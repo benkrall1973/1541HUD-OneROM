@@ -69,7 +69,23 @@ For a standard two-page installation, copy the corresponding Lower or Upper
 template instead and provide only its two 8192-byte files. Do not add a dummy
 A page merely because another person's build uses one.
 
-## Compose the image
+## Build and compose the image
+
+For a fresh public checkout, the supported route is WSL2/Linux. The wrapper
+builds the patched Control core and both Control plugins from this repository,
+then invokes the locally built OneROM CLI to compose your private manifest:
+
+```bash
+bash consolidation/scripts/build-control-v0.8.1.sh \
+  private-roms/UB3-Control-DolphinDOS-CAE.json \
+  output/onerom-ub3-control-fire24g.bin
+```
+
+The bundled Windows `tools/onerom-v0.5.0.exe` is for inspecting and flashing
+the public release images; it does not replace ARM GCC, Make, Cargo, and a
+POSIX shell required for a fresh source build.
+
+## Compose an already-built core
 
 From the repository root, substitute your actual base firmware path and chosen
 private manifest path:
