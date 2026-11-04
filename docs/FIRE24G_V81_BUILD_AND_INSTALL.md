@@ -66,7 +66,7 @@ manifest. The Monitor build uses the pinned core directly and must use the passi
 ### UB4 Monitor pinned inputs
 
 The public UB4 Monitor composition is self-contained.  Its exact pinned source
-dependencies live in `source/one-rom-v0.8.1/firmware/third_party/`:
+dependencies live in `source/one-rom-v0.8.1/third_party/`:
 `tinyusb`, `picobootx`, and `pico-sdkless`.  The Monitor manifest also uses
 the two checked-in 8 KiB baseline inputs below; these are the non-DOS inputs
 used to produce the supplied Monitor release image.
