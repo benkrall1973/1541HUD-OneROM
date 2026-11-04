@@ -19,6 +19,23 @@ board using the Fire-24G OneROM image on the public `v8.1.0-fire24g` branch
 existing installation uses SEL_B only as an active-low, open-drain-style reset
 control: firmware never drives it HIGH.
 
+## Two-page ROM routing without a 74LS138
+
+The 74LS138 `X1`/`X2` entries in the table above apply only to the three-page
+C/A/E arrangement. A conventional 1541 using two 8 KiB ROM sockets needs no
+74LS138: `X1` supplies the second ROM page directly to the `/CS` **pin 20** of
+the otherwise empty socket. `X2` is unused.
+
+| OneROM installation | OneROM socket | `X1` connection |
+| --- | --- | --- |
+| Standard lower-socket | `$C000` main-PCB socket **UB3** | Pin 20 of the `$E000` main-PCB socket **UB4** |
+| Standard upper-socket | `$E000` main-PCB socket **UB4** | Pin 20 of the `$C000` main-PCB socket **UB3** |
+
+Here **UB3** and **UB4** are 1541 *main-PCB ROM socket designators*. They do
+not refer to the project names “UB3 Control OneROM” and “UB4 Monitor OneROM.”
+Use the matching Lower or Upper two-page composition template; do not apply
+the 74LS138 C/A/E image to this direct two-page wiring.
+
 ## USB VBUS isolation
 
 For the verified installed-drive arrangement, use a **data-only / VBUS-blocked
