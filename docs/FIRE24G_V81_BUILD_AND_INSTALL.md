@@ -91,8 +91,9 @@ The Monitor PowerShell entry point also accepts `-Toolchain`, `-Make`, and
 the repository portable instead of baking in somebody's Desktop path, because
 that sort of thing is how "reproducible" builds become performance art.
 `Build-Control-V8.1-Clean.cmd` remains an optional native Windows composition
-helper for an already-built core and plugins. It is not the supported fresh
-public source-build path.
+helper for an already-built core and plugins. Invoke it as
+`Build-Control-V8.1-Clean.cmd private-roms/<your-config>.json output/<name>.bin`.
+It is not the supported fresh public source-build path.
 
 ## Flash and acceptance procedure
 
