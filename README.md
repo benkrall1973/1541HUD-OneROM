@@ -45,6 +45,20 @@ release. It includes qualified source, wiring records, the 1541HUD Python
 application, ROM-free templates, and two ready-to-flash stock images. It
 deliberately does **not** distribute third-party DOS ROMs.
 
+## AI-assisted builds
+
+An AI coding assistant can be a practical build partner for this project: it
+can inspect the repository, help install and verify the documented toolchain,
+prepare a lawful ROM manifest, run the qualified build wrapper, compare hashes,
+and troubleshoot a failed build. The repository is deliberately organized so a
+fresh clone contains the pinned source, overlays, runbook, and validation
+material needed for that work.
+
+AI assistance does not replace builder judgment. Supply only ROM pages you are
+entitled to use, review any changes before building, and verify the target
+OneROM serial before flashing. Never let an assistant guess which of two
+connected boards should be programmed.
+
 ## Before you start
 
 This is a documented modification for a 1541 long board, not a universal
