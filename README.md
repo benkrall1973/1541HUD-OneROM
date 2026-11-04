@@ -185,9 +185,10 @@ firmware binaries back to a public fork.
 
 ## Building from source
 
-The qualified Windows toolchain is ARM GNU Toolchain 14.2.1, GNU Make, and a
-Windows-safe BusyBox `sh.exe`; Rust/Cargo is also required for Control builds.
-The bundled CLI is sufficient for flashing release images, but it is not a
+The qualified source-build host is WSL2 or Linux with ARM GNU Toolchain 14.2.1,
+GNU Make, and a POSIX shell; Rust/Cargo is also required for Control builds.
+Native Windows remains supported for 1541HUD and the bundled OneROM CLI, which
+is sufficient for inspecting and flashing release images, but it is not a
 replacement for the compiler toolchain.
 
 The detailed procedures and build-script arguments are in

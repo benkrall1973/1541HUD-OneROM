@@ -63,22 +63,23 @@ the Control USB and Host-Control plugins before composing the owner-supplied
 manifest. The Monitor build uses the pinned core directly and must use the passive core define
 `HUD1541_PASSIVE_UB4`; do not build its plugins with a normal ROM-serving core.
 
-### Supported build host: native Windows
+### Supported source-build host: WSL2 or Linux
 
-The qualified build host is **native Windows** with GNU Make, ARM GNU Toolchain
-14.2.1, and a Windows-safe POSIX shell (the project uses BusyBox `sh.exe`).
-This is the toolchain used for the qualified Fire-24G work; do not substitute
-Git Bash merely because it happens to contain a file named `sh.exe`.
+The qualified source-build route is **WSL2/Linux** with GNU Make, ARM GNU
+Toolchain 14.2.1, and a POSIX shell.  The upstream V8.1 Makefiles use POSIX
+recipe commands such as `mkdir -p`, pipes, and command substitution.  Plain
+native Windows builds with GNU Make plus a loose `sh.exe` are not reliable and
+are not a supported public route.
 
-For UB4, use `firmware-monitor/Build-Monitor-Fire24G-V0.8.1.ps1` and pass
-`-Toolchain`, `-Make`, and `-OneRomCli` when the tools are not on `PATH`.
-WSL2/Linux remains a supported alternative for the `.sh` wrappers, but it is
-not required and must not be presented as the only public route.
+`firmware-monitor/Build-Monitor-Fire24G-V0.8.1.ps1` is retained as a Windows
+helper for environments that already have a compatible POSIX build layer, but
+it is not the qualified fresh-checkout path.  Windows remains fully supported
+for the OneROM CLI, USB inspection/flashing, and the 1541HUD application.
 
 ### Prerequisites for a fresh checkout
 
 - ARM GNU Toolchain 14.2.1 or compatible `arm-none-eabi-gcc`.
-- GNU Make and a Windows-safe POSIX shell (`sh.exe`) for native Windows builds.
+- WSL2/Linux, GNU Make, and a POSIX shell for source builds.
 - OneROM CLI 0.5.0 or compatible `onerom` executable. The validated Windows
   executable is included at `tools/onerom-v0.5.0.exe`; place it on `PATH` or
   pass its path to the build wrapper where needed.

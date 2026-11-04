@@ -20,3 +20,7 @@ private-roms/*
 /firmware-control/.tmp-*/
 /firmware-control/source/
 /firmware-control/overlays/*.raw.patch
+/firmware-monitor/build-kits/
+/firmware-monitor/.tmp-native-build/
+/.buildtools/
+/.tmp-make/

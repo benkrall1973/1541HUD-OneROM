@@ -1,0 +1,50 @@
+{
+  "$schema": "https://images.onerom.org/configs/schema.json",
+  "version": 1,
+  "name": "1541HUD Passive Monitor V0.8.1.28 Fire-24G",
+  "description": "Passive 1541HUD Monitor for Fire-24G. Uses V8.1 resource claims, revised RGB density palette, SEL_A/GPIO26 VIA /CS2 capture, and deferred persistent RGB policy storage.",
+  "categories": ["drive", "firmware", "commodore"],
+  "rom_sets": [
+    {
+      "type": "single",
+      "roms": [
+        {
+          "description": "1541HUD Monitor USB system plugin (exclusive CDC)",
+          "file": "active-plugins/system/1541HUD-Monitor-USB/build/1541-OneROM-1541HUD-Monitor-USB-v0.8.1.3.bin",
+          "type": "system_plugin"
+        }
+      ]
+    },
+    {
+      "type": "single",
+      "roms": [
+        {
+          "description": "1541HUD passive PIO/DMA monitor user plugin",
+          "file": "active-plugins/user/1541HUD-Monitor/build/1541-OneROM-1541HUD-Monitor-v0.8.1.28.bin",
+          "type": "user_plugin"
+        }
+      ]
+    },
+    {
+      "type": "multi",
+      "roms": [
+        {
+          "label": "1541 ONEROM BOOTLOADER",
+          "description": "Upper E000 8KB ROM",
+          "file": "build-kits/ub4-monitor-v08003-gcc14/inputs/1541-OneROM-Bootloader-Universal-v1.1.0.bin",
+          "type": "2364",
+          "cs1": "active_low"
+        },
+        {
+          "description": "Lower C000 8KB ROM",
+          "file": "build-kits/ub4-monitor-v08003-gcc14/inputs/1541-c000.325302-01.bin",
+          "type": "2364",
+          "cs1": "active_low"
+        }
+      ],
+      "firmware_overrides": {
+        "fire": { "standby": true }
+      }
+    }
+  ]
+}

@@ -54,10 +54,10 @@ $coreDependencies = Join-Path $core 'third_party'
 foreach ($dependency in @('tinyusb', 'picobootx', 'pico-sdkless')) {
     $source = Join-Path $dependencyKit $dependency
     $destination = Join-Path $coreDependencies $dependency
-    if (-not (Test-Path -LiteralPath $source)) {
-        throw "Pinned Monitor dependency is missing from the local kit: $source"
-    }
     if (-not (Test-Path -LiteralPath $destination)) {
+        if (-not (Test-Path -LiteralPath $source)) {
+            throw "Pinned Monitor dependency is missing from the root source and local kit: $source"
+        }
         New-Item -ItemType Directory -Force -Path $coreDependencies | Out-Null
         Copy-Item -LiteralPath $source -Destination $coreDependencies -Recurse -Force
     }
