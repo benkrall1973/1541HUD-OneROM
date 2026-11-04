@@ -60,27 +60,22 @@ The Control wrapper builds the local patched V8.1 base, Control USB plugin and
 Host-Control plugin before composing the owner-supplied manifest. The Monitor build must use the passive core define
 `HUD1541_PASSIVE_UB4`; do not build its plugins with a normal ROM-serving core.
 
-### Supported build host: WSL2 on Windows
+### Supported build host: native Windows
 
-For Windows users, use **WSL2 with Ubuntu** as the supported public build
-environment. The upstream firmware Makefiles are POSIX Makefiles: they use
-`sh`, `mkdir -p`, `rm`, `find`, pipes and Unix path rules. WSL2 provides those
-tools as normal tools rather than hoping a particular Windows Make/shell pairing
-happens to emulate them correctly.
+The qualified build host is **native Windows** with GNU Make, ARM GNU Toolchain
+14.2.1, and a Windows-safe POSIX shell (the project uses BusyBox `sh.exe`).
+This is the toolchain used for the qualified Fire-24G work; do not substitute
+Git Bash merely because it happens to contain a file named `sh.exe`.
 
-Use `firmware-monitor/Build-Monitor-Fire24G-V0.8.1.sh` from WSL2/Linux. It
-builds the passive base, both Monitor plugins and the final Fire-24G
-composition. The existing `.ps1` remains an engineering script for a prepared
-native Windows environment, not the public-supported route.
-
-Native Windows with MSYS2/Git Bash may work for experienced users, but is not
-the baseline procedure and must not be represented as tested merely because
-`make.exe` exists on PATH. Windows has already contributed enough drama.
+For UB4, use `firmware-monitor/Build-Monitor-Fire24G-V0.8.1.ps1` and pass
+`-Toolchain`, `-Make`, and `-OneRomCli` when the tools are not on `PATH`.
+WSL2/Linux remains a supported alternative for the `.sh` wrappers, but it is
+not required and must not be presented as the only public route.
 
 ### Prerequisites for a fresh checkout
 
-- ARM GNU Toolchain 14.2 or compatible `arm-none-eabi-gcc` on `PATH`.
-- GNU Make and a POSIX shell (`sh`) in WSL2/Linux.
+- ARM GNU Toolchain 14.2.1 or compatible `arm-none-eabi-gcc`.
+- GNU Make and a Windows-safe POSIX shell (`sh.exe`) for native Windows builds.
 - OneROM CLI 0.5.0 or compatible `onerom` executable. The validated Windows
   executable is included at `tools/onerom-v0.5.0.exe`; place it on `PATH` or
   pass its path to the build wrapper where needed.

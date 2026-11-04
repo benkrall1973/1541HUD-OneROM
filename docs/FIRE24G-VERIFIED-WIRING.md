@@ -1,7 +1,8 @@
 # Fire-24G verified wiring and reset behavior
 
 This document records the hardware configuration verified on the 1541 long
-board using the Fire-24G OneROM image on the `Fire24G` branch.
+board using the Fire-24G OneROM image on the public `v8.1.0-fire24g` branch
+(currently identical to `main`).
 
 ## Selector mapping
 
