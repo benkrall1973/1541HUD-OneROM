@@ -1,0 +1,42 @@
+name: Dependency refresh probe
+
+on:
+  push:
+    branches:
+      - security/dependency-updates
+    paths:
+      - ".github/workflows/dependency-refresh-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  resolve-and-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: source/one-rom-v0.8.1/rust
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust 1.88
+        run: rustup toolchain install 1.88 --profile minimal && rustup default 1.88
+      - name: Record baseline
+        run: |
+          rustc --version
+          cargo --version
+          grep -n '^zip' fw/Cargo.toml cli/Cargo.toml
+      - name: Resolve patched Zip line in a disposable workspace
+        run: |
+          sed -i 's/^zip = "6\.0"$/zip = "9.0.5"/' fw/Cargo.toml
+          sed -i 's/^zip = "8\.2"$/zip = "9.0.5"/' cli/Cargo.toml
+          cargo update -p zip --precise 9.0.5
+          cargo check --workspace
+          git diff -- Cargo.toml fw/Cargo.toml cli/Cargo.toml Cargo.lock > ../../../../dependency-refresh.patch
+      - name: Upload proposed manifest and lockfile patch
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-refresh-patch
+          path: dependency-refresh.patch
+          if-no-files-found: error
