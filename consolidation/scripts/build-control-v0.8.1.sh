@@ -27,9 +27,9 @@ command -v git >/dev/null
 [[ -f "$overlay" ]] || { echo "Control core overlay not found: $overlay" >&2; exit 1; }
 
 cargo_version="$(cargo --version | awk '{print $2}')"
-case "$(printf '%s\n%s\n' '1.85.0' "$cargo_version" | sort -V | head -n1)" in
+case "$(printf '%s\n%s\n' '1.93.0' "$cargo_version" | sort -V | head -n1)" in
   1.85.0) ;;
-  *) echo "Cargo $cargo_version is too old; need Cargo 1.85 or newer." >&2; exit 1 ;;
+  *) echo "Cargo $cargo_version is too old; need Cargo 1.93 or newer." >&2; exit 1 ;;
 esac
 
 mkdir -p "$(dirname -- "$output")"
