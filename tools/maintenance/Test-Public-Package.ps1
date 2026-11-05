@@ -45,6 +45,7 @@ $required = @(
     'docs/PUBLIC_PACKAGE_MANIFEST.md',
     'docs/RELEASE_CHECKLIST.md',
     'docs/VALIDATION_MATRIX.md',
+    'docs/DEPENDENCY_ALERT_TRIAGE.md',
     'tools/maintenance/Test-Public-Package.ps1',
     'templates/control-compose.template.json',
     'templates/UB3-Control-Lower-Socket.template.json',
@@ -130,4 +131,5 @@ $textHits = foreach ($file in Get-ChildItem -LiteralPath $PackageRoot -Recurse -
 if ($textHits) { throw "Private path or serial-like data in public package:`n$($textHits -join "`n")" }
 
 Write-Host "PASS: $PackageRoot is structurally complete and contains no denied payload, history, serial, or local-path markers."
+
 

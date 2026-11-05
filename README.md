@@ -210,6 +210,7 @@ Run the package check before publishing a derivative:
 - [Package boundary and redistribution policy](docs/PUBLIC_PACKAGE_MANIFEST.md)
 - [Release checklist](docs/RELEASE_CHECKLIST.md)
 - [Validation matrix and support boundary](docs/VALIDATION_MATRIX.md)
+- [Dependency-alert triage](docs/DEPENDENCY_ALERT_TRIAGE.md)
 - [Notices and upstream provenance](NOTICE.md)
 - [Contributing guide](CONTRIBUTING.md)
 - [Security and hardware-safety reporting](SECURITY.md)
@@ -224,4 +225,5 @@ other 1541 revisions and wiring choices require their own electrical review.
 Contributions are welcome under the repository [MIT License](LICENSE). Preserve
 the separate licenses and notices for OneROM and all vendored dependencies;
 the project does not grant redistribution rights for third-party DOS ROMs.
+
 
