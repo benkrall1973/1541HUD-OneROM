@@ -40,6 +40,9 @@ jobs:
           git diff -- Cargo.toml fw/Cargo.toml cli/Cargo.toml Cargo.lock > ../../../dependency-refresh.patch
       - name: Check qualified host-build packages
         run: cargo check -p onerom-fw -p onerom-cli
+      - name: Emit proposed patch for review
+        if: always()
+        run: cat ../../../dependency-refresh.patch
       - name: Upload proposed manifest and lockfile patch
         if: always()
         uses: actions/upload-artifact@v4
