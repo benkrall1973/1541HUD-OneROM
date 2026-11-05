@@ -6,6 +6,11 @@ on:
       - security/dependency-updates
     paths:
       - ".github/workflows/dependency-refresh-probe.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/dependency-refresh-probe.yml"
   workflow_dispatch:
 
 permissions:
@@ -33,7 +38,7 @@ jobs:
           sed -i 's/^zip = "8\.2"$/zip = "9.0.5"/' cli/Cargo.toml
           cargo update -p zip --precise 9.0.5
           cargo check --workspace
-          git diff -- Cargo.toml fw/Cargo.toml cli/Cargo.toml Cargo.lock > ../../../../dependency-refresh.patch
+          git diff -- Cargo.toml fw/Cargo.toml cli/Cargo.lock > ../../../../dependency-refresh.patch
       - name: Upload proposed manifest and lockfile patch
         uses: actions/upload-artifact@v4
         with:
