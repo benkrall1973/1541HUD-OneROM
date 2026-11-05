@@ -25,8 +25,8 @@ jobs:
         working-directory: source/one-rom-v0.8.1/rust
     steps:
       - uses: actions/checkout@v4
-      - name: Install Rust 1.88
-        run: rustup toolchain install 1.88 --profile minimal && rustup default 1.88
+      - name: Install current compatible Rust stable
+        run: rustup toolchain install 1.93 --profile minimal && rustup default 1.93
       - name: Record baseline
         run: |
           rustc --version
@@ -37,7 +37,7 @@ jobs:
           sed -i 's/^zip = "6\.0"$/zip = "9.0.5"/' fw/Cargo.toml
           sed -i 's/^zip = "8\.2"$/zip = "9.0.5"/' cli/Cargo.toml
           cargo update -p zip@6.0.0 --precise 9.0.5
-          git diff -- Cargo.toml fw/Cargo.toml cli/Cargo.toml Cargo.lock > ../../../../dependency-refresh.patch
+          git diff -- Cargo.toml fw/Cargo.toml cli/Cargo.toml Cargo.lock > ../../../dependency-refresh.patch
       - name: Check qualified host-build packages
         run: cargo check -p onerom-fw -p onerom-cli
       - name: Upload proposed manifest and lockfile patch
