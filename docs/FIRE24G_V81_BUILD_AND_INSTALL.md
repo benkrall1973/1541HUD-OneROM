@@ -99,7 +99,7 @@ for the OneROM CLI, USB inspection/flashing, and the 1541HUD application.
 - OneROM CLI 0.5.0 or compatible `onerom` executable. The validated Windows
   executable is included at `tools/onerom-v0.5.0.exe`; place it on `PATH` or
   pass its path to the build wrapper where needed.
-- Rust/Cargo where the Control source build requests it.
+- Rust/Cargo **1.93.0 or newer** for the pinned V8.1 Rust host tooling. The original 1.85 floor was only a wrapper check; it is not sufficient for the currently vendored source snapshot. The dependency-refresh branch validated `onerom-fw` and `onerom-cli` with Rust/Cargo 1.93.0 on Linux.
 
 The Monitor PowerShell entry point also accepts `-Toolchain`, `-Make`, and
 `-OneRomCli` arguments for an installed-but-not-on-PATH toolchain. This keeps
