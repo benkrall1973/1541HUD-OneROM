@@ -37,7 +37,6 @@ jobs:
           sed -i 's/^zip = "6\.0"$/zip = "9.0.5"/' fw/Cargo.toml
           sed -i 's/^zip = "8\.2"$/zip = "9.0.5"/' cli/Cargo.toml
           cargo update -p zip@6.0.0 --precise 9.0.5
-          cargo update -p zip@8.6.0 --precise 9.0.5
           cargo check --workspace
           git diff -- Cargo.toml fw/Cargo.toml cli/Cargo.toml Cargo.lock > ../../../../dependency-refresh.patch
       - name: Upload proposed manifest and lockfile patch
