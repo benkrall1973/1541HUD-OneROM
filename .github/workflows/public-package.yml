@@ -1,0 +1,30 @@
+name: Validate public package
+
+on:
+  push:
+    branches: [main, v8.1.0-fire24g]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Package and HUD regression checks
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate public package boundary
+        shell: pwsh
+        run: ./tools/maintenance/Test-Public-Package.ps1 -PackageRoot .
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run 1541HUD regression tests
+        shell: pwsh
+        run: python -m unittest discover -s 1541hud/tests -v
