@@ -11,7 +11,24 @@ This triage applies to `v8.1.0-fire24g-r1`, which vendors a pinned, unreleased
 OneROM V8.1 development snapshot. The public release contains two firmware
 images; neither image embeds the Rust host CLI or its archive parser.
 
-## Open alerts
+## Candidate resolution under review
+
+The `security/dependency-updates` branch contains a runner-generated candidate
+resolution, not a released-image claim:
+
+- both direct Zip constraints are `zip = "9.0.5"`; Cargo resolves one **Zip
+  9.4.0** package;
+- the workspace lock resolves **Rustls 0.23.46** (from 0.23.42);
+- GitHub Actions compiled `onerom-fw` and `onerom-cli` with **Rust/Cargo
+  1.93.0** on Linux.
+
+Rust 1.88 was insufficient for the pinned V8.1 snapshot: upstream metadata
+uses `NonNull::from_ref`, and its expanded workspace includes tooling needing
+Rust 1.89–1.93. The public Control wrapper therefore now requires Cargo 1.93
+or newer. Full Control/Monitor source builds and any resulting image hardware
+acceptance remain required before an r2 release.
+
+## Original-release alert classification
 
 | Alert | Dependency and location | Project exposure | Decision |
 | --- | --- | --- | --- |
