@@ -1,14 +1,14 @@
-# Intended public-package manifest
+# Public package boundary
 
-This is a selection manifest for the future public repository. It is not a
-command to change this private repository's visibility and it does not alter
-the qualified private release.
+This document defines what belongs in the **public** 1541HUD / OneROM
+Fire-24G repository. It is the current release boundary, not a plan for a
+future repository and not a substitute for the build or wiring guides.
 
-## Include
+## Included and intentionally public
 
 | Area | Reason |
 | --- | --- |
-| `templates/`, `tools/maintenance/`, and this manifest | ROM-free templates, package validator, and public-boundary records. |
+| `templates/`, `private-roms/` templates, `utilities/rom-pages/`, and `tools/maintenance/` | ROM-free templates, utilities, validator, and public-boundary records. |
 | `source/one-rom-v0.8.1` | Single pinned, unreleased upstream V8.1 development snapshot used by both roles, including the exact vendored UB4 build dependencies `tinyusb`, `picobootx`, and `pico-sdkless`. |
 | `firmware-control/overlays/control-core-v0.8.1.patch` and active `1541HUD-USB-v0.8.1` / `1541HUD-Host-Control-v0.8.1` source | UB3 integration source. The wrapper applies the tracked Control-core delta to the pinned source in an ignored work tree. |
 | `firmware-monitor` active Monitor plugins, `shared/1541hud_mailbox.h`, manifest, and two baseline Monitor inputs | UB4 passive-monitor integration source. The wrapper builds directly from the pinned source with the passive-core flag; the checked-in OneROM bootloader and stock C000 baseline input reproduce the public UB4 Monitor image without a hidden local kit. |
@@ -18,7 +18,7 @@ the qualified private release.
 | `utilities/dosname-rom-probe/` source and documentation | Optional diagnostic utility, after its provenance is checked. |
 | Two named stock Fire-24G release images under `releases/` | Ready-to-flash UB3 Control stock-test and UB4 passive Monitor images; the validator permits only these exact binaries. |
 
-## Exclude
+## Explicit exclusions
 
 | Area | Why it is excluded |
 | --- | --- |
@@ -29,7 +29,11 @@ the qualified private release.
 | S-JiffyDOS files and tests | Experimental, unqualified, and explicitly outside the current product scope. |
 | USB serial numbers, local paths, SSH helpers, and local diagnostics | Operator/machine-specific information. |
 
-## Required user-supplied inputs in a public build
+The package validator at `tools/maintenance/Test-Public-Package.ps1` enforces
+the structural portion of this boundary. It does not decide copyright status;
+maintainers must still review proposed additions.
+
+## Builder-supplied private inputs
 
 A public build can compile the firmware bases and project plugins once the
 documented toolchain prerequisites are supplied. The UB4 Monitor composition
@@ -48,8 +52,9 @@ expected, their exact 8 KiB size, and their private-build SHA-256 reference.
 It must not provide download links to copyrighted ROMs or the bytes
 themselves.
 
-## Explicitly deferred decisions
+## Deferred scope
 
 - License/provenance status of the DOSNAME D64/PRG utility before publication.
 - C64 configurator repair and release.
 - Additional public prebuilt firmware beyond the two named stock releases.
+

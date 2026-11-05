@@ -33,12 +33,18 @@ function Get-Sha256Hex {
 $required = @(
     'README.md',
     'LICENSE',
+    'NOTICE.md',
+    'CONTRIBUTING.md',
+    'SECURITY.md',
+    '.github/ISSUE_TEMPLATE/bug_report.md',
     'docs/FIRE24G_V81_ENGINEERING_DOSSIER.md',
     'docs/FIRE24G_V81_BUILD_AND_INSTALL.md',
     'docs/UB3_CONTROL_CLI_COMPOSITION_GUIDE.md',
     'docs/THIRD_PARTY_DOS_PAGE_PREPARATION.md',
     'docs/PUBLIC_FIRE24G_RELEASES.md',
     'docs/PUBLIC_PACKAGE_MANIFEST.md',
+    'docs/RELEASE_CHECKLIST.md',
+    'docs/VALIDATION_MATRIX.md',
     'tools/maintenance/Test-Public-Package.ps1',
     'templates/control-compose.template.json',
     'templates/UB3-Control-Lower-Socket.template.json',
@@ -124,3 +130,4 @@ $textHits = foreach ($file in Get-ChildItem -LiteralPath $PackageRoot -Recurse -
 if ($textHits) { throw "Private path or serial-like data in public package:`n$($textHits -join "`n")" }
 
 Write-Host "PASS: $PackageRoot is structurally complete and contains no denied payload, history, serial, or local-path markers."
+

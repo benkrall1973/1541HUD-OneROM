@@ -130,7 +130,7 @@ workflow. Close 1541HUD first so it releases the board USB ports.
 3. Confirm the displayed serial is the board you intend to flash.
 4. Flash exactly one image, replacing `<SERIAL>` with that board's serial.
 
-   **UB3 Control — stock DOS 2.6 test image**
+   **UB3 Control - stock DOS 2.6 test image**
 
    ```powershell
    ./tools/onerom-v0.5.0.exe --serial <SERIAL> program `
@@ -138,7 +138,7 @@ workflow. Close 1541HUD first so it releases the board USB ports.
      --verify
    ```
 
-   **UB4 Monitor — passive telemetry image**
+   **UB4 Monitor - passive telemetry image**
 
    ```powershell
    ./tools/onerom-v0.5.0.exe --serial <SERIAL> program `
@@ -208,6 +208,11 @@ Run the package check before publishing a derivative:
 - [UB3 custom composition guide](docs/UB3_CONTROL_CLI_COMPOSITION_GUIDE.md)
 - [ROM page preparation](docs/THIRD_PARTY_DOS_PAGE_PREPARATION.md)
 - [Package boundary and redistribution policy](docs/PUBLIC_PACKAGE_MANIFEST.md)
+- [Release checklist](docs/RELEASE_CHECKLIST.md)
+- [Validation matrix and support boundary](docs/VALIDATION_MATRIX.md)
+- [Notices and upstream provenance](NOTICE.md)
+- [Contributing guide](CONTRIBUTING.md)
+- [Security and hardware-safety reporting](SECURITY.md)
 
 ## Safety and support boundaries
 
@@ -215,3 +220,8 @@ Disconnect power before altering wiring. Never connect a 5 V drive signal
 directly to a 3.3 V-only OneROM GPIO. Do not flash a board until its serial
 and role are known. This project documents a specific, tested installation;
 other 1541 revisions and wiring choices require their own electrical review.
+
+Contributions are welcome under the repository [MIT License](LICENSE). Preserve
+the separate licenses and notices for OneROM and all vendored dependencies;
+the project does not grant redistribution rights for third-party DOS ROMs.
+

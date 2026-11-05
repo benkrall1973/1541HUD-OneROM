@@ -1,10 +1,32 @@
-# Proprietary and Confidential
+# MIT License
 
-Copyright (c) 2026 OneROM project contributors. All rights reserved.
+Copyright (c) 2026 1541HUD / OneROM Fire-24G contributors
 
-This repository is a private engineering repository. No permission is granted
-to copy, modify, distribute, sublicense, or publish project-owned material
-without written authorization from the project owner.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of the project-authored software, documentation, templates, and associated
+files in this repository (the "Project Material"), to deal in the Project
+Material without restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Project Material, and to permit persons to whom the Project Material is
+furnished to do so, subject to the following conditions:
 
-Third-party and vendored material retains its own license notices. Nothing in
-this file changes or replaces those notices.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Project Material.
+
+THE PROJECT MATERIAL IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES
+OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE PROJECT MATERIAL OR THE USE OR
+OTHER DEALINGS IN THE PROJECT MATERIAL.
+
+## Third-party material and ROMs
+
+This license applies only to material authored for this project. Vendored
+OneROM source, third-party dependencies, and their documentation retain their
+own copyright notices and licenses; see `source/one-rom-v0.8.1/LICENSE.md` and
+the notices within those trees. This repository does not grant a license to
+third-party DOS ROMs, ROM-derived pages, or other excluded payloads. Builders
+must supply only ROM material they are legally entitled to use.
+
