@@ -76,11 +76,12 @@ and never in a patch. From v1.0.0 onwards such a change lands in a major
 release, and never in a minor or a patch.
 
 - `program` and `firmware build` automatically add the USB plugin when a system
-  plugin isn't specified (or a config file doesn't define a plugin). Use
-  `--no-plugin` to build without plugins.
+  plugin isn't specified. Use `--no-plugin` to build without any plugins.
 - An unused signature from an earlier CLI fails with
   `hardware commission --signature`. One ROMs already commissioned aren't
   affected. Raise a new signing request, or sign again with `hardware sign`.
+- `hardware commission` and `hardware sign` fail with a manufacturer name
+  longer than <!--[const:COMMISSIONING_MANUFACTURER_MAX_LEN]-->32<!--[/]--> characters.
 - `--config-name`, `--config-description`, `--save-config` and the
   [per-device overrides](#per-device-overrides) are rejected when used with
   `program --firmware`. When used with `program --base-firmware` these,
@@ -88,6 +89,7 @@ release, and never in a minor or a patch.
   used. Previously they were ignored.
 - `program --base-firmware` without `--config` or `--slot` requires
   `--no-config`.
+- `console --no-echo` requires `--raw`.
 
 Every release's breaking changes are collected in
 [Appendix: Breaking Change History](#appendix-breaking-change-history), at the
@@ -438,9 +440,8 @@ Plugins masquerade as ROMs. At most one system plugin and one user plugin are
 supported. A user plugin requires a system plugin. A system plugin uses slot 0
 and a user plugin in slot 1.
 
-The USB plugin is automatically added when a system plugin isn't specified (or
-the config file doesn't define a plugin). Therefore this adds both the USB plugin
-and the host-control plugin:
+The USB plugin is automatically added when a system plugin isn't specified.
+Therefore this command adds both the USB plugin and the host-control plugin:
 
 ```
 onerom program --board fire-24-e \
@@ -868,8 +869,8 @@ onerom program --config c64.json --out firmware.bin
 
 | Option | Description |
 |---|---|
-| `--plugin <SPEC>` | Plugin specification. Repeatable. See [Plugin specification](#plugin-specification). May be combined with `--config`: the plugins are inserted ahead of the config's ROM slots (which shift up), and it is an error if the config already defines a plugin of its own. Without it, the USB plugin is added where the config doesn't define a plugin. Conflicts with `--firmware`. |
-| `--no-plugin` | Build without plugins. It is an error if the config defines a plugin. Conflicts with `--plugin` and `--firmware`. |
+| `--plugin <SPEC>` | Plugin specification. Repeatable. See [Plugin specification](#plugin-specification). Can be used with `--config` if the config doesn't contain a plugin. Conflicts with `--firmware`. |
+| `--no-plugin` | Build without any plugins. Conflicts with `--plugin` and `--firmware`. |
 | `--config-name <NAME>` | Name for the generated ROM configuration. Conflicts with `--config`. |
 | `--config-description <DESC>` (aliases `--desc`, `--description`) | Description for the generated configuration. Defaults to *"Created by the One ROM CLI"*. Conflicts with `--config`. |
 | `--save-config <FILE>` | Save the generated configuration to JSON. Only valid with `--slot` or `--no-config`. Conflicts with `--config`. `--plugin usb` is saved as `"plugin": "usb"`. |
@@ -1518,7 +1519,7 @@ echo 'LOAD "*",8' | onerom console
 | `--output, -o <FILE>` (alias `--out`) | Also write One ROM's output to this file, replacing its contents.  The file contains only what One ROM sends.  Output is still displayed. |
 | `--line-ending <ENDING>` | What Enter sends: `cr`, `lf` or `crlf`.  Default `cr`, which retro systems expect. |
 | `--raw` | Send each key as you press it, not a line at a time.  No line editing.  Enter sends the line ending.  Ctrl-C exits. |
-| `--no-echo` | Don't display what you type.  Use when the retro system echoes what it receives back.  Only applies with `--raw`.  In line mode the terminal displays the line as you edit it. |
+| `--no-echo` | Don't display what you type.  Use when the retro system echoes back what it receives.  Requires `--raw`. |
 | `--serial-port <PORT>` | Serial port to open: `1` or `2`.  Default `1`.  Port 1 is the USB plugin's default serial port.  Port 2 requires the USB plugin and a user plugin that supports it. |
 
 If stdin is not a terminal, its contents are sent unchanged, and the command
@@ -2067,6 +2068,7 @@ onerom clone --from old.bin --to FC9D67248E8E8023
 |---|---|
 | `--from <SOURCE>` | Source One ROM to copy from. Can be the serial number of the One ROM to copy or a firmware file. Required. |
 | `--to <DEVICE>` | Serial number of the destination One ROM. Required. |
+| `--board, -b <BOARD>` | Board type of the destination One ROM. Required for an uncommissioned One ROM without One ROM firmware. |
 | `--force, -f` | Continue despite non-fatal problems. Each problem is printed as a warning. |
 
 Device required: yes, and a source One ROM unless `--from` is a firmware file.
@@ -2150,9 +2152,9 @@ onerom hardware commission --board fire-40-b --size M --manufacturer "Acme Retro
 |---|---|
 | `--board, -b <BOARD>` | Board type, for example `fire-40-b`. Must be a Fire board with the matching RP2350 package (A or B). Required. |
 | `--size <SIZE>` | The board's [size](#board-sizes), for example `M`. Required for a board that supports external flash. |
-| `--manufacturer <NAME>` | Manufacturer's name, for example `"Acme Retro"`. Printable ASCII without `*` or a leading or trailing space. Required. |
-| `--revision <REVISION>` (alias `--rev`) | The board's revision, for example `A1`. Printable ASCII without a leading or trailing space. |
-| `--batch <BATCH>` | The board's manufacturing batch, for example a PCB order number. Printable ASCII without a leading or trailing space. |
+| `--manufacturer <NAME>` | Manufacturer's name, for example `"Acme Retro"`. 1 to <!--[const:COMMISSIONING_MANUFACTURER_MAX_LEN]-->32<!--[/]--> printable ASCII characters without `*` or a leading or trailing space. Required. |
+| `--revision <REVISION>` (alias `--rev`) | The board's revision, for example `A1`. 1 to <!--[const:COMMISSIONING_REVISION_MAX_LEN]-->16<!--[/]--> printable ASCII characters without a leading or trailing space. |
+| `--batch <BATCH>` | The board's manufacturing batch, for example a PCB order number. 1 to <!--[const:COMMISSIONING_BATCH_MAX_LEN]-->16<!--[/]--> printable ASCII characters without a leading or trailing space. |
 | `--signer <URL>` | Signing server's address, for example `https://sign.internal.example.com`. Must use https. Requires `--key-id`. |
 | `--key-id <ID>` | Signing key's ID from 1 to 65535, for example `256`. Conflicts with `--key`. |
 | `--pin <PIN>` | PIN of the signing server's key or of an encrypted key file. Asked for in a terminal if omitted. Conflicts with `--signature`. |
@@ -2279,9 +2281,9 @@ onerom hardware sign --chip-id DE3F9C232F655B6B --board fire-40-b --size L \
 | `--chip-id <CHIPID>` | One ROM's Chip ID as 16 hex digits, for example `DE3F9C232F655B6B`. [`scan --verbose`](#scan) prints it. Required. |
 | `--board, -b <BOARD>` | Board type, for example `fire-40-b`. Must be a Fire board. Required. |
 | `--size <SIZE>` | The board's [size](#board-sizes), for example `M`. Required for a board that supports external flash. |
-| `--manufacturer <NAME>` | Manufacturer's name, for example `"Acme Retro"`. Printable ASCII without `*` or a leading or trailing space. Required. |
-| `--revision <REVISION>` (alias `--rev`) | The board's revision, for example `A1`. Printable ASCII without a leading or trailing space. |
-| `--batch <BATCH>` | The board's manufacturing batch, for example a PCB order number. Printable ASCII without a leading or trailing space. |
+| `--manufacturer <NAME>` | Manufacturer's name, for example `"Acme Retro"`. 1 to <!--[const:COMMISSIONING_MANUFACTURER_MAX_LEN]-->32<!--[/]--> printable ASCII characters without `*` or a leading or trailing space. Required. |
+| `--revision <REVISION>` (alias `--rev`) | The board's revision, for example `A1`. 1 to <!--[const:COMMISSIONING_REVISION_MAX_LEN]-->16<!--[/]--> printable ASCII characters without a leading or trailing space. |
+| `--batch <BATCH>` | The board's manufacturing batch, for example a PCB order number. 1 to <!--[const:COMMISSIONING_BATCH_MAX_LEN]-->16<!--[/]--> printable ASCII characters without a leading or trailing space. |
 | `--date <DATE>` | Commissioning date as `YYYYMMDD`, for example `20260929`. Defaults to today's UTC date. Cannot be in the future. |
 | `--signer <URL>` | Signing server's address, for example `https://sign.internal.example.com`. Must use https. Requires `--key-id`. |
 | `--key-id <ID>` | Signing key's ID from 1 to 65535, for example `256`. Conflicts with `--key`. |
@@ -2551,8 +2553,8 @@ The configuration options mirror [`program`](#program): `--config` (`-j`),
 `--slot`, `--plugin`, `--no-plugin`, `--config-name`, `--config-description`, `--save-config`,
 `--no-config`, and the per-device overrides `--instance-name`,
 `--serial-override`, `--logging`, `--disable-swd`, `--turbo-boot`,
-`--reserve-pin`, `--addr-mon-min-cs-act-ns` (all rejected with `--no-config`).
-Build-specific options:
+`--reserve-pin` and `--addr-mon-min-cs-act-ns`. `--no-config` can't be used
+with `--config`, `--slot` or a per-device override. Build-specific options:
 
 | Option | Description |
 |---|---|
@@ -3401,11 +3403,12 @@ release. Newest release first.
 ### v0.6.0
 
 - `program` and `firmware build` automatically add the USB plugin when a system
-  plugin isn't specified (or a config file doesn't define a plugin). Use
-  `--no-plugin` to build without plugins.
+  plugin isn't specified. Use `--no-plugin` to build without any plugins.
 - An unused signature from an earlier CLI fails with
   `hardware commission --signature`. One ROMs already commissioned aren't
   affected. Raise a new signing request, or sign again with `hardware sign`.
+- `hardware commission` and `hardware sign` fail with a manufacturer name
+  longer than <!--[const:COMMISSIONING_MANUFACTURER_MAX_LEN]-->32<!--[/]--> characters.
 - `--config-name`, `--config-description`, `--save-config` and the
   [per-device overrides](#per-device-overrides) are rejected when used with
   `program --firmware`. When used with `program --base-firmware` these,
@@ -3413,6 +3416,7 @@ release. Newest release first.
   used. Previously they were ignored.
 - `program --base-firmware` without `--config` or `--slot` requires
   `--no-config`.
+- `console --no-echo` requires `--raw`.
 
 ### v0.5.0
 

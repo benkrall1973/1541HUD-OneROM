@@ -88,7 +88,8 @@ void setup_vbus_interrupt(void) {
     volatile uint32_t *intr = &IO_BANK0_INTR0 + reg_offset;
     *inte |= (1 << bit);                        // Enable rising edge interrupt
     *intr = (1 << bit);                         // Clear any pending
-    NVIC_ISER0 |= (1 << IO_IRQ_BANK0);          // Enable IO_BANK0 interrupt in NVIC
+    NVIC_ISER0 |= (1 << IRQ_IO_IRQ_BANK0);      // Enable IO_BANK0 interrupt in NVIC
+    RUNTIME->firmware_flags |= FIRMWARE_FLAG_VBUS_DETECT;
 
     // Set as input, pull-down, output disable
     GPIO_PAD(vbus_pin) |= (PAD_PD | PAD_OUTPUT_DISABLE | PAD_INPUT);
@@ -104,14 +105,19 @@ void setup_vbus_interrupt(void) {
     }
 }
 
-// VBUS interrupt Handler
+// Enters the bootloader if the VBUS interrupt fired.  Called from core 0's
+// IO_IRQ_BANK0 handler, which is shared with the user plugin.
 void vbus_connect_handler(void) {
-    // Clear the interrupt
     uint8_t vbus_pin = HW->gpio_vbus;
+    if (vbus_pin >= MAX_GPIOS) {
+        return;
+    }
     uint32_t reg_offset = vbus_pin / 8;
-    uint32_t bit = ((vbus_pin % 8) * 4) + 3;
-    volatile uint32_t *intr = &IO_BANK0_INTR0 + reg_offset;
-    *intr = (1 << bit);
+    uint32_t bit = 1u << (((vbus_pin % 8) * 4) + 3);
+    if (!(IO_BANK0_PROC_INTS(0, reg_offset) & bit)) {
+        return;
+    }
+    IO_BANK0_INTR(reg_offset) = bit;
 
     // Disable interrupts before logging
     __asm volatile("cpsid i");
@@ -486,15 +492,15 @@ void setup_timer0(void) {
 }
 
 void usb_controller_out_of_reset(void) {
-    RESET_RESET &= ~RESET_USBCTRL;
+    RESET_RESET_CLR = RESET_USBCTRL;
     while (!(RESET_DONE & RESET_USBCTRL)) {}
 }
 
 // RESET_DONE isn't set until clk_usb runs.  USB DPRAM is accessible once the
 // reset bit is clear.
 void usb_controller_reset_and_release(void) {
-    RESET_RESET |= RESET_USBCTRL;
-    RESET_RESET &= ~RESET_USBCTRL;
+    RESET_RESET_SET = RESET_USBCTRL;
+    RESET_RESET_CLR = RESET_USBCTRL;
 }
 
 void setup_usb_controller(void) {
@@ -564,7 +570,7 @@ void setup_adc(void) {
     DEBUG("ADC clock enabled");
 
     // Take ADC out of reset
-    RESET_RESET &= ~(RESET_ADC);
+    RESET_RESET_CLR = RESET_ADC;
     while (!(RESET_DONE & RESET_ADC));
 
     // Enable ADC and temperature sensor

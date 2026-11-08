@@ -9,8 +9,8 @@ future repository and not a substitute for the build or wiring guides.
 | Area | Reason |
 | --- | --- |
 | `templates/`, `private-roms/` templates, `utilities/rom-pages/`, and `tools/maintenance/` | ROM-free templates, utilities, validator, and public-boundary records. |
-| `source/one-rom-v0.8.1` | Single pinned, unreleased upstream V8.1 development snapshot used by both roles, including the exact vendored UB4 build dependencies `tinyusb`, `picobootx`, and `pico-sdkless`. |
-| `firmware-control/overlays/control-core-v0.8.1.patch` and active `1541HUD-USB-v0.8.1` / `1541HUD-Host-Control-v0.8.1` source | UB3 integration source. The wrapper applies the tracked Control-core delta to the pinned source in an ignored work tree. |
+| `source/one-rom-v0.8.1` | Exact signed official upstream `v0.8.1` source used by both roles. Its build scripts retrieve their own pinned dependencies. |
+| Active `1541HUD-USB-v0.8.1` and `1541HUD-Host-Control-v0.8.1` source | UB3 integration source. The wrapper builds these custom plugins against the official pinned core in an ignored work tree. |
 | `firmware-monitor` active Monitor plugins, `shared/1541hud_mailbox.h`, manifest, and two baseline Monitor inputs | UB4 passive-monitor integration source. The wrapper builds directly from the pinned source with the passive-core flag; the checked-in OneROM bootloader and stock C000 baseline input reproduce the public UB4 Monitor image without a hidden local kit. |
 | ROM-free private-input instructions and the UB3 CLI composition guide | Explain the two standard C/E socket layouts and the optional C/A/E DolphinDOS-style layout without distributing ROM bytes; users create a private composition manifest locally. |
 | `1541hud/source/1541HUD_V0.8.0.51.py`, launcher, tests, and current HUD documentation | The qualified desktop operator tool. |

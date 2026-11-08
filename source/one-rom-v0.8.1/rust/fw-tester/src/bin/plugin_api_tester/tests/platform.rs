@@ -119,6 +119,16 @@ pub fn test_alloc_mem(emu: &Emulator) -> Result<(), String> {
         alloc_request(0),
         OraResult::InvalidArg,
     ));
+    for reserved in [1u8, 0xFF] {
+        refused.push((
+            format!("reserved {reserved:#x}"),
+            ffi::ora_alloc_request_t {
+                reserved: [reserved],
+                ..req
+            },
+            OraResult::InvalidArg,
+        ));
+    }
     for bit in [
         ffi::ORA_MEM_ACCEPT_ALIGNED_ONLY,
         ffi::ORA_MEM_ACCEPT_NO_EXEC,
@@ -215,8 +225,8 @@ pub fn test_peripheral_and_irq_calls(emu: &Emulator, max_gpios: u8) -> Result<()
     emu.setup_adc();
 
     for irq in [
-        ffi::ora_irq_t_ORA_IRQ_TIMER0_IRQ_0,
-        ffi::ora_irq_t_ORA_IRQ_USBCTRL_IRQ,
+        onerom_metadata::onerom_irq_t::IRQ_TIMER0_IRQ_0.0,
+        onerom_metadata::onerom_irq_t::IRQ_USBCTRL_IRQ.0,
     ] {
         emu.register_irq(irq, Some(dummy_irq_handler));
         emu.enable_irq(irq, true);

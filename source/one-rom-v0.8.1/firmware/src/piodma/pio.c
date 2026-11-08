@@ -78,26 +78,6 @@ void pio_gpio_to_block(uint8_t gpio, uint8_t block) {
 int pio(void) {
     int rc;
 
-#if defined(HUD1541_PASSIVE_UB4)
-    /* UB4 is an observation-only 1541HUD board.  ROM-serving PIO must never
-     * start here: it can drive the 1541 bus before the Monitor capture plugin
-     * has claimed its passive resources.
-     *
-     * This does not mean PIO peripherals can remain in reset.  The user
-     * Monitor and the RGB engine are launched after pio() returns and both
-     * need live PIO register blocks.  The old early return left every block
-     * reset, so a Monitor could claim SM3 but its CTRL/PC/DMA state remained
-     * permanently zero.  Releasing a block from reset does not configure a
-     * GPIO or start an SM; it is still completely passive. */
-#if REAL_HARDWARE
-    RESET_RESET &= ~(RESET_PIO0 | RESET_PIO1 | RESET_PIO2);
-    while ((RESET_DONE & (RESET_PIO0 | RESET_PIO1 | RESET_PIO2)) !=
-           (RESET_PIO0 | RESET_PIO1 | RESET_PIO2)) {
-    }
-#endif
-    return 0;
-#endif
-
     if (0) {
         DEBUG("PIO RAM Mode");
         uint32_t rom_table_addr = (uint32_t)(uintptr_t)RUNTIME->rom_table;

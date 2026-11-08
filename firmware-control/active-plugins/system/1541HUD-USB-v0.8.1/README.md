@@ -14,9 +14,9 @@ make TOOLCHAIN=/usr/bin
 
 Set `ONEROM_ROOT` to the Control work tree created by the supported Control
 wrapper:
-`firmware-control/.work/control-core-v0.8.1/firmware-control/source/control-baseline-v0.8.1-release`.
-The wrapper reconstructs that work tree from the root-level pinned V8.1 source
-and the tracked Control core overlay. The output is:
+`firmware-control/.work/control-core-v0.8.1/one-rom-v0.8.1`.
+The wrapper copies the root-level official v0.8.1 source into that work tree.
+The output is:
 
 ```text
 build/1541-OneROM-1541HUD-USB-v0.8.1.10.bin

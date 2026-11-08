@@ -51,7 +51,7 @@ An AI coding assistant can be a practical build partner for this project: it
 can inspect the repository, help install and verify the documented toolchain,
 prepare a lawful ROM manifest, run the qualified build wrapper, compare hashes,
 and troubleshoot a failed build. The repository is deliberately organized so a
-fresh clone contains the pinned source, overlays, runbook, and validation
+fresh clone contains the pinned official source, runbook, and validation
 material needed for that work.
 
 AI assistance does not replace builder judgment. Supply only ROM pages you are
@@ -106,8 +106,7 @@ before connecting a board to the drive. In particular:
 | Item | Purpose |
 | --- | --- |
 | `releases/` | Ready-to-flash Fire-24G UB3 stock Control and UB4 Monitor images. |
-| `source/one-rom-v0.8.1/` | One pinned, unreleased upstream OneROM V8.1 development snapshot used by both build roles. |
-| `firmware-control/overlays/` | Tracked Control-core delta applied to the pinned source in an ignored work tree. |
+| `source/one-rom-v0.8.1/` | Exact signed official OneROM v0.8.1 source used by both build roles. |
 | `tools/onerom-v0.5.0.exe` | Bundled upstream OneROM CLI for Windows scan, inspection, and flashing. |
 | `1541hud/` | 1541HUD Python source, launcher, build script, and tests. |
 | `firmware-control/` | UB3 Control source and 1541HUD Control plugins. |
