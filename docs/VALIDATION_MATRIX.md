@@ -8,6 +8,8 @@ Fire-24G / 1541 long-board installation; it does not magically certify every
 | Area | Status | Boundary |
 | --- | --- | --- |
 | Fire-24G UB3 Control role | Verified configuration | Use the documented long-board wiring, reset resistor, and documented USB-powered operation. |
+| Exact public stock Control image | Loose-board accepted; drive test pending | Flash verification and 47 checks passed on 2026-11-10; see STOCK_CONTROL_LOOSE_TEST_2026-11-10.md. |
+| Windows CLI 0.6.0-hud1 | Loose-board exercised | Discovery, flash backup/read, programming with verification, inspection and USB-powered reboot passed on the tested Windows host. |
 | Fire-24G UB4 passive Monitor role | Verified configuration | Passive capture only; UB4 does not serve ROM or control write protect. |
 | IEC device 8/9 | Verified configuration | SEL_A wiring required; Apply+Save tested with OneROM continuously USB-powered. |
 | Active-low reset | Verified configuration | SEL_B through 1 kOhm to C46-positive/CR7-anode reset node. |

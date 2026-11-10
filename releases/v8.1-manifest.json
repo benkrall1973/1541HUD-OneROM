@@ -9,9 +9,10 @@
       "usb": "0.8.1.16",
       "user": "0.8.1.5",
       "file": "onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0.8.1.bin",
-      "test_scope": "Recomposed stock image; core/plugins drive-tested in private ROM collection",
+      "test_scope": "Exact stock image flashed with verification and 47 loose-board checks passed on 2026-11-10. USB-powered IEC/LED persistence and GPIO/control sequencing passed; actual drive operation and full power-cycle test remain pending. Cosmetic invalid-IEC reply still advertises MAX=11.",
       "sha256": "734736EB8E2E990FFD101A3918E8834DBAA10F8173A1B876DDAD4AC75E378D40",
-      "bytes": 262144
+      "bytes": 262144,
+      "qualification": "qualification/stock-control-loose-2026-11-10.json"
     },
     {
       "role": "UB4 Monitor",

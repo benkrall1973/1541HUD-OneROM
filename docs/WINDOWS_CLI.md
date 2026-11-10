@@ -43,5 +43,7 @@ notices in .buildtools/windows-cli-package. It never programs or reboots a
 device. CI runs this same script on Windows.
 
 The executable is unsigned. Native build and offline tests do not qualify
-USB driver behavior on every Windows installation. Loose-board USB and NV
-checks remain separate hardware tests; full drive behavior needs a 1541.
+USB driver behavior on every Windows installation. Loose-board USB, flashing,
+reboot and saved IEC/LED checks passed on the maintainer's Windows host on
+2026-11-10; see STOCK_CONTROL_LOOSE_TEST_2026-11-10.md. Full drive behavior
+still needs a 1541, and a complete USB power-cycle test remains pending.

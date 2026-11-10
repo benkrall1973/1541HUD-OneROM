@@ -1,0 +1,260 @@
+{
+  "date": "2026-11-10",
+  "scope": "Loose OneROM; no drive bus or physical reset/WP wiring validated",
+  "checks": [
+    {
+      "name": "CDC API ready",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "One fixed stock slot",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Stock slot label",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Initial IEC valid",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Initial GPIO26 matches IEC",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Reject unavailable/invalid ROM slot 0",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Reject unavailable/invalid ROM slot 1",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Reject unavailable/invalid ROM slot 255",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Reject unavailable/invalid ROM slot bad",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Reject unsupported IEC 7",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Reject unsupported IEC 10",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Reject unsupported IEC 11",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Reject unsupported IEC 12",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Reject unsupported IEC bad",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Invalid commands preserve saved fields",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Save IEC 9",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Save LEDs OFF",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "IEC 9 survives USB-powered reboot",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "GPIO26 releases to input for IEC 9",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "LED OFF survives USB-powered reboot",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "WP override command ON",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "GPIO25 asserts WP override",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "WP override readback ON",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "WP override command OFF",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "GPIO25 releases WP override",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Reset sequence starts",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Reset sequence releases",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "GPIO27 returns to input",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Repeated CDC query 1",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Repeated CDC query 2",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Repeated CDC query 3",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Repeated CDC query 4",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Repeated CDC query 5",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Repeated CDC query 6",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Repeated CDC query 7",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Repeated CDC query 8",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Repeated CDC query 9",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Repeated CDC query 10",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Repeated CDC query 11",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Repeated CDC query 12",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Restore starting IEC",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Restore starting LED policy",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Restored IEC persists",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Saved slot unchanged",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Restored LED policy persists",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Final GPIO26 matches restored IEC",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Final stock slot active",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "notes": [
+    "Invalid IEC reply advertises MAX=11 although only 8/9 are accepted (cosmetic range-reporting defect)."
+  ],
+  "settings_restored": true,
+  "failure": null,
+  "stock_image_sha256": "734736EB8E2E990FFD101A3918E8834DBAA10F8173A1B876DDAD4AC75E378D40",
+  "not_tested": [
+    "Actual drive ROM operation",
+    "Full power-cycle persistence",
+    "Physical reset waveform/timing",
+    "Physical WP feedback with sensor",
+    "IEC bus communication",
+    "Alternate ROM selection (stock image has one slot)"
+  ],
+  "passed": 47,
+  "total": 47,
+  "flash_verification": "passed",
+  "cli": "0.6.0-hud1",
+  "result": "Loose-board acceptance passed; drive qualification pending"
+}

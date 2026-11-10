@@ -10,7 +10,9 @@ package. Both target **Fire-24G** hardware only.
 
 See [the baseline runbook](V81_BASELINE_RUNBOOK.md) for component versions and test scope.
 The stock Control image was recomposed with the drive-tested components; this
-exact stock composition has not itself been flashed. Monitor code was tested
+exact stock composition passed flashing and 47 loose-board checks on 2026-11-10;
+drive operation remains pending. See STOCK_CONTROL_LOOSE_TEST_2026-11-10.md.
+Monitor code was tested
 in the drive with device NV preserved; the public image has default NV and
 two sanitized diagnostic filename strings. Instructions and addresses are unchanged.
 

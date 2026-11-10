@@ -42,7 +42,10 @@ instructions, addresses and terminators are unchanged. The sanitizer is at
 tools/maintenance/Sanitize-Monitor-Diagnostics.ps1. The private archive retains
 the exact flashed image. The public stock Control image was recomposed
 with tested core/plugins and the stock pages already distributed here. That
-exact stock composition is build/inspection verified, not separately flashed.
+exact stock composition was flashed and passed 47 loose-board checks on
+2026-11-10 with CLI 0.6.0-hud1. Drive operation remains pending. The test record
+and the retained cosmetic IEC range-reporting defect are documented in
+STOCK_CONTROL_LOOSE_TEST_2026-11-10.md.
 The private drive ROM collection, device identifiers and recovery dumps stay
 private. Public image hashes and sizes are in releases/v8.1-manifest.json.
 
