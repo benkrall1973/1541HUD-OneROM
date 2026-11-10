@@ -28,7 +28,7 @@ The plugin adds commands and values in the ranges RBCP reserves for implementati
 
 ## Sending bytes out through One ROM
 
-RBCP's Pipes group lets the host write bytes to a pipe on the device, and this plugin's pipe is One ROM's log channel — so a retro system can get its output to a PC over One ROM's USB, with no serial port or display of its own.  Read it with `onerom monitor log`, or any terminal on the CDC serial port.  See [Logging](/docs/LOGGING.md) for what else arrives there.
+RBCP's Pipes group lets the host write bytes to a pipe on the device, and this plugin's pipe is One ROM's log channel — so a retro system can get its output to a PC over One ROM's USB, with no serial port or display of its own.  Read it with `onerom monitor log`, or any terminal on the CDC serial port.  See [Logging](../../../../source/one-rom-v0.8.1/docs/LOGGING.md) for what else arrives there.
 
 Four bytes per command, transferred whole or not at all.  A refusal means the channel is full because nothing has drained it, and `GET_PIPE_INFO` reports the room left so a host can decide whether to retry or drop the bytes.  The device never blocks waiting for space, because no further RBCP command can be issued until the current one completes — a device that waited on a stalled USB link would stall the whole session.
 

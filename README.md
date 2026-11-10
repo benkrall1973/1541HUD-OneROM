@@ -96,7 +96,7 @@ before connecting a board to the drive. In particular:
   or serve the drive ROM.
 - ROM and IEC Apply+Save were tested with a normal powered USB cable. A full
   USB power cycle is no longer required for those changes. Drive power-off
-  detection remains a separate, deferred feature.
+  sensing was dropped from planned work; it is not required for this workflow.
 
 ## What is included
 
@@ -151,7 +151,16 @@ values, image contents, and the full acceptance sequence.
 
 ## Run 1541HUD
 
-On Windows, run:
+Install Python 3.12 or newer for Windows with **pip, Tcl/Tk, and the Python launcher**.
+From the repository root, install the USB serial dependency into the same
+Python installation used by the launcher:
+
+```powershell
+py -3 -m pip install -r ./1541hud/requirements.txt
+py -3 -c "import tkinter, serial; print('1541HUD dependencies ready')"
+```
+
+Then run:
 
 ```text
 1541hud/source/Run-1541HUD-V0.8.0.51.cmd
@@ -162,6 +171,11 @@ number. Assign the Control and Monitor roles in **Settings**, then use the
 dashboard cards to inspect telemetry or issue Control commands. A connected
 UB4 is optional; UB3 remains usable for ROM, IEC, reset, and write-protect
 functions without it.
+
+See [1541HUD setup and troubleshooting](1541hud/README.md) if Python is not
+found, no USB boards appear, or you want to build a standalone application.
+The Python source is distributed here; the bundled Windows EXE is the OneROM
+CLI, not a standalone 1541HUD application.
 
 ## Custom ROM images
 
@@ -201,6 +215,7 @@ Run the package check before publishing a derivative:
 
 ## Documentation map
 
+- [Current maintenance review and retained limitations](docs/MAINTENANCE_REVIEW_2026-11-10.md)
 - [Release images and hashes](docs/PUBLIC_FIRE24G_RELEASES.md)
 - [Verified wiring and reset behavior](docs/FIRE24G-VERIFIED-WIRING.md)
 - [Engineering dossier: GPIO, LEDs, reset, architecture](docs/FIRE24G_V81_ENGINEERING_DOSSIER.md)

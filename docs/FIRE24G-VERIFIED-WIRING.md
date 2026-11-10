@@ -40,8 +40,9 @@ the 74LS138 C/A/E image to this direct two-page wiring.
 Use a normal USB data cable, including one that supplies 5 V. ROM and IEC
 Apply+Save were tested while OneROM remained powered by USB. No data-only
 cable or USB power blocker is required for these saved settings.
-This does not add drive power-off sensing: automatic detection
-of a drive power cycle while OneROM stays USB-powered remains deferred.
+This does not add automatic drive power-off sensing. That feature was dropped
+from planned work because the USB-powered reboot workflow meets the settings
+reload requirement.
 
 ## C46 reset path
 
@@ -73,9 +74,17 @@ and collector to **P6 pin 12**. The transistor pulls that write-protect node
 low only when `ROMWP=ON`; firmware otherwise drives `SEL_C` LOW, leaving the
 override off after startup. Never connect a OneROM GPIO directly to P6 pin 12.
 
+For the specified KSC2383YTA, pin 1 is emitter, pin 2 collector, and pin 3
+base. Verify the manufacturer's pin diagram and viewing direction before
+assembly; other NPN parts can have different pin orders.
+
 Optional write-protect sensing is separate: feed P6 pin 12 through a 22 kOhm
 resistor to `SEL_D` (GPIO24), with another 22 kOhm resistor from `SEL_D` to
 ground. UB4 has no write-protect wiring or authority.
+
+The divider senses the shared WP node. When override is active, Q1 forces
+that node low and physical disk WP status is masked; the HUD indicates this.
+Turn override off to observe the physical sensor state.
 
 ## Reset electrical estimate
 

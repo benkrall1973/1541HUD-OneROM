@@ -1,0 +1,2 @@
+# Runtime USB transport dependency. Tkinter is supplied by the Python install.
+pyserial==3.5

@@ -1,17 +1,21 @@
 # Fire-24G release checklist
 
 Use this checklist before publishing a new firmware image, 1541HUD revision,
-or GitHub Release. A release is a promise to other people; do not turn it into
-an archaeological dig later.
+or GitHub Release. Record the source, artifacts and acceptance scope together
+so later maintainers can identify the exact published configuration.
 
 ## Prepare
 
 - [ ] Start from a clean checkout of the intended commit.
 - [ ] Record the pinned upstream OneROM revision and every project overlay
   included in the build.
-- [ ] Confirm that no third-party DOS ROM, private manifest, serial number,
-  local path, or unrelated binary is staged.
+- [ ] Confirm that no optional DOS ROM collection, private manifest, serial
+  number, local path, or unrelated binary is staged. Only the explicitly
+  named stock baseline inputs/images are permitted; retain their notices.
 - [ ] Run `./tools/maintenance/Test-Public-Package.ps1 -PackageRoot .`.
+- [ ] Run `python tools/maintenance/Check-Documentation.py`.
+- [ ] Confirm the README prerequisites and launch instructions work from a
+  fresh Python installation, including the documented pyserial dependency.
 
 ## Build and inspect
 

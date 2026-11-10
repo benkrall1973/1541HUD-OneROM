@@ -32,6 +32,9 @@ function Get-Sha256Hex {
 
 $required = @(
     'README.md',
+    '1541hud/README.md',
+    '1541hud/requirements.txt',
+    'tools/maintenance/Check-Documentation.py',
     'LICENSE',
     'NOTICE.md',
     'CONTRIBUTING.md',

@@ -23,7 +23,7 @@ future repository and not a substitute for the build or wiring guides.
 
 | Area | Why it is excluded |
 | --- | --- |
-| `roms/` payloads and any ROM-derived page image | Third-party/proprietary or unverified redistribution status. |
+| `roms/` payloads and additional ROM-derived page images | Excluded except for the explicitly named, hash-checked stock baseline inputs above. |
 | Any composed `.bin` except the two named stock Fire-24G release images | Custom or third-party DOS payloads must not be distributed. |
 | `firmware-*/releases/`, historical EXEs, `outputs/`, `work/`, and build kits | Generated artifacts, old candidates, or third-party material not yet cleared for public redistribution. |
 | `c64-onerom-configurator/` | Deferred until its Control-board discovery issue is separately repaired and qualified. |
@@ -50,8 +50,9 @@ At minimum the templates need:
 
 The public documentation must say which files are needed, where they are
 expected, their exact 8 KiB size, and their private-build SHA-256 reference.
-It must not provide download links to copyrighted ROMs or the bytes
-themselves.
+Do not add optional DOS ROM download links or payloads. The existing named
+stock baseline inputs and release images are explicit package exceptions,
+not permission to redistribute additional ROMs. See [notices](../NOTICE.md).
 
 ## Deferred scope
 

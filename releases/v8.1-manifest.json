@@ -39,6 +39,6 @@
     "file": "onerom-v0.6.0-hud1.exe",
     "bytes": 7900672,
     "sha256": "FAACDDD0D050EC824A0766FABB110369F73A2031B49AF5882E5103DDBE02B734",
-    "scope": "Windows release build, native CLI/ZIP regressions and offline inspection of both published images; no hardware programmed."
+    "scope": "Windows release build and native CLI/ZIP regressions; offline image inspection plus recorded loose-board discovery, verified programming, USB-powered reboot and saved-setting checks. Actual drive and full USB power-cycle qualification remain pending."
   }
 }

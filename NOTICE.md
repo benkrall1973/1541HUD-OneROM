@@ -23,9 +23,24 @@ See `source/one-rom-v0.8.1/LICENSE.md` and the upstream project at
 Vendored dependencies retain their own licenses and copyright notices. Their
 license files must remain with any redistribution of the relevant source.
 
-## ROMs and other excluded payloads
+## Stock baseline inputs and excluded ROM collections
 
-No third-party DOS ROMs or ROM-derived pages are distributed by this
-repository. The presence of a ROM-free template or documentation reference
-does not grant permission to copy, download, or redistribute any DOS ROM.
+The public package deliberately includes two named stock firmware images in
+`releases/`. The Control stock image contains Commodore 1541 DOS 2.6. The
+Monitor composition inputs in `firmware-monitor/inputs/` include the stock
+C000 page `1541-c000.325302-01.bin` and the OneROM Universal bootloader.
+The package validator checks these named inputs and images against recorded
+hashes. See [release contents](docs/PUBLIC_FIRE24G_RELEASES.md) and the
+[package boundary](docs/PUBLIC_PACKAGE_MANIFEST.md).
+
+The root MIT license covers project-authored integration materials; it does
+not grant rights to the Commodore ROM payload or other third-party material.
+Inclusion in the baseline and hash verification are not a separate license
+grant. The upstream bootloader and other dependencies retain their applicable
+upstream notices.
+
+Optional JiffyDOS, SpeedDOS, DolphinDOS and other private DOS collections,
+their ROM-derived pages, and custom composed images are excluded. Builders
+must supply ROM pages they are entitled to use. A template or documentation
+reference does not grant permission to copy or redistribute those ROMs.
 

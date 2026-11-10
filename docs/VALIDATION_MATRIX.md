@@ -2,8 +2,8 @@
 
 This table distinguishes what this repository documents as verified from what
 remains a builder responsibility. "Verified" means tested in the documented
-Fire-24G / 1541 long-board installation; it does not magically certify every
-1541 revision, cable, ROM, or modification ever made by humanity.
+Fire-24G / 1541 long-board installation. Other board revisions, cables, ROM
+sets and modifications require their own qualification.
 
 | Area | Status | Boundary |
 | --- | --- | --- |
