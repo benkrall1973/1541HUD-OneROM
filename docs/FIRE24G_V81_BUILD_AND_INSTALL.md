@@ -1,9 +1,14 @@
 # 1541HUD Fire-24G V8.1 Build and Installation Record
 
-This is the active, hardware-verified configuration for the paired OneROM
-installation in the 1541 long board. UB3 is the state-changing **Control**
-board; UB4 is the electrically passive **Monitor** board. Do not exchange
-their firmware, USB roles, or wiring.
+This records the active configuration for the paired OneROM installation in
+the 1541 long board. Control core/plugins and Monitor operation were tested
+in the drive. The exact public stock Control composition passed 47 loose-board
+checks on 2026-11-10; its drive-operation and full-power-cycle qualification
+remain pending. See the [baseline runbook](V81_BASELINE_RUNBOOK.md) for the
+image-specific test scope.
+
+UB3 is the state-changing **Control** board; UB4 is the electrically passive
+**Monitor** board. Do not exchange their firmware, USB roles, or wiring.
 
 ## Confirmed board identity
 
