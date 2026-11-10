@@ -37,13 +37,15 @@ time.
 > ideas, and troubleshooting, while learning and validating the hardware as I
 > go.
 
-This repository is the public Fire-24G baseline built from a pinned,
-**unreleased** OneROM V8.1 development snapshot from
-[Piers Finlayson's upstream `releases/0.8.1` branch](https://github.com/piersfinlayson/one-rom/tree/releases/0.8.1).
-It is a community-tested integration, not an official upstream OneROM V8.1
-release. It includes qualified source, wiring records, the 1541HUD Python
+This repository is the public Fire-24G baseline built from the official
+OneROM v0.8.1 release, pinned at commit
+`1b189260d85a5feced19e969399986f5f1d1cabe`, with the custom 1541HUD plugins
+and role-specific build overlays. The integration is community-tested.
+See the [baseline runbook](docs/V81_BASELINE_RUNBOOK.md) for versions and test scope.
+It includes qualified source, wiring records, the 1541HUD Python
 application, ROM-free templates, and two ready-to-flash stock images. It
-deliberately does **not** distribute third-party DOS ROMs.
+does not distribute optional third-party DOS collections beyond the documented
+stock baseline inputs/images. Supply your own lawful ROM pages for custom sets.
 
 ## AI-assisted builds
 
@@ -179,7 +181,7 @@ firmware binaries back to a public fork.
 
 ## Building from source
 
-The qualified source-build host is WSL2 or Linux with ARM GNU Toolchain 14.2.1,
+The qualified source-build host is WSL2 or Linux with ARM GNU Toolchain 15.3.Rel1,
 GNU Make, and a POSIX shell; Rust/Cargo is also required for Control builds.
 Native Windows remains supported for 1541HUD and the bundled OneROM CLI, which
 is sufficient for inspecting and flashing release images, but it is not a

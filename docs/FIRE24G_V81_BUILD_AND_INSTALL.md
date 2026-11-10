@@ -103,8 +103,7 @@ for the OneROM CLI, USB inspection/flashing, and the 1541HUD application.
 
 The Monitor PowerShell entry point also accepts `-Toolchain` and
 `-OneRomCli` arguments for an installed-but-not-on-PATH toolchain. This keeps
-the repository portable instead of baking in somebody's Desktop path, because
-that sort of thing is how "reproducible" builds become performance art.
+the repository portable without embedding operator-specific paths.
 `Build-Control-V8.1-Clean.cmd` remains an optional native Windows composition
 helper for an already-built core and plugins. Invoke it as
 `Build-Control-V8.1-Clean.cmd private-roms/<your-config>.json output/<name>.bin`.
@@ -114,7 +113,7 @@ It is not the supported fresh public source-build path.
 
 1. Shut down 1541HUD so it releases both CDC ports.
 2. Use `onerom --unrecognised scan` and verify the target serial. Do not flash
-   the other board because two red boards look alike, obviously.
+   the other board; select the target explicitly by serial.
 3. Program with `--verify`, reboot normally, and inspect the installed plugin
    versions/slots before reconnecting 1541HUD.
 4. UB3: verify ROM save/readback, IEC 8 and 9 save/readback, write-protect

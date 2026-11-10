@@ -7,14 +7,16 @@ because its current project exposure is limited.
 
 ## Release baseline
 
-This triage applies to `v8.1.0-fire24g-r1`, which vendors a pinned, unreleased
-OneROM V8.1 development snapshot. The public release contains two firmware
-images; neither image embeds the Rust host CLI or its archive parser.
+The current baseline is the official OneROM v0.8.1 source pinned at
+`1b189260d85a5feced19e969399986f5f1d1cabe`. The custom integration supplies
+two firmware images; neither embeds the Rust host CLI or its archive parser.
+The alert numbers and candidate resolutions below are historical records from
+the preceding development baseline, not a current GitHub alert inventory.
 
 ## Candidate resolution under review
 
-The `security/dependency-updates` branch contains a runner-generated candidate
-resolution, not a released-image claim:
+The former `security/dependency-updates` branch recorded a runner-generated
+candidate resolution, not a released-image claim:
 
 - both direct Zip constraints are `zip = "9.0.5"`; Cargo resolves one **Zip
   9.4.0** package;
@@ -26,7 +28,8 @@ Rust 1.88 was insufficient for the pinned V8.1 snapshot: upstream metadata
 uses `NonNull::from_ref`, and its expanded workspace includes tooling needing
 Rust 1.89–1.93. The public Control wrapper therefore now requires Cargo 1.93
 or newer. Full Control/Monitor source builds and any resulting image hardware
-acceptance remain required before an r2 release.
+acceptance remain required before adopting that dependency candidate. The
+official v0.8.1 firmware source is retained unchanged in the current baseline.
 
 ## Original-release alert classification
 

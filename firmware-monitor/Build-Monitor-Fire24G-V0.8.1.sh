@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build an unqualified UB4 candidate; never use the UB3 reset overlay here.
+# Build UB4 Monitor from the tested source; never use the UB3 reset overlay.
 set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 upstream="$root/source/one-rom-v0.8.1"

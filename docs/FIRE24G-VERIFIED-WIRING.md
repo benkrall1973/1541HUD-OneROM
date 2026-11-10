@@ -1,8 +1,7 @@
 # Fire-24G verified wiring and reset behavior
 
 This document records the hardware configuration verified on the 1541 long
-board using the Fire-24G OneROM image on the public `v8.1.0-fire24g` branch
-(currently identical to `main`).
+board using the Fire-24G OneROM integration on the public `v8.1` branch.
 
 ## Selector mapping
 
@@ -38,9 +37,10 @@ the 74LS138 C/A/E image to this direct two-page wiring.
 
 ## USB-powered operation
 
-ROM and IEC Apply+Save were tested while OneROM remained powered by a normal
-USB cable. A special VBUS-blocked cable is no longer required to apply these
-saved settings. This does not add drive power-off sensing: automatic detection
+Use a normal USB data cable, including one that supplies 5 V. ROM and IEC
+Apply+Save were tested while OneROM remained powered by USB. No data-only
+cable or USB power blocker is required for these saved settings.
+This does not add drive power-off sensing: automatic detection
 of a drive power cycle while OneROM stays USB-powered remains deferred.
 
 ## C46 reset path

@@ -36,12 +36,13 @@ mkdir -p "$(dirname -- "$output")"
 # The narrow metadata-gated overlay is a UB3 safety interlock, not a fork.
 rm -rf "$work"
 mkdir -p "$work"
-cp -a "$upstream" "$core"
+mkdir -p "$core"
+git -C "$root" archive HEAD:source/one-rom-v0.8.1 | tar -x -C "$core"
 # The tracked Windows checkout carries CRLF in this source file; normalise the
 # disposable build copy before applying the POSIX patch.
 sed -i 's/\r$//' "$core/firmware/src/rp235x.c"
 # Fail immediately if the reset overlay cannot be applied.
-patch -d "$core" -p1 < "$overlay"
+patch --fuzz=0 -d "$core" -p1 < "$overlay"
 grep -Fq "UB3 Control reset interlock" "$core/firmware/src/rp235x.c" || {
   echo "Failed to apply UB3 reset interlock overlay." >&2
   exit 1
@@ -53,9 +54,9 @@ make -C "$core" TOOLCHAIN="${TOOLCHAIN:-/usr/bin}" all
 # those exact dependencies; the custom USB plugin then uses the same copies.
 make -C "$core/plugins/system/usb" TOOLCHAIN="${TOOLCHAIN:-/usr/bin}"
 make -C "$usb" clean
-make -C "$usb" ONEROM_ROOT="$core"
+make -C "$usb" ONEROM_ROOT="$core" all
 make -C "$host" clean
-make -C "$host" ONEROM_ROOT="$core"
+make -C "$host" ONEROM_ROOT="$core" all
 
 "$core/rust/target/release/onerom" --verbose firmware build \
   --board fire-24-g \

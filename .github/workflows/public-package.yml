@@ -2,7 +2,7 @@ name: Validate public package
 
 on:
   push:
-    branches: [main, v8.1, v8.1.0-fire24g]
+    branches: [v8.1]
   pull_request:
   workflow_dispatch:
 
