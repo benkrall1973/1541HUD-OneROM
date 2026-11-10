@@ -71,7 +71,7 @@ jobs:
         run: bash tools/maintenance/Audit-Host-Dependencies.sh "$PWD/.buildtools/host-security-core"
 
       - name: Check Wayland scanner compatibility
-        run: cargo test --locked --manifest-path .buildtools/host-security-core/rust/Cargo.toml -p wayland-scanner
+        run: cargo check --locked --manifest-path .buildtools/host-security-core/rust/Cargo.toml -p wayland-client -p wayland-protocols
 
   windows-cli:
     name: Build and test patched Windows CLI

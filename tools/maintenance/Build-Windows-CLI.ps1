@@ -15,9 +15,9 @@ tar -xf $tar -C $core
 Check-Exit
 bash tools/maintenance/Apply-Host-Dependencies.sh ($core.Replace('\','/'))
 Check-Exit
-Copy-Item tools/maintenance/tests/host_dependency_zip.rs (Join-Path $core 'rust/fw/tests/hud_host_dependency_zip.rs')
 python tools/maintenance/Prepare-Host-Fixtures.py $core
 Check-Exit
+Copy-Item tools/maintenance/tests/host_dependency_zip.rs (Join-Path $core 'rust/fw/tests/hud_host_dependency_zip.rs')
 $env:HUD_ZIP_FIXTURES = Join-Path $core 'rust/fw/tests/hud-generated-fixtures'
 Push-Location (Join-Path $core 'rust')
 try {
