@@ -1,91 +1,88 @@
 # Host-tool dependency security overlay
 
-The official OneROM v0.8.1 tree under source/one-rom-v0.8.1 remains unchanged.
-Supported Control and Monitor wrappers export it into disposable build trees,
-then apply overlays/host-dependencies-v0.8.1.patch before compiling Rust tools.
-The role-specific C firmware overlays are applied separately.
+The official OneROM v0.8.1 source remains unchanged at
+source/one-rom-v0.8.1. Supported builds export it into disposable work trees
+and apply overlays/host-dependencies-v0.8.1.patch. Role-specific C firmware
+overlays are separate. Every patched build checks the overlay and lockfile
+hashes against overlays/host-dependencies-v0.8.1.json and uses Cargo --locked.
 
-The host overlay updates the ROM-fetching library and CLI to ZIP 9.5.0 and
-locks Rustls 0.23.46. Compatible lockfile updates also select ctutils 0.4.4,
-libz-sys 1.1.31, webpki-roots 1.0.10 and quinn-proto 0.11.18. The accompanying
-JSON records exact versions and SHA-256 hashes of the patch and resulting lock.
-Version selection follows the [ZIP release](https://github.com/zip-rs/zip2/releases/tag/v9.5.0)
-and the [RustSec Rustls advisories](https://rustsec.org/advisories/RUSTSEC-2026-0346).
-The helper verifies them after applying the patch with zero fuzz. Rust build
-commands use --locked so dependency resolution cannot change silently.
+## Current dependency resolution
 
-## Scope
+The overlay selects ZIP 9.5.0, Rustls 0.23.46, ctutils 0.4.4, libz-sys 1.1.31,
+webpki-roots 1.0.10, quinn-proto 0.11.18, Quick-XML 0.41.0,
+wayland-scanner 0.31.11, Git2 0.21.0, built 0.8.1, Tokio 1.54.1,
+event-listener 5.4.2, async-executor 1.14.1, chacha20 0.10.2 and
+clipboard-win 5.4.3. CLI and Studio build dependencies both select Git2 0.21;
+this avoids retaining an older Git2 through feature unification.
 
-These dependencies run on the build/CLI host. They are not libraries in the
-RP2350 C firmware. Published firmware images, ROM collections, NV contents,
-GPIO wiring and plugin versions are not replaced by this change. No board
-needs flashing to update the source-built host tools.
+Quick-XML 0.41 fixes
+[RUSTSEC-2026-0194](https://rustsec.org/advisories/RUSTSEC-2026-0194.html) and
+[RUSTSEC-2026-0195](https://rustsec.org/advisories/RUSTSEC-2026-0195.html).
+The updated Wayland scanner supports that parser. CI compiles its actual
+wayland-client and wayland-protocols consumers.
 
-Use the supported wrappers or the combined Test-Source-Build.sh checker to
-obtain the patched tools. Building directly in the pristine upstream directory
-bypasses the overlay. The bundled Windows onerom-v0.5.0.exe is a legacy binary
-and is not rebuilt or covered by this overlay's validation. Use the freshly
-built CLI for archive retrieval/composition; do not treat the old executable
-as a patched host-tool distribution.
+These are host dependencies. They are not libraries in the RP2350 C firmware.
+The drive-tested Control and Monitor image bytes, plugin versions, ROM
+collection and NV settings are unchanged. Updating the CLI needs no flashing.
 
-## Validation commands
+## Windows distribution
 
-After the Control wrapper has prepared its core tree, set core to
-firmware-control/.work/control-core-v0.8.1/one-rom-v0.8.1 and run:
+The supported Windows executable is tools/onerom-v0.6.0-hud1.exe, built from
+the pinned upstream CLI 0.6.0 with this overlay. hud1 identifies this community
+distribution; --version continues to report upstream 0.6.0. It is unsigned.
+See [Windows CLI build and use](WINDOWS_CLI.md), tools/windows-cli-manifest.json,
+and the accompanying dependency inventory and license notices.
+
+The prior onerom-v0.5.0.exe is retired from the current tree. Historical
+commits/releases still retain it. A direct build in the pristine upstream
+directory bypasses the overlay; use the supported scripts.
+
+## Validation
+
+Linux/WSL host checks:
 
 ```sh
-bash tools/maintenance/Test-Host-Dependencies.sh "$PWD/$core"
+bash tools/maintenance/Test-Host-Dependencies.sh /path/to/prepared-core
 cargo install cargo-audit --version 0.22.2 --locked
-bash tools/maintenance/Audit-Host-Dependencies.sh "$PWD/$core"
+bash tools/maintenance/Audit-Host-Dependencies.sh /path/to/prepared-core
 ```
 
-The test helper uses actual onerom-fw archive loading with synthetic stored
-and deflated members, cache/no-cache behavior, missing members, truncated
-archives, invalid ZIP bytes and damaged CRCs. It also runs CLI unit tests.
-Image conversion/transformation and general CLI integration tests also run.
-USB-discovery suites run only when the Linux USB sysfs directory exists;
-otherwise the helper prints an explicit skip. The broad upstream firmware
-download suite is outside this focused check. Generated fixtures and added
-integration tests stay in the disposable tree.
-Public CI repeats these checks against a fresh source export.
+The ZIP regressions exercise actual onerom-fw archive loading with synthetic
+stored/deflated members, missing members, invalid/truncated ZIPs and CRC
+damage. CLI unit, image conversion/transformation and general integration
+tests run. USB-discovery suites require USB sysfs on Linux; unavailable sysfs
+is reported as an explicit skip. Windows CI runs the native argument and scan
+regressions against the tests' nonexistent VID/PID, not an attached board.
 
-The audit helper scans the whole prepared workspace, then compares findings
-against the all-target normal/build dependency graph of onerom-cli and
-onerom-metadata. Vulnerabilities in that supported graph fail the check. Other
-workspace findings remain printed and recorded; they are not silently ignored.
-Advisory warnings are reported separately. A reused advisory database is a
-snapshot; use a fresh directory for a fresh database fetch.
+Windows builds and release-profile tests use Build-Windows-CLI.ps1.
+Full ARM CI uses Test-Source-Build.sh to compile the official cores and all
+four custom plugins, compose both images, and inspect them with the
+source-built CLI. Its Control image contains synthetic pages and must never
+be flashed. CI publishes logs and hash records, not the synthetic images.
 
-## Remaining boundaries
+## Audit policy and remaining boundaries
 
-The pristine vendored lockfile still describes older dependencies. GitHub may
-continue reporting alerts against that stored snapshot even when the supported
-build applies the overlay. This change does not dismiss those alerts.
+The audit now fails on any vulnerability record in the complete prepared
+workspace lockfile, any yanked package, or an unsoundness advisory in the
+supported CLI/metadata normal/build dependency graph across all targets.
+Warnings remain printed with their scope; there is no advisory ignore list.
 
-The prepared-workspace scan still reports Quick-XML 0.39.4 advisories
-RUSTSEC-2026-0194 and RUSTSEC-2026-0195. Quick-XML is outside the supported
-CLI/metadata dependency graph. Updating the separate tooling that uses it
-requires its own compatibility work; a workspace-wide clean audit is not
-claimed. Continue using trusted ROM/configuration inputs: patched dependencies
-do not provide resource limits for arbitrary archives.
+The 2026-11-10 fresh database scan found zero vulnerability records and zero
+yanked packages. No unsoundness advisory remains in the supported host graph.
+Two LRU unsoundness records remain in the unused upstream Studio graphics
+chain (iced_glyphon -> iced_wgpu -> Studio); neither CLI nor firmware uses it.
+Unmaintained-package warnings also remain in upstream GUI, prototype and
+development dependencies. Replacing that GUI stack is separate work; this
+integration does not build or distribute Studio.
 
-## Recorded results: 2026-11-09
+The pristine vendored source and its older lockfiles remain preserved for
+provenance. GitHub can therefore continue reporting alerts against them,
+including the excluded Studio prototype. A clean supported build does not
+mean those historical source alerts have vanished. Use trusted ROM/config
+inputs: patched archive libraries do not impose resource limits on arbitrary
+archives.
 
-Both complete firmware builds, composition and inspection passed with the
-final overlay using Cargo 1.99.0 and Arm GNU 15.3.Rel1. Host tests passed 573
-checks with eight upstream tests ignored. USB-discovery suites were explicitly
-skipped because this WSL environment has no USB sysfs directory. All 48 HUD
-tests and public-package validation passed. No board was programmed.
-
-Cargo-audit 0.22.2 with advisory database commit
-d9cb059f3217db87aeccd190b81eaffe8cc29cb9 found 27 vulnerability records in the
-pristine workspace lock and two in the overlaid lock. The two remaining
-Quick-XML records are outside the supported host graph; that graph has zero
-vulnerability records in this snapshot. Unmaintained/unsound/yanked advisory
-warnings are still reported. These counts are advisory records, not a claim
-about exploitability of the installed drive firmware.
-
-Exact versions, patch/lock hashes and test scope are recorded in
-host-dependency-validation.json. Published firmware and the legacy Windows
-executable are unchanged; no release-image or Windows-binary replacement is
-claimed by these source-build results.
+The previous 2026-11-09 validation is historical. Its hashes and counts in
+host-dependency-validation.json describe the earlier overlay, not hud1.
+Current evidence is recorded in qualification/host-maintenance-2026-11-10.json
+and the linked CI run.

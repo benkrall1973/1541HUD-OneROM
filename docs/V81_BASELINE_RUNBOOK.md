@@ -80,8 +80,9 @@ archived privately under archive/public-2026-11-09/. The old r1 release and
 its original downloaded images are also backed up privately. The current
 release replaces the old pinned Monitor firmware. Historical recovery images
 remain private; this cleanup does not rewrite public Git history.
-Automatic drive power-off sensing and the separate C64 configurator release
-remain deferred. RBCP support stays present. RPM assumes standard DOS SYNC
+Automatic drive power-off sensing was dropped: saved ROM and IEC address
+settings are reapplied on reboot while USB remains powered. The separate C64
+configurator release remains deferred. RBCP support stays present. RPM assumes standard DOS SYNC
 counts; nonstandard disk formats need separate qualification.
 
 Both complete source builds and the repeatable checker passed on 2026-11-09.

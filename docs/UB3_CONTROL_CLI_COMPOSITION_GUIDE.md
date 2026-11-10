@@ -82,7 +82,7 @@ bash consolidation/scripts/build-control-v0.8.1.sh \
   output/onerom-ub3-control-fire24g.bin
 ```
 
-The bundled Windows `tools/onerom-v0.5.0.exe` is for inspecting and flashing
+The bundled Windows `tools/onerom-v0.6.0-hud1.exe` is for inspecting and flashing
 the public release images; it does not replace ARM GCC, Make, Cargo, and a
 POSIX shell required for a fresh source build.
 

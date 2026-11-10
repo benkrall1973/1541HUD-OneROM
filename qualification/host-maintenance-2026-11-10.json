@@ -1,0 +1,182 @@
+{
+  "date": "2026-11-10",
+  "upstream": "1b189260d85a5feced19e969399986f5f1d1cabe",
+  "overlay": {
+    "upstream": "1b189260d85a5feced19e969399986f5f1d1cabe",
+    "packages": {
+      "zip": "9.5.0",
+      "rustls": "0.23.46",
+      "ctutils": "0.4.4",
+      "libz-sys": "1.1.31",
+      "webpki-roots": "1.0.10",
+      "quinn-proto": "0.11.18",
+      "quick-xml": "0.41.0",
+      "wayland-scanner": "0.31.11",
+      "git2": "0.21.0",
+      "built": "0.8.1",
+      "tokio": "1.54.1",
+      "event-listener": "5.4.2",
+      "async-executor": "1.14.1",
+      "chacha20": "0.10.2",
+      "clipboard-win": "5.4.3"
+    },
+    "lock_sha256": "fdef097186cf3384b35b9efc9f9d7c51e705dca3c1c9549df8eabc6829048d11",
+    "patch_sha256": "1c57b31237e2eec2a1deb78d18d677559464fe038906897641e272d95c379f1a"
+  },
+  "audit": {
+    "tool": "cargo-audit 0.22.2",
+    "database_commit": "28d73fc95e5972af3403225a217def57dcaba3c4",
+    "workspace_vulnerabilities": 0,
+    "yanked_packages": 0,
+    "supported_host_unsoundness": 0,
+    "warnings": {
+      "unmaintained": [
+        {
+          "package": "bare-metal",
+          "version": "0.2.5",
+          "advisory": "RUSTSEC-2026-0110"
+        },
+        {
+          "package": "basic-toml",
+          "version": "0.1.10",
+          "advisory": "RUSTSEC-2026-0374"
+        },
+        {
+          "package": "bincode",
+          "version": "2.0.1",
+          "advisory": "RUSTSEC-2025-0141"
+        },
+        {
+          "package": "instant",
+          "version": "0.1.13",
+          "advisory": "RUSTSEC-2024-0384"
+        },
+        {
+          "package": "paste",
+          "version": "1.0.15",
+          "advisory": "RUSTSEC-2024-0436"
+        },
+        {
+          "package": "pin-utils",
+          "version": "0.1.0",
+          "advisory": "RUSTSEC-2026-0441"
+        },
+        {
+          "package": "proc-macro-error2",
+          "version": "2.0.1",
+          "advisory": "RUSTSEC-2026-0173"
+        },
+        {
+          "package": "rustybuzz",
+          "version": "0.14.1",
+          "advisory": "RUSTSEC-2026-0206"
+        },
+        {
+          "package": "rustybuzz",
+          "version": "0.20.1",
+          "advisory": "RUSTSEC-2026-0206"
+        },
+        {
+          "package": "ttf-parser",
+          "version": "0.20.0",
+          "advisory": "RUSTSEC-2026-0192"
+        },
+        {
+          "package": "ttf-parser",
+          "version": "0.21.1",
+          "advisory": "RUSTSEC-2026-0192"
+        },
+        {
+          "package": "ttf-parser",
+          "version": "0.25.1",
+          "advisory": "RUSTSEC-2026-0192"
+        },
+        {
+          "package": "zbus_names",
+          "version": "3.0.0",
+          "advisory": "RUSTSEC-2026-0371"
+        },
+        {
+          "package": "zbus_names",
+          "version": "4.3.3",
+          "advisory": "RUSTSEC-2026-0371"
+        },
+        {
+          "package": "zvariant",
+          "version": "4.2.0",
+          "advisory": "RUSTSEC-2026-0370"
+        },
+        {
+          "package": "zvariant",
+          "version": "5.13.0",
+          "advisory": "RUSTSEC-2026-0370"
+        },
+        {
+          "package": "zvariant_derive",
+          "version": "4.2.0",
+          "advisory": "RUSTSEC-2026-0372"
+        },
+        {
+          "package": "zvariant_derive",
+          "version": "5.13.0",
+          "advisory": "RUSTSEC-2026-0372"
+        }
+      ],
+      "unsound": [
+        {
+          "package": "lru",
+          "version": "0.12.5",
+          "advisory": "RUSTSEC-2026-0002"
+        },
+        {
+          "package": "lru",
+          "version": "0.12.5",
+          "advisory": "RUSTSEC-2026-0253"
+        }
+      ]
+    }
+  },
+  "ci_run": "https://github.com/benkrall1973/1541HUD-OneROM/actions/runs/42834966792",
+  "ci_conclusion": "success",
+  "arm_build": {
+    "source_commit": "a0e254ac38921f897f6e1ca4a86966639f011502",
+    "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)",
+    "compiler": "arm-none-eabi-gcc (Arm GNU Toolchain 15.3.Rel1 (Build arm-15.149)) 15.3.1 20260627",
+    "host_overlay_sha256": "1c57b31237e2eec2a1deb78d18d677559464fe038906897641e272d95c379f1a",
+    "images": [
+      {
+        "file": "CONTROL-SYNTHETIC-DO-NOT-FLASH.bin",
+        "bytes": 262144,
+        "sha256": "e006ec6ad0a6ccefdff26711ca938da8b5507f623e106c167dcac24bb5cf34a5",
+        "scope": "Synthetic ROM pages; never flash"
+      },
+      {
+        "file": "monitor-build-check.bin",
+        "bytes": 229376,
+        "sha256": "a04a302c6a36d6ce0597cbd08071210b26fd1dba122d6e1ad63dc723bde4917e",
+        "scope": "Build verification only; not the hardware-accepted release image"
+      }
+    ],
+    "hardware_programmed": false
+  },
+  "windows_cli": {
+    "name": "1541HUD Windows CLI",
+    "upstream_cli": "0.6.0",
+    "distribution": "hud1",
+    "source_commit": "a0e254ac38921f897f6e1ca4a86966639f011502",
+    "upstream": "1b189260d85a5feced19e969399986f5f1d1cabe",
+    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)",
+    "target": "x86_64-pc-windows-msvc",
+    "overlay_sha256": "1C57B31237E2EEC2A1DEB78D18D677559464FE038906897641E272D95C379F1A",
+    "lock_sha256": "FDEF097186CF3384B35B9EFC9F9D7C51E705DCA3C1C9549DF8EABC6829048D11",
+    "file": "onerom-v0.6.0-hud1.exe",
+    "bytes": 7900672,
+    "sha256": "FAACDDD0D050EC824A0766FABB110369F73A2031B49AF5882E5103DDBE02B734",
+    "scope": "Windows release build, native CLI/ZIP regressions and offline inspection of both published images; no hardware programmed."
+  },
+  "license_packages": 299,
+  "firmware_images_changed": false,
+  "hardware_programmed": false,
+  "hardware_scope": "Windows binary locally started and inspected both published images offline; new CLI USB/BOOTSEL/NV hardware qualification remains pending."
+}

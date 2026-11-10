@@ -41,6 +41,26 @@ intentionally excluded from the public package. Run HUD tests with
 python -m unittest discover -s 1541hud/tests -v. The public CI also runs native
 Monitor protocol/RPM and Control cooperative-wait regression tests.
 
+## Full ARM CI
+
+The Full Fire-24G Control and Monitor ARM builds job runs the combined checker
+on Ubuntu with Rust/Cargo 1.99.0 and Arm GNU 15.3.Rel1. It uses the upstream
+toolchain installer and verifies the downloaded archive against Arm's checksum
+before extraction. Both role cores and all four custom plugins are compiled;
+both images are composed and inspected with the source-built CLI.
+
+The job uploads full-build.log and build-verification.json with source commit,
+tool versions and composed-image hashes. It deliberately does not publish the
+synthetic Control image as a downloadable firmware artifact. No board is
+accessed. Recorded source-build images do not replace the hardware-tested
+release images; changing build metadata can change their hashes.
+
+The first successful full ARM CI run for the refreshed dependency overlay is
+[42834966792](https://github.com/benkrall1973/1541HUD-OneROM/actions/runs/42834966792),
+source a0e254ac. Current evidence is recorded in
+qualification/host-maintenance-2026-11-10.json. The historical results below
+remain as a record of the earlier overlay and Monitor versions.
+
 ## Recorded verification: 2026-11-09
 
 Both roles were built from a fresh public v8.1 clone with Arm GNU 15.3.Rel1

@@ -10,8 +10,10 @@ the root [MIT License](LICENSE).
 ## OneROM upstream snapshot
 
 `source/one-rom-v0.8.1/` is a pinned snapshot of Piers Finlayson's OneROM
-development branch `releases/0.8.1`. It is **not** an official upstream V8.1
-release. Its software/firmware and documentation are licensed under the
+official v0.8.1 release source at commit
+`1b189260d85a5feced19e969399986f5f1d1cabe` on `releases/0.8.1`.
+The custom integration and patched host CLI are community builds, not official
+upstream binary distributions. Its software/firmware and documentation are licensed under the
 upstream MIT license; its hardware material has its own CERN-OHL-W-2.0 terms.
 See `source/one-rom-v0.8.1/LICENSE.md` and the upstream project at
 <https://github.com/piersfinlayson/one-rom>.

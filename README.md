@@ -104,7 +104,7 @@ before connecting a board to the drive. In particular:
 | --- | --- |
 | `releases/` | Ready-to-flash Fire-24G UB3 stock Control and UB4 Monitor images. |
 | `source/one-rom-v0.8.1/` | Exact signed official OneROM v0.8.1 source used by both build roles. |
-| `tools/onerom-v0.5.0.exe` | Bundled upstream OneROM CLI for Windows scan, inspection, and flashing. |
+| `tools/onerom-v0.6.0-hud1.exe` | Patched OneROM CLI 0.6.0 for Windows composition, scan, inspection, and flashing. |
 | `1541hud/` | 1541HUD Python source, launcher, build script, and tests. |
 | `firmware-control/` | UB3 Control source and 1541HUD Control plugins. |
 | `firmware-monitor/` | UB4 passive Monitor source and plugins. |
@@ -120,7 +120,7 @@ workflow. Close 1541HUD first so it releases the board USB ports.
 2. Open PowerShell in the repository root and discover the board:
 
    ```powershell
-   ./tools/onerom-v0.5.0.exe --unrecognised --board fire-24-g scan
+   ./tools/onerom-v0.6.0-hud1.exe --unrecognised scan --board fire-24-g
    ```
 
 3. Confirm the displayed serial is the board you intend to flash.
@@ -129,7 +129,7 @@ workflow. Close 1541HUD first so it releases the board USB ports.
    **UB3 Control - stock DOS 2.6 test image**
 
    ```powershell
-   ./tools/onerom-v0.5.0.exe --serial <SERIAL> program `
+   ./tools/onerom-v0.6.0-hud1.exe --serial <SERIAL> program `
      --firmware ./releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0.8.1.bin `
      --verify
    ```
@@ -137,7 +137,7 @@ workflow. Close 1541HUD first so it releases the board USB ports.
    **UB4 Monitor - passive telemetry image**
 
    ```powershell
-   ./tools/onerom-v0.5.0.exe --serial <SERIAL> program `
+   ./tools/onerom-v0.6.0-hud1.exe --serial <SERIAL> program `
      --firmware ./releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.32.bin `
      --verify
    ```

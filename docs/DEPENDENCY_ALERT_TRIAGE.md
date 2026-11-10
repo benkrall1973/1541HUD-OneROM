@@ -19,8 +19,16 @@ The supported Control/Monitor wrappers apply a checksummed host-only overlay
 in their exported core trees. It selects ZIP 9.5.0, Rustls 0.23.46 and compatible
 security updates for ctutils, libz-sys, webpki-roots and quinn-proto. See
 HOST_DEPENDENCY_OVERLAY.md for versions, verification commands and limitations.
-The checked-in upstream snapshot and legacy bundled Windows CLI are unchanged.
-This is not a claim that all vendored GitHub alerts have disappeared.
+The current overlay also updates Quick-XML through wayland-scanner, Git2,
+Tokio and event-listener, and removes the recorded yanked-package pins.
+The Windows CLI is rebuilt from this overlaid source as 0.6.0-hud1; the
+checked-in upstream snapshot remains unchanged. The prepared workspace has
+zero vulnerability records; supported CLI/metadata builds also have no
+unsoundness records. Upstream Studio-only LRU unsoundness and maintenance
+warnings remain visible. This is not a claim that all vendored GitHub alerts
+have disappeared. The tables below describe historical alert handling;
+HOST_DEPENDENCY_OVERLAY.md and the current qualification record supersede
+their old "keep open pending upgrade" status for supported host builds.
 
 ## Historical candidate resolution
 
