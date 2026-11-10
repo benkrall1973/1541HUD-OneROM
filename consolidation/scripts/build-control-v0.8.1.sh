@@ -34,8 +34,8 @@ fi
 mkdir -p "$(dirname -- "$output")"
 # Build from the exact official One ROM v0.8.1 source tracked in this tree.
 # The narrow metadata-gated overlay is a UB3 safety interlock, not a fork.
-rm -rf "$work"
-mkdir -p "$work"
+# Re-export tracked inputs before applying the overlay. Retain dependency and
+# compiler caches so a second verification does not rebuild the entire CLI.
 mkdir -p "$core"
 git -C "$root" archive HEAD:source/one-rom-v0.8.1 | tar -x -C "$core"
 # The tracked Windows checkout carries CRLF in this source file; normalise the

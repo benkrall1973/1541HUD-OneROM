@@ -9,7 +9,7 @@ their firmware, USB roles, or wiring.
 
 | Board | Role | Active firmware |
 | --- | --- | --- |
-| UB3 | Control | OneROM V8.1 Control, 8-ROM 74LS138 image |
+| UB3 | Control | Official v0.8.1; USB 0.8.1.16 / Host-Control 0.8.1.5 |
 | UB4 | Monitor | 1541HUD Monitor `v0.8.1.30` |
 
 Windows COM numbers are not identities and may change after every reconnect.
@@ -96,6 +96,8 @@ for the OneROM CLI, USB inspection/flashing, and the 1541HUD application.
 
 - ARM GNU Toolchain 15.3.Rel1 or compatible `arm-none-eabi-gcc`.
 - WSL2/Linux, GNU Make, and a POSIX shell for source builds.
+- Git, patch, tar, Python 3 and native C/C++ build tools; network access for
+  the pinned upstream dependencies and Cargo crates.
 - OneROM CLI 0.5.0 or compatible `onerom` executable. The validated Windows
   executable is included at `tools/onerom-v0.5.0.exe`; place it on `PATH` or
   pass its path to the build wrapper where needed.

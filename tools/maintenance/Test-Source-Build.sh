@@ -18,6 +18,7 @@ for path, kind in [
     sets.append(dict(type='single', roms=[dict(file=str(root / path), type=kind)]))
 sets.append(dict(type='multi', roms=[dict(file=str(page), type='2364', cs1='active_low') for _ in range(3)]))
 config = dict(version=1, name='SYNTHETIC BUILD CHECK - DO NOT FLASH',
+              description='Build verification only; contains synthetic ROM pages.',
               rom_sets=sets, reserved_pins=['sel_b', 'sel_c', 'sel_d'])
 (check / 'compose.json').write_text(json.dumps(config, indent=2))
 PY
