@@ -50,4 +50,6 @@ $record = [ordered]@{
     scope = 'Windows release build, native CLI/ZIP regressions and offline inspection of both published images; no hardware programmed.'
 }
 $record | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $output 'windows-cli-manifest.json') -Encoding utf8
+python tools/maintenance/Package-CLI-Licenses.py $core $output
+Check-Exit
 Write-Output "PASS: Windows CLI built and tested: $exe"
