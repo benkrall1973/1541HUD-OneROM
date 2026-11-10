@@ -44,3 +44,24 @@ jobs:
         run: |
           gcc -O2 -DORA_HOST_TEST -fshort-enums -DMAJOR_VERSION=0 -DMINOR_VERSION=8 -DPATCH_VERSION=1 -DBUILD_VERSION=5 -DNV_ERASE_FN_MAX=80 -ffunction-sections -fdata-sections -I source/one-rom-v0.8.1/firmware/ora -I firmware-control/active-plugins/user/1541HUD-Host-Control-v0.8.1/src qualification/test-cooperative-knock.c -Wl,--gc-sections -o /tmp/control-knock
           /tmp/control-knock
+
+  host-dependency-tests:
+    name: Patched host CLI and ZIP regressions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select current stable Rust
+        run: |
+          rustup update stable --no-self-update
+          rustup default stable
+      - name: Export official source and apply host-only overlay
+        run: |
+          mkdir -p .buildtools/host-security-core
+          git archive HEAD:source/one-rom-v0.8.1 | tar -x -C .buildtools/host-security-core
+          bash tools/maintenance/Apply-Host-Dependencies.sh "$PWD/.buildtools/host-security-core"
+      - name: Test CLI and archive loading
+        run: bash tools/maintenance/Test-Host-Dependencies.sh "$PWD/.buildtools/host-security-core"
+      - name: Install pinned advisory scanner
+        run: cargo install cargo-audit --version 0.22.2 --locked
+      - name: Audit supported host dependency graph
+        run: bash tools/maintenance/Audit-Host-Dependencies.sh "$PWD/.buildtools/host-security-core"

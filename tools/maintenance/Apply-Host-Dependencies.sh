@@ -19,5 +19,5 @@ for name, version in expected['packages'].items():
     found = re.findall(r'(?m)^name = "' + re.escape(name) + r'"\nversion = "([^\"]+)"$', lock.read_text())
     if found != [version]:
         raise SystemExit(f'Unexpected {name} resolution: {found}')
-print('Host dependency overlay verified: ZIP 9.5.0 / Rustls 0.23.46')
+print('Host dependency overlay verified: ' + ', '.join(f'{k} {v}' for k, v in expected['packages'].items()))
 PY

@@ -2,8 +2,12 @@
   "upstream": "1b189260d85a5feced19e969399986f5f1d1cabe",
   "packages": {
     "zip": "9.5.0",
-    "rustls": "0.23.46"
+    "rustls": "0.23.46",
+    "ctutils": "0.4.4",
+    "libz-sys": "1.1.31",
+    "webpki-roots": "1.0.10",
+    "quinn-proto": "0.11.18"
   },
-  "lock_sha256": "60e705acbedb86a3ba5d321e42ef7b49a55fa0b762d38837c8496ccc03d36d49",
-  "patch_sha256": "ca05d065aec361f8395c10120586bbe054279961cc72f50e63f31cc0ffc6de59"
+  "lock_sha256": "02225ed0164e867056367ee6f579a9174345580256c5fc3beff6e9f25f55b771",
+  "patch_sha256": "d75a4a80f12e723c2aa22b558260b85f59297d2740184a0284a87567d9d6e94c"
 }

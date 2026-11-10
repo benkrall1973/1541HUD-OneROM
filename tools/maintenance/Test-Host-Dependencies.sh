@@ -27,5 +27,11 @@ PY
 cd "$core/rust"
 cargo metadata --locked --no-deps --format-version 1 >/dev/null
 cargo test --locked -p onerom-fw
-cargo test --locked -p onerom-cli
+cargo test --locked -p onerom-cli --bins
+cargo test --locked -p onerom-cli --test image_convert --test image_transform --test general
+if [[ -d /sys/bus/usb/devices ]]; then
+  cargo test --locked -p onerom-cli --test args --test scan
+else
+  echo "SKIP: USB-discovery integration suites require /sys/bus/usb/devices (unavailable here)."
+fi
 echo "PASS: host CLI and ZIP extraction regressions"
