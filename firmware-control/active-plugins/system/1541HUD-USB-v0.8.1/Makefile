@@ -10,8 +10,8 @@ OBJDUMP := $(if $(TOOLCHAIN),$(TOOLCHAIN)/arm-none-eabi-objdump,arm-none-eabi-ob
 MAJOR_VERSION := 0
 MINOR_VERSION := 8
 PATCH_VERSION := 1
-BUILD_VERSION := 10
-WORK_BUILD := 10
+BUILD_VERSION := 16
+WORK_BUILD := 16
 
 # Optional test-only C flags, for example ROMSEL_DIAGNOSTIC_FLAGS=-DROMSEL_XIP_TEST=1.
 # Kept separate so production builds remain byte-for-byte governed by the
@@ -19,21 +19,20 @@ WORK_BUILD := 10
 ROMSEL_DIAGNOSTIC_FLAGS ?=
 
 # GNU ld 2.39+ warns about the flat plugin's deliberate RWX load segment.
-# The supported GNU Arm 10.3 linker does not recognise this newer option, so
-# leave it off by default. Newer toolchains may opt in explicitly with:
-# make RWX_SEGMENT_FLAG=-Wl,--no-warn-rwx-segments
-# Keep the default relative so GNU Make works in both WSL and native Windows.
-# Callers may still override this with an absolute POSIX path.
-ONEROM_ROOT ?= ../../../source/control-baseline-v0.8.1-release
+# The qualified GNU Arm 15.3.Rel1 linker understands the suppression; without
+# it --fatal-warnings converts the intentional layout into a failed build.
+ONEROM_ROOT ?= ../../../.work/control-core-v0.8.1/one-rom-v0.8.1
 ORA_DIR := $(ONEROM_ROOT)/firmware/ora
 ORA_INCLUDE := -I$(ORA_DIR)
 PLUGIN_INCLUDE := -I.
 
-# These are tracked source snapshots, not build-time network downloads.  Their
-# exact upstream identities are recorded in THIRD_PARTY.md beside the core.
-TINYUSB_DIR      ?= $(ONEROM_ROOT)/third_party/tinyusb
-PICOBOOTX_DIR    ?= $(ONEROM_ROOT)/third_party/picobootx
-PICO_SDKLESS_DIR ?= $(ONEROM_ROOT)/third_party/pico-sdkless
+# Use the dependency checkouts made by the official v0.8.1 USB plugin.  The
+# official plugin owns their pinned revisions and clones them on its first
+# build; sharing those directories prevents this Control fork from silently
+# selecting a different USB stack.
+TINYUSB_DIR      ?= $(ONEROM_ROOT)/plugins/system/usb/tinyusb
+PICOBOOTX_DIR    ?= $(ONEROM_ROOT)/plugins/system/usb/picobootx
+PICO_SDKLESS_DIR ?= $(ONEROM_ROOT)/plugins/system/usb/pico-sdkless
 
 BUILD_DIR := build
 
@@ -47,7 +46,7 @@ SHELL := cmd.exe
 MKDIR_P = if not exist "$(subst /,\,$(1))" mkdir "$(subst /,\,$(1))"
 RM_RF = if exist "$(subst /,\,$(1))" rmdir /S /Q "$(subst /,\,$(1))"
 else
-RWX_SEGMENT_FLAG ?=
+RWX_SEGMENT_FLAG ?= -Wl,--no-warn-rwx-segments
 MKDIR_P = mkdir -p $(1)
 RM_RF = rm -rf $(1)
 endif

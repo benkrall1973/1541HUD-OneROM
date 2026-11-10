@@ -33,7 +33,7 @@ an archaeological dig later.
 - [ ] Verify write-protect OFF/ON/OFF if the optional circuit is fitted.
 - [ ] Verify `ROMRESET`, wait for release, then perform an immediate directory
   read without an IEC stall.
-- [ ] Power-cycle the drive with a VBUS-blocked USB cable and confirm saved NV
+- [ ] Test Apply+Save while OneROM remains powered by normal USB, then confirm saved NV
   configuration reloads.
 
 ### UB4 Monitor

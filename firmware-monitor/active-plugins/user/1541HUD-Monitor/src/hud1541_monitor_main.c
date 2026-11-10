@@ -24,6 +24,7 @@
 #include "plugin.h"
 #include "1541hud_mailbox.h"
 #include "flash_erase.h"
+#include "monitor_rpm_validity.h"
 
 /*
  * V8.1 passive-monitor contract: this plugin claims the exact PIO0/SM3,
@@ -316,19 +317,19 @@ static uint8_t all_bus_gpios_are_inputs(ora_gpio_query_fn_t q) {
  * output, while allowing core and Monitor to read the same input signal. */
 static uint8_t claim_capture_resources(ora_lookup_fn_t lookup,
                                        volatile hud1541_mailbox_t *m) {
- ora_claim_dma_channel_fn_t claim_dma =
-  (ora_claim_dma_channel_fn_t)lookup(ORA_ID_CLAIM_DMA_CHANNEL);
+ ora_claim_hw_fn_t claim_hw =
+  (ora_claim_hw_fn_t)lookup(ORA_ID_CLAIM_HW);
  ora_claim_pio_fn_t claim_pio = (ora_claim_pio_fn_t)lookup(ORA_ID_CLAIM_PIO);
  uint32_t dma = DMA_CH;
  uint32_t block = CAPTURE_PIO_BLOCK;
  uint32_t sm = CAPTURE_PIO_SM;
  uint32_t first = CAPTURE_PIO_FIRST_INSTR;
 
- if (claim_dma == 0 || claim_pio == 0) {
+ if (claim_hw == 0 || claim_pio == 0) {
   m->pio_pc = 0xE0u; /* a required V8.1 claim API is unavailable */
   return 0u;
  }
- if (claim_dma(&dma, 0u) != ORA_RESULT_OK || dma != DMA_CH) {
+ if (claim_hw(ORA_HW_DMA_CHANNEL, &dma, 0u) != ORA_RESULT_OK || dma != DMA_CH) {
   m->pio_pc = 0xE1u; /* DMA11 unavailable */
   return 0u;
  }
@@ -777,13 +778,15 @@ static void decode_snapshot(volatile hud1541_mailbox_t *m,
  uint8_t *rpm_marker_valid, uint8_t *rpm_marker_track,
  uint8_t *rpm_marker_sector, uint8_t *rpm_marker_id1,
  uint8_t *rpm_marker_id2, uint8_t *rpm_revolutions,
- uint32_t *rpm_start_us, uint32_t *rpm_last_us) {
+ uint32_t *rpm_start_us, uint32_t *rpm_last_us,
+ uint16_t *rpm_sync_intervals) {
  if (uc2_pcr_write(snapshot)) {
   uint8_t pcr = logical_data_from_gpio(snapshot);
   /* UC2 CB2 is the 1541 disk write gate. PCR CB2 manual-low (110b)
    * asserts it; manual-high (111b) releases it for normal reading. */
   uint8_t write_gate = (uint8_t)((pcr & 0xE0u) == 0xC0u);
   if (!*write_gate_valid || write_gate != *last_write_gate) {
+   hud_rpm_invalidate(rpm_marker_valid, hdr_state, rpm_sync_intervals);
    *write_gate_valid = 1u;
    *last_write_gate = write_gate;
    if (telemetry_mask(m) & HUD1541_TELEM_CORE) queue_write_gate(m, write_gate);
@@ -806,9 +809,7 @@ static void decode_snapshot(volatile hud1541_mailbox_t *m,
  *last_motor = motor;
  if (telemetry_mask(m) & HUD1541_TELEM_CORE) queue_motor(m, motor);
 
- if (!motor) {
-  *rpm_marker_valid = 0u;
- }
+ hud_rpm_invalidate(rpm_marker_valid, hdr_state, rpm_sync_intervals);
  }
 
  if (!*phase_valid) {
@@ -819,6 +820,7 @@ static void decode_snapshot(volatile hud1541_mailbox_t *m,
  uint8_t delta = (uint8_t)((phase - oldp) & 3u);
 
  *last_phase = phase;
+ hud_rpm_invalidate(rpm_marker_valid, hdr_state, rpm_sync_intervals);
  m->phase_event_count++;
  if (telemetry_mask(m) & HUD1541_TELEM_CORE) queue_phase(m, oldp, phase, delta, motor);
 
@@ -847,6 +849,7 @@ static void decode_snapshot(volatile hud1541_mailbox_t *m,
  m->density_event_count++;
  if (telemetry_mask(m) & HUD1541_TELEM_CORE) queue_density(m, density);
  } else if (density != *last_density) {
+ hud_rpm_invalidate(rpm_marker_valid, hdr_state, rpm_sync_intervals);
  *last_density = density;
  m->density_event_count++;
  if (telemetry_mask(m) & HUD1541_TELEM_CORE) queue_density(m, density);
@@ -915,10 +918,12 @@ static void decode_snapshot(volatile hud1541_mailbox_t *m,
     queue_hdrmeta_diag(m, *hdr_checksum, *hdr_id1, id2, checksum_valid);
    }
 
-   if (checksum_valid) {
+   if (hud_rpm_header_eligible(checksum_valid, *motor_valid, *last_motor,
+                               *stepping, *last_write_gate)) {
     /* Header RAM writes identify a valid physical track and density zone.
      * sync_rpm_edge() below owns the timer and counts the raw SYNC waveform. */
     if (!*rpm_marker_valid || *rpm_marker_track != *hdr_track) {
+     *rpm_sync_intervals = 0u;
      *rpm_marker_valid = 1u;
      *rpm_marker_track = *hdr_track;
      *rpm_marker_sector = sec;
@@ -940,6 +945,8 @@ static void decode_snapshot(volatile hud1541_mailbox_t *m,
  uint8_t was_stepping = *stepping;
  *last_drvst = data;
  *stepping = (uint8_t)((data & 0x40u) ? 1u : 0u);
+ if (*stepping || was_stepping != *stepping)
+  hud_rpm_invalidate(rpm_marker_valid, hdr_state, rpm_sync_intervals);
  m->last_drvst = data;
 
  /* Stock DOS writes destination DRVTRK before a seek, then clears DRVST
@@ -966,6 +973,7 @@ static void decode_snapshot(volatile hud1541_mailbox_t *m,
   * valid targets so those trace records cannot flood the diagnostic queue. */
  if (data >= 1u && data <= 42u) {
   if (!*track_write_valid || data != *last_track_write) {
+   hud_rpm_invalidate(rpm_marker_valid, hdr_state, rpm_sync_intervals);
    if (telemetry_mask(m) & HUD1541_TELEM_CORE) queue_track_write(m, data);
   }
   *last_track_write = data;
@@ -1000,6 +1008,7 @@ static void decode_snapshot(volatile hud1541_mailbox_t *m,
  m->write_protect_valid = 1u;
  if (telemetry_mask(m) & HUD1541_TELEM_CORE) queue_write_protect(m, wp);
  } else if (wp != *last_wp) {
+ hud_rpm_invalidate(rpm_marker_valid, hdr_state, rpm_sync_intervals);
  *last_wp = wp;
  if (telemetry_mask(m) & HUD1541_TELEM_CORE) queue_write_protect(m, wp);
  }
@@ -1148,6 +1157,7 @@ void hud1541_probe_main(ora_lookup_fn_t lookup,
  m->consumer_total = consumer_total;
 
  if (update_ring_health(m, produced_total, &consumer_total)) {
+  hud_rpm_invalidate(&rpm_marker_valid, &hdr_state, &rpm_sync_intervals);
   warning_until_us = TIMER0_RAWL + HUD1541_LED_WARNING_HOLD_US;
  }
  if (m->led_request_seq != last_led_request_seq) {
@@ -1167,6 +1177,7 @@ void hud1541_probe_main(ora_lookup_fn_t lookup,
   if (pio_dma_pause(m)) {
    saved = hud1541_save_led_policy(lookup, pending_led_policy);
    if (pio_dma_init(m)) {
+    hud_rpm_invalidate(&rpm_marker_valid, &hdr_state, &rpm_sync_intervals);
     /* pio_dma_init resets the DMA write pointer, so reset the matching
      * software epoch rather than mixing old totals with a new ring. */
     produced_total = 0u;
@@ -1209,13 +1220,15 @@ void hud1541_probe_main(ora_lookup_fn_t lookup,
  &hdr_state, &hdr_track, &hdr_sector,
  &hdr_checksum, &hdr_id1, &hdr_meta_divider, &hdr_ticks16,
  &rpm_marker_valid, &rpm_marker_track, &rpm_marker_sector, &rpm_marker_id1,
- &rpm_marker_id2, &rpm_revolutions, &rpm_start_us, &rpm_last_us);
+ &rpm_marker_id2, &rpm_revolutions, &rpm_start_us, &rpm_last_us,
+ &rpm_sync_intervals);
 
  if (!rpm_marker_valid || !last_motor) rpm_sync_intervals = 0u;
 
  produced_total = dma_update_producer(produced_total, &last_remaining);
  m->produced_total = produced_total;
  if (update_ring_health(m, produced_total, &consumer_total)) {
+  hud_rpm_invalidate(&rpm_marker_valid, &hdr_state, &rpm_sync_intervals);
   warning_until_us = TIMER0_RAWL + HUD1541_LED_WARNING_HOLD_US;
  }
  /* Do not wait for the producer to go idle: it never does during passive

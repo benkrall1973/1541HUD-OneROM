@@ -5,8 +5,14 @@ package. Both target **Fire-24G** hardware only.
 
 | Board | File | SHA-256 |
 | --- | --- | --- |
-| UB3 Control | `releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0.8.1.bin` | `2F07F383DFEE805CA944E2A57AF82C16D4C0D7F05C7990505264D04C382F7568` |
-| UB4 Monitor | `releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.28.bin` | `1351A0C4448C9C442E053923841226B16A6351B271314CDCC56C0638D7BBD406` |
+| UB3 Control | `releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0.8.1.bin` | `734736EB8E2E990FFD101A3918E8834DBAA10F8173A1B876DDAD4AC75E378D40` |
+| UB4 Monitor | `releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.30.bin` | `44E260C9E591EB9AE67DC9892CA7761ACE384171BF733110A34AA4F9B8CC80D2` |
+
+See [the baseline runbook](V81_BASELINE_RUNBOOK.md) for component versions and test scope.
+The stock Control image was recomposed with the drive-tested components; this
+exact stock composition has not itself been flashed. Monitor code was tested
+in the drive with device NV preserved; the public image has default NV and
+two sanitized diagnostic filename strings. Instructions and addresses are unchanged.
 
 ## UB3 Control stock test image
 

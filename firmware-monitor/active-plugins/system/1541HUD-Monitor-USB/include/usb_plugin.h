@@ -9,11 +9,11 @@
 #include <stdbool.h>
 #include "plugin.h"
 #include "tusb.h"
-#include "include.h"
 #include "usb_custom_pbx.h"
 #include "usb_led.h"
 #include "usb_gpio.h"
 #include "usb_log.h"
+#include "usb_peer.h"
 
 // Context structure for our plugin
 typedef struct {
@@ -61,6 +61,16 @@ typedef struct {
     ora_log_write_fn_t log_write;
     ora_log_query_fn_t log_query;
 
+    uint8_t exclusive_serial_in;
+
+    // 1 if serial port 1 is enabled.  Set by serial_ports_init().
+    uint8_t serial_port_1_enabled;
+
+    // Serial port 2's state as SERIAL_PORT_2_* bits, then its tinyusb CDC
+    // interface.  Set by serial_ports_init().
+    uint8_t serial_port_2;
+    uint8_t serial_port_2_cdc_itf;
+
     // Whether a terminal has the CDC port open, and whether a session it has
     // just started is still to be set up.  Both are set from tud_cdc_line_state_cb(),
     // which reports the transition - see usb_log.c.
@@ -86,10 +96,14 @@ typedef struct {
     gpio_hold_t holds[ONEROM_GPIO_MAX_HOLDS];
 } usb_plugin_context_t;
 
-// Forward declaration of the context, defined by the active USB plugin main.
+// Forward declaration of the context, which we define in usb_main.c
 extern usb_plugin_context_t context;
 
+// From usb_main.c
+const usb_peer_usbc_t *usb_peer_usbc(void);
+
 // Forward declaration of plugin's Picoboot functions, from usb_picoboot.c
+
 void usb_picoboot_init(uint8_t ep_out, uint8_t ep_in);
 bool usb_picoboot_control_xfer_cb(
     uint8_t rhport,
@@ -102,9 +116,9 @@ void usb_picoboot_task(void);
 
 // Longest effective serial, in characters.  A configured override is bounded by
 // the metadata schema, and the chip-ID fallback is 16 hex digits.
-#define USB_SERIAL_MAX_CHARS MAX_SERIAL_NUMBER_LEN
+#define USB_SERIAL_MAX_CHARS ORA_MAX_SERIAL_NUMBER_LEN
 
-// Yield the device's effective USB serial as ASCII, defined by the active USB plugin main.
+// Yield the device's effective USB serial as ASCII, defined in usb_main.c.
 //
 // A configured serial override where one is set, and the RP2350 chip ID as 16
 // uppercase hex digits otherwise.  That two-step is what the device presents as
@@ -119,27 +133,18 @@ void usb_picoboot_task(void);
 size_t usb_get_serial(char *out, size_t out_size);
 
 // Logging macros
-#if defined(DEBUG)
-#undef DEBUG
-#endif
 #define DEBUG(...) do { \
     if (context.debug) { \
         context.debug(__VA_ARGS__); \
     } \
 } while (0)
 
-#if defined(LOG)
-#undef LOG
-#endif
 #define LOG(...) do { \
     if (context.log) { \
         context.log(__VA_ARGS__); \
     } \
 } while (0)
 
-#if defined(ERR)
-#undef ERR
-#endif
 #define ERR(...) do { \
     if (context.err_log) { \
         context.err_log(__VA_ARGS__); \

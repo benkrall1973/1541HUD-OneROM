@@ -14,24 +14,10 @@
 // ---------------------------------------------------------------------------
 // Flash handling
 //
-// Protect the first 128KB for now - firmware, metadata and system plugin
-// slot.
+// Protect the firmware, metadata and system plugin regions.
 // ---------------------------------------------------------------------------
-#define FLASH_PROTECTED_START   RP2350_FLASH_BASE
-#define FLASH_PROTECTED_END     (RP2350_FLASH_BASE + 128u * 1024u)
-
-// ---------------------------------------------------------------------------
-// Synthetic address range bases
-//
-// These are protocol-level constants and must not change without corresponding
-// changes to host tooling.
-// ---------------------------------------------------------------------------
-
-// 0x90000000: logical ROM read range.  Returns the original (un-mangled)
-// byte at the given logical ROM address, regardless of how the image is
-// stored in RAM.  Size is dynamic: determined by the ROM type currently
-// being served, retrieved via ctx at call time.
-#define APP_RANGE_LOGICAL_ROM_BASE  0x90000000u
+#define FLASH_PROTECTED_START   ORA_FLASH_CS0_BASE_ADDR
+#define FLASH_PROTECTED_END     ORA_USER_PLUGIN_BASE
 
 // ---------------------------------------------------------------------------
 // Range handler function types
@@ -92,24 +78,23 @@ static pb_status_t app_range_logical_rom_read_prepare(uint32_t addr, uint32_t le
 static pb_status_t app_range_logical_rom_read(uint32_t addr, uint8_t *buf, uint32_t len, void *ctx);
 static pb_status_t app_range_logical_rom_write_prepare(uint32_t addr, uint32_t len, bool *is_flash, void *ctx);
 static pb_status_t app_range_logical_rom_write(uint32_t addr, const uint8_t *buf, uint32_t len, void *ctx);
+static pb_status_t app_range_usb_dpram_read_prepare(uint32_t addr, uint32_t len, void *ctx);
+static pb_status_t app_range_usb_dpram_read(uint32_t addr, uint8_t *buf, uint32_t len, void *ctx);
 
 // Handlers tried in order.  Each prepare returns PB_STATUS_OK if it owns
 // the range, PB_STATUS_NOT_FOUND to continue, or another error to reject.
 static const app_read_range_entry_t k_custom_read_ranges[] = {
     { app_range_logical_rom_read_prepare, app_range_logical_rom_read },
+    { app_range_usb_dpram_read_prepare, app_range_usb_dpram_read },
 };
 static const app_write_range_entry_t k_custom_write_ranges[] = {
     { app_range_logical_rom_write_prepare, app_range_logical_rom_write },
 };
 
-#define APP_CUSTOM_RANGE_COUNT \
+#define APP_CUSTOM_READ_RANGE_COUNT \
     (sizeof(k_custom_read_ranges) / sizeof(k_custom_read_ranges[0]))
-
-_Static_assert(
-    sizeof(k_custom_read_ranges) / sizeof(k_custom_read_ranges[0]) ==
-    sizeof(k_custom_write_ranges) / sizeof(k_custom_write_ranges[0]),
-    "read and write range tables must be the same size"
-);
+#define APP_CUSTOM_WRITE_RANGE_COUNT \
+    (sizeof(k_custom_write_ranges) / sizeof(k_custom_write_ranges[0]))
 
 #endif // USB_PICOBOOTX_IMPL
 
@@ -128,6 +113,5 @@ pb_status_t app_picoboot_read(uint32_t addr, uint8_t *buf, uint32_t len, void *c
 pb_status_t app_picoboot_write_prepare(uint32_t addr, uint32_t size, bool *is_flash, void *ctx);
 pb_status_t app_picoboot_write(uint32_t addr, const uint8_t *buf, uint32_t len, void *ctx);
 pb_status_t app_picoboot_flash_erase_prepare(const pb_addr_size_args_t *args, void *ctx);
-const onerom_rom_slot_t *app_get_active_rom_set(const usb_plugin_context_t *ctx);
 
 #endif // USB_PICOBOOTX_H

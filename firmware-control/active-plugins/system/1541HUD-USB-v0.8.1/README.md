@@ -19,15 +19,16 @@ The wrapper copies the root-level official v0.8.1 source into that work tree.
 The output is:
 
 ```text
-build/1541-OneROM-1541HUD-USB-v0.8.1.10.bin
+build/1541-OneROM-1541HUD-USB-v0.8.1.16.bin
 ```
 
-Do not pair it with another core line. The V8 Control image also requires the
-documented idle-yield core integration for persistent NV writes.
+Pair it with the official v0.8.1 core, the UB3 early-reset build overlay, and
+Host-Control 0.8.1.5 or newer. Persistent NV writes require that plugin's
+cooperative idle wait; no idle-yield core patch is required.
 
 ## V8.1 HUD transport
 
-Build `v0.8.1.10` includes the V8.1 USB-DPRAM reservation required by the
+Build `v0.8.1.16` includes the V8.1 USB-DPRAM reservation required by the
 firmware before it can place its DPRAM log and allocator pool. It also enables
 the exclusive-serial property so the Control
 protocol owns the CDC stream; core logs are retrieved through picoboot/DPRAM

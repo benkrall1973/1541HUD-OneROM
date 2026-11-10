@@ -25,7 +25,7 @@
 // space gated by a ONEROM_FEAT_* bit) and the major only for one that breaks an
 // existing host - which should not happen.
 #define ONEROM_PBX_EXT_MAJOR  1u
-#define ONEROM_PBX_EXT_MINOR  0u
+#define ONEROM_PBX_EXT_MINOR  2u
 
 // All One ROM custom commands carry all 16 argument bytes.
 #define ONEROM_CMD_ARGS_LEN  16u
@@ -43,14 +43,16 @@
 //
 // ONEROM_CMD_GET_CAPS and ONEROM_CMD_GPIO_QUERY return data to the host, so
 // they are sent with picobootx's PICOBOOT_DIR_IN (0x80) bit set in cmd_id -
-// 0x82 and 0x84 as they appear on the wire.  ONEROM_CMD_SET_LED and
-// ONEROM_CMD_GPIO_SET have no data phase and travel with the bit clear.
+// 0x82 and 0x84 as they appear on the wire.  ONEROM_CMD_SET_LED,
+// ONEROM_CMD_GPIO_SET and ONEROM_CMD_SET_STANDBY have no data phase and travel
+// with the bit clear.
 typedef enum {
-    ONEROM_CMD_SET_LED    = 0x01,
-    ONEROM_CMD_GET_CAPS   = 0x02,
-    ONEROM_CMD_GPIO_SET   = 0x03,
-    ONEROM_CMD_GPIO_QUERY = 0x04,
-    ONEROM_CMD_LED_QUERY  = 0x05,
+    ONEROM_CMD_SET_LED     = 0x01,
+    ONEROM_CMD_GET_CAPS    = 0x02,
+    ONEROM_CMD_GPIO_SET    = 0x03,
+    ONEROM_CMD_GPIO_QUERY  = 0x04,
+    ONEROM_CMD_LED_QUERY   = 0x05,
+    ONEROM_CMD_SET_STANDBY = 0x06,
 } onerom_cmd_id_t;
 
 // Every reserved field below is zero on send and ignored on receive.  That is
@@ -209,8 +211,9 @@ _Static_assert(sizeof(onerom_caps_t) == ONEROM_CAPS_LEN, "onerom_caps_t size mis
 #define ONEROM_FEAT_GPIO_HOLD   (1u << 2)   // duration_ms/after_state are honoured
 #define ONEROM_FEAT_LED_ARGS    (1u << 3)   // SET_LED's colour/brightness/
                                             // period/hold are honoured
-// Bits 4 upwards are reserved for later: pulls, drive strength, slew, pulse
-// trains, named pins.
+#define ONEROM_FEAT_STANDBY     (1u << 4)   // ONEROM_CMD_SET_STANDBY is available
+#define ONEROM_FEAT_GPIO_USES   (1u << 5)   // onerom_gpio_entry_t's uses is filled in
+// Bits 6 upwards are reserved.
 
 // The longest hold SET_LED accepts is ORA_LED_MAX_HOLD_MS, from the ORA API.
 // A longer request is refused rather than clamped.
@@ -243,6 +246,23 @@ typedef struct __attribute__((packed)) {
 _Static_assert(sizeof(onerom_gpio_set_args_t) == 16, "onerom_gpio_set_args_t size mismatch");
 
 // ---------------------------------------------------------------------------
+// ONEROM_CMD_SET_STANDBY - turn standby on or off
+//
+// No data phase.  A standby value other than 0 or 1 fails with
+// PB_STATUS_INVALID_ARG.  The command fails with PB_STATUS_NOT_PERMITTED where
+// ONEROM_FEAT_STANDBY is clear.
+// ---------------------------------------------------------------------------
+
+typedef struct __attribute__((packed)) {
+    uint8_t  standby;      // 1 = standby, 0 = serving
+    uint8_t  reserved0[3];
+    uint32_t reserved1;
+    uint32_t reserved2;
+    uint32_t reserved3;
+} onerom_set_standby_args_t;
+_Static_assert(sizeof(onerom_set_standby_args_t) == 16, "onerom_set_standby_args_t size mismatch");
+
+// ---------------------------------------------------------------------------
 // ONEROM_CMD_GPIO_QUERY - what One ROM is using a run of GPIOs for
 //
 // IN, transfer_len = count * sizeof(onerom_gpio_entry_t).  The host sizes the
@@ -255,6 +275,12 @@ _Static_assert(sizeof(onerom_gpio_set_args_t) == 16, "onerom_gpio_set_args_t siz
 // future growth of onerom_gpio_entry_t: at 5 bytes per entry the multiple-of-4
 // rule breaks, and at 6 the RP2350B no longer fits.  Grow the entry and a host
 // must start splitting the sweep.
+//
+// Where ONEROM_FEAT_GPIO_USES is set, uses holds bits 0 to 7 of
+// ora_gpio_info_t::uses, so it covers ora_gpio_use_t values up to 7.  A use
+// above 7 requires a longer entry, which an older host can't decode, so it also
+// requires a new ONEROM_FEAT_* caps bit.  The plugin API tester fails on an
+// ora_gpio_use_t value above 7.
 // ---------------------------------------------------------------------------
 
 typedef struct __attribute__((packed)) {
@@ -265,11 +291,10 @@ typedef struct __attribute__((packed)) {
 _Static_assert(sizeof(onerom_gpio_query_args_t) == 16, "onerom_gpio_query_args_t size mismatch");
 
 typedef struct __attribute__((packed)) {
-    uint8_t use;        // ora_gpio_use_t: 0 free, 1 serving reads, 2 serving
-                        // drives, 3 system pin
+    uint8_t use;        // ora_gpio_use_t
     uint8_t level;      // Level currently on the pad, 0 or 1
     uint8_t is_output;  // 1 if the output driver is enabled, 0 if not
-    uint8_t reserved;
+    uint8_t uses;       // ora_gpio_info_t::uses bits 0 to 7
 } onerom_gpio_entry_t;
 _Static_assert(sizeof(onerom_gpio_entry_t) == 4, "onerom_gpio_entry_t size mismatch");
 

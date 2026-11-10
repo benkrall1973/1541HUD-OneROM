@@ -36,23 +36,12 @@ not refer to the project names “UB3 Control OneROM” and “UB4 Monitor OneRO
 Use the matching Lower or Upper two-page composition template; do not apply
 the 74LS138 C/A/E image to this direct two-page wiring.
 
-## USB VBUS isolation
+## USB-powered operation
 
-For the verified installed-drive arrangement, use a **data-only / VBUS-blocked
-USB cable** or an inline USB power blocker for both UB3 and UB4. USB data and
-ground remain connected; USB +5 V (VBUS) must not back-power either OneROM.
-Otherwise the host computer can keep a board alive when 1541 power is removed,
-preventing the board from receiving the intended cold boot with the drive. For
-UB3, that boot is when the saved NV configuration is re-read, including the
-selected ROM and IEC device address; a USB-back-powered UB3 can therefore come
-back with stale running state instead of the saved configuration.
-
-This is a power-cycle requirement, not a substitute for the UB3 C46 reset
-pulse below. `ROMRESET` asserts SEL_B for 350 ms while the drive remains
-powered; the firmware's controlled OneROM reboot is a separate action. Prefer
-a purpose-made cable/blocker. On a conventional USB-A/USB-B USB 2 cable the
-red conductor is normally VBUS, but do not assume color conventions or modify
-a USB-C cable without verifying its wiring.
+ROM and IEC Apply+Save were tested while OneROM remained powered by a normal
+USB cable. A special VBUS-blocked cable is no longer required to apply these
+saved settings. This does not add drive power-off sensing: automatic detection
+of a drive power cycle while OneROM stays USB-powered remains deferred.
 
 ## C46 reset path
 

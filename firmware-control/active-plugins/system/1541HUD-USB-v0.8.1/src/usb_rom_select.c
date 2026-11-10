@@ -39,6 +39,9 @@
 #define ROMSEL_LED_POLICY_AUTO     0xA5u
 #define ROMSEL_LED_POLICY_OFF      0x5Au
 #define ROMSEL_MAX_SELECTABLE      8u
+#ifndef ROMSEL_DIAGNOSTIC_NO_AUTO_NV
+#define ROMSEL_DIAGNOSTIC_NO_AUTO_NV 0
+#endif
 #define ROMSEL_RX_MAX              63u
 
 // RP2350 bootrom flash functions.  These signatures mirror the Host Control
@@ -1211,7 +1214,7 @@ void romsel_cdc_rx(const uint8_t *buf, uint32_t count) {
 
 
 void romsel_task(void) {
-    seed_first_boot_defaults();
+    if (!ROMSEL_DIAGNOSTIC_NO_AUTO_NV) seed_first_boot_defaults();
     reset_service();
 
     /* Complete a long CDC reply before accepting another command. */

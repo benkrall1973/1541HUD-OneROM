@@ -50,11 +50,13 @@ const ora_plugin_header_t ora_plugin_header = {
     .entry  = rbcp_main,
     .plugin_type = ORA_PLUGIN_TYPE_USER,
     .sam_usage = 255,
-    .overrides1 = 0,
+    // NV[0] holds the non-plugin boot slot, shared with the USB selector.
+    .overrides1 = ORA_OVERRIDE1_BOOT_SLOT,
     .properties1 = ORA_PROPERTY1_SUPPORTS_YIELD,
     .min_fw_major_version = 0,
     .min_fw_minor_version = 8,
     .min_fw_patch_version = 1,
+    .boot_slot_addr = 0x1002F000u,
     .reserved = {0},
 };
 
@@ -560,6 +562,47 @@ void host_control_test_reset(void) {
 // will never return and recovery requires a device power cycle.  A future API
 // extension providing a timeout or cancellation mechanism would allow a
 // cleaner recovery path.
+// v0.8.1's core WAIT_FOR_KNOCK never calls the hardware yield API. A USB
+// NV save can therefore wait forever for this core's exclusive-mode ACK.
+// Reproduce its 32-bit knock/payload matching here, yielding only when the
+// capture ring is empty. RING_DATA_SIZE is fixed at 32 in this plugin.
+static ora_result_t wait_for_knock_cooperative(
+    const ora_knock_t *knock, volatile uint32_t *buffer, uint8_t entries_log2,
+    uint32_t flags, uint32_t *payload, uint8_t payload_len,
+    volatile uint32_t *start, volatile uint32_t **next_read) {
+    if (knock == NULL || buffer == NULL || knock->len == 0u ||
+        knock->data_size != 32u || entries_log2 != RING_ENTRIES_LOG2 ||
+        (payload_len != 0u && payload == NULL)) return ORA_RESULT_INVALID_ARG;
+    volatile uint32_t *read = start != NULL ? start : *s_write_pos_ptr;
+    volatile uint32_t *end = buffer + (1u << entries_log2);
+    ora_yield_fn_t yield = s_lookup(ORA_ID_YIELD);
+    uint8_t matched = 0u;
+    uint8_t collected = 0u;
+    while (matched < knock->len || collected < payload_len) {
+        volatile uint32_t *write = *s_write_pos_ptr;
+        if (read == write) {
+            if (yield != NULL) (void)yield(NULL);
+            ORA_TEST_YIELD();
+            continue;
+        }
+        uint32_t entry = *read;
+        if (++read >= end) read = buffer;
+        // Match the core's current debounce(): filter the other X-selected
+        // pages; primary CS has already been debounced by the monitor PIO.
+        if ((flags & ORA_WAIT_FOR_KNOCK_FLAG_DEBOUNCE_CS) &&
+            (entry & knock->x_mask)) continue;
+        if (matched < knock->len) {
+            uint32_t value = entry & knock->mask;
+            if (value == knock->matches[matched]) matched++;
+            else matched = value == knock->matches[0] ? 1u : 0u;
+        } else {
+            payload[collected++] = entry;
+        }
+    }
+    if (next_read != NULL) *next_read = read;
+    return ORA_RESULT_OK;
+}
+
 static uint8_t ring_read_byte(void) {
     for (;;) {
         if (RING_BUF_CUR_READ_INDEX() == RING_BUF_CUR_WRITE_INDEX()) {
@@ -2285,7 +2328,9 @@ static void aux_pin_info(const aux_pin_t *pin, uint8_t *out) {
     uint8_t level    = 0u;
     uint8_t driven   = 0u;
     for (uint8_t i = 0u; i < pin->count; i++) {
-        ora_gpio_info_t info = { (uint8_t)sizeof(ora_gpio_info_t), 0u, 0u, 0u };
+        // The v0.8.1 API added the trailing `uses` bitmap.  Initialise by
+        // member so the size-negotiated query remains safe across API growth.
+        ora_gpio_info_t info = { .size = (uint8_t)sizeof(ora_gpio_info_t) };
         if (s_gpio_query(pin->gpio[i], &info) != ORA_RESULT_OK) {
             return;
         }
@@ -3748,7 +3793,7 @@ void rbcp_main(
 
     rbcp_setup(ora_lookup_fn, knock);
 
-    ora_wait_for_knock_fn_t wait_for_knock = ora_lookup_fn(ORA_ID_WAIT_FOR_KNOCK);
+    ora_wait_for_knock_fn_t wait_for_knock = wait_for_knock_cooperative;
 
     s_log("RBCP: ready, awaiting knock");
 

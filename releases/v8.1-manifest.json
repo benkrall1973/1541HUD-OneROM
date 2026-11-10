@@ -1,0 +1,27 @@
+{
+  "baseline": "v8.1",
+  "upstream": "1b189260d85a5feced19e969399986f5f1d1cabe",
+  "hud": "0.8.0.51",
+  "images": [
+    {
+      "role": "UB3 Control stock",
+      "core": "0.8.1",
+      "usb": "0.8.1.16",
+      "user": "0.8.1.5",
+      "file": "onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0.8.1.bin",
+      "test_scope": "Recomposed stock image; core/plugins drive-tested in private ROM collection",
+      "sha256": "734736EB8E2E990FFD101A3918E8834DBAA10F8173A1B876DDAD4AC75E378D40",
+      "bytes": 262144
+    },
+    {
+      "role": "UB4 Monitor",
+      "core": "0.8.1",
+      "usb": "0.8.1.4",
+      "user": "0.8.1.30",
+      "file": "onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.30.bin",
+      "test_scope": "Drive-tested code; default NV; two equal-length diagnostic filename replacements (334 bytes); all other bytes unchanged",
+      "sha256": "44E260C9E591EB9AE67DC9892CA7761ACE384171BF733110A34AA4F9B8CC80D2",
+      "bytes": 229376
+    }
+  ]
+}

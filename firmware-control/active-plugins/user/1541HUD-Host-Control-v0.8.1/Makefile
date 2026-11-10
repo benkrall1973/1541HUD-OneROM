@@ -7,10 +7,9 @@ CC      := $(if $(TOOLCHAIN),$(TOOLCHAIN)/arm-none-eabi-gcc,arm-none-eabi-gcc)
 OBJCOPY := $(if $(TOOLCHAIN),$(TOOLCHAIN)/arm-none-eabi-objcopy,arm-none-eabi-objcopy)
 OBJDUMP := $(if $(TOOLCHAIN),$(TOOLCHAIN)/arm-none-eabi-objdump,arm-none-eabi-objdump)
 
-# GNU ld 2.39+ reports the deliberately flat plugin segment as RWX.  Older
-# supported toolchains do not recognise the suppression, so leave it opt-in.
-# Support the recovered build on native Windows too.  The toolchain itself is
-# already native; only the original POSIX directory-management recipes differ.
+# GNU ld 2.39+ reports the deliberately flat plugin segment as RWX. The
+# qualified GNU Arm 15.3.Rel1 linker recognises the suppression; otherwise
+# fatal linker warnings reject the intentional layout.
 ifeq ($(OS),Windows_NT)
 RWX_SEGMENT_FLAG ?= -Wl,--no-warn-rwx-segments
 SHELL := cmd.exe
@@ -18,7 +17,7 @@ SHELL := cmd.exe
 MKDIR_P = if not exist "$(subst /,\,$(1))" mkdir "$(subst /,\,$(1))"
 RM_RF = if exist "$(subst /,\,$(1))" rmdir /S /Q "$(subst /,\,$(1))"
 else
-RWX_SEGMENT_FLAG ?=
+RWX_SEGMENT_FLAG ?= -Wl,--no-warn-rwx-segments
 MKDIR_P = mkdir -p $(1)
 RM_RF = rm -rf $(1)
 endif
@@ -26,7 +25,7 @@ endif
 MAJOR_VERSION := 0
 MINOR_VERSION := 8
 PATCH_VERSION := 1
-BUILD_VERSION := 3
+BUILD_VERSION := 5
 
 # Maximum size of the flash erase routine.  This is copied onto the stack at
 # NV commit time.  Used to size the buffer and checked at link time.
@@ -39,7 +38,7 @@ NV_ERASE_FN_MAX := 80
 # v8.1 host-control plugin's static-RAM guardrail.
 PLUGIN_STATIC_MAX := 424
 
-ONEROM_ROOT ?= ../../../source/control-baseline-v0.8.1-release
+ONEROM_ROOT ?= ../../../.work/control-core-v0.8.1/one-rom-v0.8.1
 ORA_DIR := $(ONEROM_ROOT)/firmware/ora
 ORA_INCLUDE := -I$(ORA_DIR)
 PLUGIN_INCLUDE := -I.

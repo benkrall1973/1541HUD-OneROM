@@ -10,7 +10,6 @@
 // timing of a bounded hold, which is the one thing the ORA call deliberately
 // does not do.
 
-#include "include.h"
 #include "usb_plugin.h"
 
 // Whether a wire state byte is one this plugin knows.  ora_gpio_set validates
@@ -72,11 +71,11 @@ static uint8_t gpio_num_gpios(void) {
     }
 
     // Mirrors max_gpios[] in firmware/src/constants.c.
-    switch ((rp235x_variant_t)variant) {
-        case RP235XA:
+    switch ((uint8_t)variant) {
+        case ORA_RP235XA:
             return 30u;
 
-        case RP235XB:
+        case ORA_RP235XB:
             return 48u;
 
         default:
@@ -114,7 +113,8 @@ void gpio_init_caps(void) {
 
     context.features = ONEROM_FEAT_GPIO_SET |
                        ONEROM_FEAT_GPIO_QUERY |
-                       ONEROM_FEAT_GPIO_HOLD;
+                       ONEROM_FEAT_GPIO_HOLD |
+                       ONEROM_FEAT_GPIO_USES;
     DEBUG("GPIO control available on %u GPIOs", context.num_gpios);
 }
 
@@ -283,7 +283,7 @@ pb_status_t gpio_fill_entry(uint8_t gpio, onerom_gpio_entry_t *entry_out) {
     entry_out->use = info.use;
     entry_out->level = info.level;
     entry_out->is_output = info.is_output;
-    entry_out->reserved = 0;
+    entry_out->uses = (uint8_t)info.uses;
 
     return PB_STATUS_OK;
 }

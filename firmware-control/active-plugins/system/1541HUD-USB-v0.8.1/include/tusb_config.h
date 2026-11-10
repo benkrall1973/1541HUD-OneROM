@@ -41,17 +41,21 @@
 // One ROM specific configuration
 #define __not_in_flash(x)
 #define CFG_TUD_TASK_QUEUE_SZ     4
-// Endpoint numbers 0 to 3 and interfaces 0 to 3. TinyUSB misspells the
-// endpoint form of this setting, so retain that spelling deliberately.
+
+// Control uses one CDC port: endpoint and interface numbers 0 to 3.
+// TinyUSB spells the first
+// ENDPPOINT.
 #define CFG_TUD_ENDPPOINT_MAX     4
 #define CFG_TUD_INTERFACE_MAX     4
 #define USB_MAX_ENDPOINTS         CFG_TUD_ENDPPOINT_MAX
 
-// The USB controller's registers and EP0 buffers occupy 0x180 bytes.  This
-// Control plugin then has vendor OUT/IN, CDC notification/OUT/IN endpoints;
-// both bulk IN endpoints are double-buffered.  The core reserves this exact
-// area before it places its V8.1 DPRAM log and allocator pool.
-#define CFG_TUD_RP2040_DPRAM_SIZE (0x180 + (64 * (1 + 2 + 1 + 1 + 2)))
+// tinyusb's USB DPRAM.  The controller's registers and EP0 buffers end at
+// 0x180.  Each endpoint then has a 64-byte buffer and a bulk IN endpoint has
+// two.  The endpoints are vendor OUT and IN, then CDC notify, OUT and IN for
+// the Control serial port. The optional second CDC port is disabled to keep
+// the selector and USB stack within the system plugin's 2 KiB static RAM.
+#define CFG_TUD_RP2040_DPRAM_SIZE \
+    (0x180 + (64 * (1 + 2 + 1 + 1 + 2)))
 
 //--------------------------------------------------------------------+
 // Board Specific Configuration

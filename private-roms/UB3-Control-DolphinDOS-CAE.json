@@ -6,8 +6,8 @@
   "categories": ["drive", "firmware", "commodore", "iec"],
   "reserved_pins": ["sel_b", "sel_c", "sel_d"],
   "rom_sets": [
-    {"type":"single","roms":[{"description":"1541HUD USB Control plugin","file":"../firmware-control/active-plugins/system/1541HUD-USB-v0.8.1/build/1541-OneROM-1541HUD-USB-v0.8.1.10.bin","type":"system_plugin"}]},
-    {"type":"single","roms":[{"description":"1541HUD Host Control plugin","file":"../firmware-control/active-plugins/user/1541HUD-Host-Control-v0.8.1/build/1541-OneROM-1541HUD-Host-Control-v0.8.1.3.bin","type":"user_plugin"}]},
+    {"type":"single","roms":[{"description":"1541HUD USB Control plugin","file":"../firmware-control/active-plugins/system/1541HUD-USB-v0.8.1/build/1541-OneROM-1541HUD-USB-v0.8.1.16.bin","type":"system_plugin"}]},
+    {"type":"single","roms":[{"description":"1541HUD Host Control plugin","file":"../firmware-control/active-plugins/user/1541HUD-Host-Control-v0.8.1/build/1541-OneROM-1541HUD-Host-Control-v0.8.1.5.bin","type":"user_plugin"}]},
     {"type":"multi","roms":[
       {"label":"PRIVATE ROM SET","description":"C000-DFFF page supplied by owner","file":"control/slot0-c000-dfff.bin","type":"2364","cs1":"active_low"},
       {"description":"A000-BFFF page supplied by owner","file":"control/slot0-a000-bfff.bin","type":"2364","cs1":"active_low"},

@@ -1,9 +1,9 @@
 {
-  "name": "1541-onerom-1541hud-usb-v0.8.1.10",
-  "display_name": "1541 OneROM 1541HUD USB v0.8.1.10",
+  "name": "1541-onerom-1541hud-usb-v0.8.1.16",
+  "display_name": "1541 OneROM 1541HUD USB v0.8.1.16",
   "description": "1541HUD USB transport, selector control, SEL_C write-protect override, SEL_D physical write-protect sensing, persisted paired status/RGB LED policy, FIFO-safe CDC replies, and V8.1 USB DPRAM reservation.",
   "author": "Ben Krall and contributors",
   "source": "https://github.com/benkrall1973/1541-OneROM-Private",
   "license": "MIT",
-  "build_output": "build/1541-OneROM-1541HUD-USB-v0.8.1.10.bin"
+  "build_output": "build/1541-OneROM-1541HUD-USB-v0.8.1.16.bin"
 }

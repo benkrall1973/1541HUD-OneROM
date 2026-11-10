@@ -1,0 +1,5 @@
+*.sh text eol=lf
+*.bin -text
+*.exe -text
+firmware-control/overlays/*.patch text eol=lf whitespace=-blank-at-eol
+firmware-monitor/overlays/*.patch text eol=lf whitespace=-blank-at-eol

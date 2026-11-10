@@ -5,8 +5,8 @@
   "description": "ROM-free template. Supply lawful Monitor boot ROM pages under private-roms/monitor/.",
   "categories": ["drive", "firmware", "commodore"],
   "rom_sets": [
-    {"type":"single","roms":[{"description":"1541HUD Monitor USB plugin","file":"../firmware-monitor/active-plugins/system/1541HUD-Monitor-USB/build/1541-OneROM-1541HUD-Monitor-USB-v0.8.1.3.bin","type":"system_plugin"}]},
-    {"type":"single","roms":[{"description":"1541HUD passive Monitor plugin","file":"../firmware-monitor/active-plugins/user/1541HUD-Monitor/build/1541-OneROM-1541HUD-Monitor-v0.8.1.28.bin","type":"user_plugin"}]},
+    {"type":"single","roms":[{"description":"1541HUD Monitor USB plugin","file":"../firmware-monitor/active-plugins/system/1541HUD-Monitor-USB/build/1541-OneROM-1541HUD-Monitor-USB-v0.8.1.4.bin","type":"system_plugin"}]},
+    {"type":"single","roms":[{"description":"1541HUD passive Monitor plugin","file":"../firmware-monitor/active-plugins/user/1541HUD-Monitor/build/1541-OneROM-1541HUD-Monitor-v0.8.1.30.bin","type":"user_plugin"}]},
     {"type":"multi","roms":[
       {"label":"PRIVATE MONITOR BOOT ROM","description":"E000-FFFF page supplied by owner","file":"monitor/e000-ffff.bin","type":"2364","cs1":"active_low"},
       {"description":"C000-DFFF page supplied by owner","file":"monitor/c000-dfff.bin","type":"2364","cs1":"active_low"}

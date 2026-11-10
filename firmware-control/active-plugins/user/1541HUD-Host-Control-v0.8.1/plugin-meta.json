@@ -5,5 +5,5 @@
     "author": "Piers Finlayson",
     "source": "https://github.com/piersfinlayson/one-rom",
     "license": "MIT",
-    "build_output": "build/host_control_plugin.bin"
+    "build_output": "build/1541-OneROM-1541HUD-Host-Control-v0.8.1.5.bin"
 }

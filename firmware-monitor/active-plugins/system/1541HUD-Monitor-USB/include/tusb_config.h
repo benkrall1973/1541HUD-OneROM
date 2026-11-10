@@ -41,14 +41,19 @@
 // One ROM specific configuration
 #define __not_in_flash(x)
 #define CFG_TUD_TASK_QUEUE_SZ     4
-#define CFG_TUD_ENDPOINT_MAX      4
-#define USB_MAX_ENDPOINTS         CFG_TUD_ENDPOINT_MAX
 
-/* RP2040 USB DPRAM reserved by this one-CDC Monitor composite device.
- * Controller registers and EP0 consume 0x180 bytes.  The remaining buffers
- * are vendor OUT, vendor IN (double), CDC notification, CDC OUT, and CDC IN
- * (double): seven 64-byte buffers, for a total of 0x340 bytes. */
-#define CFG_TUD_RP2040_DPRAM_SIZE (0x180u + (64u * (1u + 2u + 1u + 1u + 2u)))
+// Endpoint numbers 0 to 5 and interfaces 0 to 5.  tinyusb spells the first
+// ENDPPOINT.
+#define CFG_TUD_ENDPPOINT_MAX     4
+#define CFG_TUD_INTERFACE_MAX     4
+#define USB_MAX_ENDPOINTS         CFG_TUD_ENDPPOINT_MAX
+
+// tinyusb's USB DPRAM.  The controller's registers and EP0 buffers end at
+// 0x180.  Each endpoint then has a 64-byte buffer and a bulk IN endpoint has
+// two.  The endpoints are vendor OUT and IN, then CDC notify, OUT and IN for
+// the single Monitor serial port. A second CDC interface is not reserved.
+#define CFG_TUD_RP2040_DPRAM_SIZE \
+    (0x180 + (64 * (1 + 2 + 1 + 1 + 2)))
 
 //--------------------------------------------------------------------+
 // Board Specific Configuration

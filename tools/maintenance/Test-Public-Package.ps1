@@ -63,16 +63,17 @@ $required = @(
     'firmware-monitor/active-plugins/system/1541HUD-Monitor-USB',
     'firmware-monitor/active-plugins/user/1541HUD-Monitor',
     'firmware-monitor/shared/1541hud_mailbox.h',
-    'source/one-rom-v0.8.1/firmware/apio/include/apio.h',
-    'source/one-rom-v0.8.1/third_party/tinyusb/src/tusb.h',
-    'source/one-rom-v0.8.1/third_party/picobootx/include/picobootx.h',
-    'source/one-rom-v0.8.1/third_party/pico-sdkless/include/pico.h',
+    'firmware-monitor/overlays/ub4-passive-v0.8.1.patch',
+    'releases/v8.1-manifest.json',
+    'docs/V81_BASELINE_RUNBOOK.md',
+    'source/one-rom-v0.8.1/firmware/Makefile',
+    'source/one-rom-v0.8.1/plugins/system/usb/Makefile',
     '1541hud/source/1541HUD_V0.8.0.51.py',
     '1541hud/tests/test_onerom_usb.py',
     'utilities/rom-pages/Split-1541-RomPages.ps1',
     'tools/onerom-v0.5.0.exe',
     'releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0.8.1.bin',
-    'releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.28.bin',
+    'releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.30.bin',
     'private-roms/README.md',
     'private-roms/UB3-Control-DolphinDOS-CAE.json',
     'private-roms/UB3-Control-Lower-Socket.json',
@@ -94,19 +95,21 @@ $forbiddenPath = '(?i)(s-jiffy|sjiffydos|jiffydos|dolphindos|speeddos|\.bin$|\.u
 $badPaths = Get-ChildItem -LiteralPath $PackageRoot -Recurse -Force -File |
     Where-Object {
         $relative = $_.FullName.Substring($PackageRoot.Length + 1).Replace('\', '/')
-        $relative -notmatch '^(private-roms/(UB3-Control-DolphinDOS-CAE|UB3-Control-Lower-Socket|UB3-Control-Upper-Socket|monitor-compose)\.json|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0\.8\.1\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.28\.bin|tools/onerom-v0\.5\.0\.exe|firmware-monitor/inputs/(1541-OneROM-Bootloader-Universal-v1\.1\.0|1541-c000\.325302-01)\.bin)$' -and $relative -match $forbiddenPath
+        $relative -notmatch '^(source/one-rom-v0\.8\.1/images/test/stub-(system|user)-plugin\.bin|private-roms/(UB3-Control-DolphinDOS-CAE|UB3-Control-Lower-Socket|UB3-Control-Upper-Socket|monitor-compose)\.json|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0\.8\.1\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.30\.bin|tools/onerom-v0\.5\.0\.exe|firmware-monitor/inputs/(1541-OneROM-Bootloader-Universal-v1\.1\.0|1541-c000\.325302-01)\.bin)$' -and $relative -match $forbiddenPath
     }
 if ($badPaths) {
     throw "Forbidden payload/history file(s) in public package:`n$($badPaths.FullName -join "`n")"
 }
 
 $expectedMonitorInputs = @{
+    'source/one-rom-v0.8.1/images/test/stub-system-plugin.bin' = 'D645C477FD96C25020EE67B35D8E3C90834DC6C1931E7B1DF1A7DDEF3695C981'
+    'source/one-rom-v0.8.1/images/test/stub-user-plugin.bin' = '2616755B5219400AB4842F71C19BF48E9157E6AABB50F78A817A7886381CA7EF'
     'firmware-monitor/inputs/1541-OneROM-Bootloader-Universal-v1.1.0.bin' = '7313B07F26FCC3778664B0C53F1AFF46AF883ED8B0A3CBF525EFC9BB40432B0E'
     'firmware-monitor/inputs/1541-c000.325302-01.bin' = '6FA7B07AFF92DA66B0A28A52BB3C82FFE310AB0FAD2CC473B40137A8D299C7E5'
 }
 foreach ($relative in $expectedMonitorInputs.Keys) {
     $input = Join-Path $PackageRoot $relative
-    if ((Get-Item -LiteralPath $input).Length -ne 8192) {
+    if ($relative -like 'firmware-monitor/inputs/*' -and (Get-Item -LiteralPath $input).Length -ne 8192) {
         throw "Monitor input is not 8192 bytes: $relative"
     }
     $actual = Get-Sha256Hex -Path $input
@@ -129,6 +132,19 @@ $textHits = foreach ($file in Get-ChildItem -LiteralPath $PackageRoot -Recurse -
     }
 }
 if ($textHits) { throw "Private path or serial-like data in public package:`n$($textHits -join "`n")" }
+
+$manifest = Get-Content -LiteralPath (Join-Path $PackageRoot 'releases/v8.1-manifest.json') -Raw | ConvertFrom-Json
+foreach ($image in $manifest.images) {
+    $path = Join-Path $PackageRoot "releases/$($image.file)"
+    if ((Get-Sha256Hex -Path $path) -ne $image.sha256 -or
+        (Get-Item -LiteralPath $path).Length -ne $image.bytes) {
+        throw "Release image hash/size mismatch: $($image.file)"
+    }
+    $binaryText = [Text.Encoding]::GetEncoding(28591).GetString([IO.File]::ReadAllBytes($path))
+    if ($binaryText -match $forbiddenText -or $binaryText -match '/mnt/[a-z]/Users/|/tmp/ub3-public-') {
+        throw "Private build marker in release image: $($image.file)"
+    }
+}
 
 Write-Host "PASS: $PackageRoot is structurally complete and contains no denied payload, history, serial, or local-path markers."
 

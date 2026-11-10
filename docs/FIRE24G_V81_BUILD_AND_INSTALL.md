@@ -10,7 +10,7 @@ their firmware, USB roles, or wiring.
 | Board | Role | Active firmware |
 | --- | --- | --- |
 | UB3 | Control | OneROM V8.1 Control, 8-ROM 74LS138 image |
-| UB4 | Monitor | 1541HUD Monitor `v0.8.1.28` |
+| UB4 | Monitor | 1541HUD Monitor `v0.8.1.30` |
 
 Windows COM numbers are not identities and may change after every reconnect.
 Bind 1541HUD by each board's USB serial as discovered locally; Windows COM
@@ -54,21 +54,21 @@ are intentionally not committed; install the pinned tool prerequisites below.
 | Component | Build command | Expected output |
 | --- | --- | --- |
 | UB3 Control, WSL2/Linux source build | `bash consolidation/scripts/build-control-v0.8.1.sh private-roms/<your-config>.json output/onerom-ub3-control-fire24g.bin` | `output/onerom-ub3-control-fire24g.bin` |
-| UB4 Monitor, WSL2/Linux source build | `TOOLCHAIN=/path/to/bin ONEROM_CLI=onerom bash firmware-monitor/Build-Monitor-Fire24G-V0.8.1.sh` | `firmware-monitor/releases/v8.1/candidates/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.28.bin` |
+| UB4 Monitor, WSL2/Linux source build | `TOOLCHAIN=/path/to/bin ONEROM_CLI=onerom bash firmware-monitor/Build-Monitor-Fire24G-V0.8.1.sh` | `firmware-monitor/releases/v8.1/candidates/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.30.bin` |
 
 Both wrappers use the root-level pinned source tree at `source/one-rom-v0.8.1`.
 The Control wrapper copies the exact official v0.8.1 source into an ignored
 work tree, then builds the Control USB and Host-Control plugins before
-composing the owner-supplied manifest. The Monitor build uses the pinned core
-directly and must use the passive core define
-`HUD1541_PASSIVE_UB4`; do not build its plugins with a normal ROM-serving core.
+composing the owner-supplied manifest. The Monitor build exports an isolated core and applies the passive overlay
+with `HUD1541_PASSIVE_UB4`; do not build its plugins with a normal ROM-serving core.
 
 ### UB4 Monitor pinned inputs
 
-The public UB4 Monitor composition is self-contained.  Its exact pinned source
-dependencies live in `source/one-rom-v0.8.1/third_party/`:
-`tinyusb`, `picobootx`, and `pico-sdkless`.  The Monitor manifest also uses
-the two checked-in 8 KiB baseline inputs below; these are the non-DOS inputs
+The public UB4 Monitor composition includes its baseline inputs. The official
+USB Makefile downloads pinned TinyUSB ec528d6aa, picobootx v0.7.0 and
+pico-sdkless v0.1.1 into the isolated core's `plugins/system/usb/` directory.
+The Monitor manifest also uses
+the two checked-in 8 KiB baseline inputs below; these are the baseline inputs
 used to produce the supplied Monitor release image.
 
 | File | SHA-256 |
@@ -76,32 +76,32 @@ used to produce the supplied Monitor release image.
 | `firmware-monitor/inputs/1541-OneROM-Bootloader-Universal-v1.1.0.bin` | `7313B07F26FCC3778664B0C53F1AFF46AF883ED8B0A3CBF525EFC9BB40432B0E` |
 | `firmware-monitor/inputs/1541-c000.325302-01.bin` | `6FA7B07AFF92DA66B0A28A52BB3C82FFE310AB0FAD2CC473B40137A8D299C7E5` |
 
-No third-party DOS ROM is used by this UB4 Monitor image.  Keep owner-supplied
+The Monitor includes the stock C000 baseline page shown above.  Keep owner-supplied
 DOS pages for UB3 Control private under `private-roms/`.
 
 ### Supported source-build host: WSL2 or Linux
 
 The qualified source-build route is **WSL2/Linux** with GNU Make, ARM GNU
-Toolchain 14.2.1, and a POSIX shell.  The upstream V8.1 Makefiles use POSIX
+Toolchain 15.3.Rel1, and a POSIX shell.  The upstream V8.1 Makefiles use POSIX
 recipe commands such as `mkdir -p`, pipes, and command substitution.  Plain
 native Windows builds with GNU Make plus a loose `sh.exe` are not reliable and
 are not a supported public route.
 
 `firmware-monitor/Build-Monitor-Fire24G-V0.8.1.ps1` is retained as a Windows
-helper for environments that already have a compatible POSIX build layer, but
-it is not the qualified fresh-checkout path.  Windows remains fully supported
+WSL wrapper: toolchain and CLI arguments are Linux paths.
+Windows remains fully supported
 for the OneROM CLI, USB inspection/flashing, and the 1541HUD application.
 
 ### Prerequisites for a fresh checkout
 
-- ARM GNU Toolchain 14.2.1 or compatible `arm-none-eabi-gcc`.
+- ARM GNU Toolchain 15.3.Rel1 or compatible `arm-none-eabi-gcc`.
 - WSL2/Linux, GNU Make, and a POSIX shell for source builds.
 - OneROM CLI 0.5.0 or compatible `onerom` executable. The validated Windows
   executable is included at `tools/onerom-v0.5.0.exe`; place it on `PATH` or
   pass its path to the build wrapper where needed.
 - Rust/Cargo **1.93.0 or newer** for the pinned V8.1 Rust host tooling. The original 1.85 floor was only a wrapper check; it is not sufficient for the currently vendored source snapshot. The dependency-refresh branch validated `onerom-fw` and `onerom-cli` with Rust/Cargo 1.93.0 on Linux.
 
-The Monitor PowerShell entry point also accepts `-Toolchain`, `-Make`, and
+The Monitor PowerShell entry point also accepts `-Toolchain` and
 `-OneRomCli` arguments for an installed-but-not-on-PATH toolchain. This keeps
 the repository portable instead of baking in somebody's Desktop path, because
 that sort of thing is how "reproducible" builds become performance art.

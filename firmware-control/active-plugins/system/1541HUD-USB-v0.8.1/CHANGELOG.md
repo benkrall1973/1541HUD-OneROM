@@ -1,5 +1,23 @@
 # Changelog
 
+## [1541HUD 0.8.1.12] - full Control qualification candidate
+
+Rebase USB source and headers on the official v0.8.1 implementation after the
+official-USB reference successfully enumerated on the loose Fire-24G. Restore
+the selector through explicit startup/task hooks and exclusive CDC ownership.
+Keep one CDC port, with matching endpoint/DPRAM settings and peer capabilities,
+to satisfy the unchanged system-plugin static-RAM limit. Preserve the custom
+selector's reset, WP, LED, ROM-list and persistent-settings functionality.
+The full custom image still requires hardware enumeration testing.
+
+## [1541HUD 0.8.1.11] - qualification candidate
+
+Use the official v0.8.1 USB interrupt ownership contract: reserve USB in the
+plugin header, publish a header interrupt handler that dispatches to TinyUSB,
+and enable the interrupt through the checked SET_IRQ_ENABLED API. Preserve the
+custom selector and reset/write-protect integration. Hardware enumeration has
+not yet been verified; r1 and r2 qualification images failed to enumerate.
+
 ## [1541HUD 0.8.1.3] - unreleased
 
 Reserve TinyUSB's USB DPRAM in the V8.1 plugin header before the firmware

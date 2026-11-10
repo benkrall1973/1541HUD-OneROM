@@ -1,0 +1,66 @@
+diff --git a/firmware/src/piodma/pio.c b/firmware/src/piodma/pio.c
+index 79a061f6..ac645901 100644
+--- a/firmware/src/piodma/pio.c
++++ b/firmware/src/piodma/pio.c
+@@ -76,6 +76,17 @@ void pio_gpio_to_block(uint8_t gpio, uint8_t block) {
+ }
+ 
+ int pio(void) {
++#if defined(HUD1541_PASSIVE_UB4)
++    // UB4 must never start a ROM-serving state machine. Capture and RGB still
++    // need live PIO blocks; releasing reset alone does not drive any GPIO.
++#if REAL_HARDWARE
++    RESET_RESET &= ~(RESET_PIO0 | RESET_PIO1 | RESET_PIO2);
++    while ((RESET_DONE & (RESET_PIO0 | RESET_PIO1 | RESET_PIO2)) !=
++           (RESET_PIO0 | RESET_PIO1 | RESET_PIO2)) {}
++#endif
++    RUNTIME->firmware_flags |= FIRMWARE_FLAG_STANDBY;
++    return 0;
++#else
+     int rc;
+ 
+     if (0) {
+@@ -88,5 +99,6 @@ int pio(void) {
+     }
+ 
+     return rc;
++#endif
+ }
+ 
+diff --git a/firmware/src/plugin.c b/firmware/src/plugin.c
+index 85b4a3df..2265cddd 100644
+--- a/firmware/src/plugin.c
++++ b/firmware/src/plugin.c
+@@ -1751,6 +1751,13 @@ ora_result_t ora_gpio_set(uint8_t gpio, uint8_t state, uint32_t flags) {
+         state != ORA_GPIO_STATE_INPUT) {
+         return ORA_RESULT_INVALID_ARG;
+     }
++#if defined(HUD1541_PASSIVE_UB4)
++    // Even FORCE cannot turn a Monitor bus/header pin into an output.
++    if (state != ORA_GPIO_STATE_INPUT &&
++        gpio != HW->gpio_status && gpio != HW->gpio_neopixel) {
++        return ORA_RESULT_NOT_SUPPORTED;
++    }
++#endif
+ 
+     if (!(flags & ORA_GPIO_FLAG_FORCE)) {
+         if (ora_gpio_use_is_busy(ora_gpio_get_use(gpio))) {
+@@ -2390,12 +2397,18 @@ ora_result_t ora_firmware_state_query(
+ ora_result_t ora_set_standby(uint8_t standby, uint32_t flags) {
+     (void)flags;
+ 
++#if defined(HUD1541_PASSIVE_UB4)
++    if (standby > 1u) return ORA_RESULT_INVALID_ARG;
++    return standby ? ORA_RESULT_OK : ORA_RESULT_NOT_SUPPORTED;
++#else
++
+     if (standby > 1) {
+         return ORA_RESULT_INVALID_ARG;
+     }
+ 
+     pio_set_standby(standby);
+     return ORA_RESULT_OK;
++#endif
+ }
+ 
+ // ---------------------------------------------------------------------------

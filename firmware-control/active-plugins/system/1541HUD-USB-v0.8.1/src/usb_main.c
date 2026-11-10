@@ -2,14 +2,23 @@
 //
 // MIT License
 
-// One ROM system plugin implementing USB + 1541 USB Selector
+// One ROM system plugin implementing USB
 
 #include "usb_plugin.h"
 #include "tusb.h"
+#include "device/dcd.h"
 #include "usb_descriptors.h"
 #include "usb_picobootx.h"
 #include "picobootx.h"
 #include "usb_rom_select.h"
+
+// Isolation-only build switch. Production builds always enable the selector.
+#ifndef ROMSEL_DIAGNOSTIC_DISABLE_SELECTOR
+#define ROMSEL_DIAGNOSTIC_DISABLE_SELECTOR 0
+#endif
+#ifndef ROMSEL_DIAGNOSTIC_INIT_ONLY
+#define ROMSEL_DIAGNOSTIC_INIT_ONLY 0
+#endif
 
 // Optimisations:
 // - Add IRQ prioritisation a la SDK
@@ -20,6 +29,35 @@ void usb_main(
     ora_plugin_type_t plugin_type,
     const ora_entry_args_t *entry_args
 );
+// This plugin's capabilities.  See usb_peer.h.
+static const struct {
+    usb_peer_usbi_t usbi;
+    uint32_t        end;
+} usb_peer_data = {
+    .usbi = {
+        .hdr = {
+            .format  = USB_PEER_USBI_FORMAT,
+            .size    = sizeof(usb_peer_usbi_t),
+            .version = USB_PEER_USBI_VERSION,
+        },
+        // Control uses one CDC port; RBCP stays on the ROM bus.
+        .serial_ports = USB_PEER_USBI_SERIAL_PORT_1,
+    },
+    .end = 0,
+};
+_Static_assert(sizeof(usb_peer_data) == sizeof(usb_peer_usbi_t) + 4u,
+               "usb_peer_data must be contiguous");
+
+#if defined(ORA_HOST_TEST)
+// This plugin's peer data, for a test.  A host build's address doesn't fit the
+// header's 32-bit peer_data.
+const uint32_t *onerom_usb_test_peer_data(void) {
+    return (const uint32_t *)&usb_peer_data;
+}
+#endif // ORA_HOST_TEST
+
+static void usb_irq_handler(ora_irq_t irq);
+
 ORA_SECTION(".plugin_header")
 const ora_plugin_header_t ora_plugin_header = {
     .magic    = ORA_PLUGIN_MAGIC,
@@ -32,19 +70,19 @@ const ora_plugin_header_t ora_plugin_header = {
     .plugin_type = ORA_PLUGIN_TYPE_SYSTEM,
     .sam_usage = 255,
     .overrides1 = ORA_OVERRIDE1_DISABLE_VBUS_DETECT,
-    /*
-     * The HUD owns this CDC interface as a request/reply protocol.  On
-     * firmware 0.8.1 this prevents firmware/plugin log traffic and the boot
-     * banner sharing the same 64-byte CDC FIFO with selector records; logs
-     * remain available through picoboot/DPRAM diagnostics.
-     */
-    .properties1 = ORA_PROPERTY1_SUPPORTS_USB_RUNNING |
-                   ORA_PROPERTY1_SUPPORTS_YIELD |
+    .properties1 = ORA_PROPERTY1_SUPPORTS_YIELD | ORA_PROPERTY1_RESERVE_USB |
                    ORA_PROPERTY1_EXCLUSIVE_SERIAL_IN,
     .min_fw_major_version = 0,
     .min_fw_minor_version = 8,
     .min_fw_patch_version = 1,
     .usb_controller_dpram_size = CFG_TUD_RP2040_DPRAM_SIZE,
+#if defined(ORA_HOST_TEST)
+    // A host build's addresses don't fit the field and nothing reads it.
+    .peer_data = 0,
+#else
+    .peer_data = (uint32_t)(uintptr_t)&usb_peer_data,
+#endif
+    .irq_handler = usb_irq_handler,
     .reserved = {0},
 };
 _Static_assert(CFG_TUD_RP2040_DPRAM_SIZE <= ORA_USB_CONTROLLER_DPRAM_MAX,
@@ -52,6 +90,23 @@ _Static_assert(CFG_TUD_RP2040_DPRAM_SIZE <= ORA_USB_CONTROLLER_DPRAM_MAX,
 
 // Plugin context, stored in .bss
 usb_plugin_context_t context;
+
+// Returns the user plugin's USBc block, or NULL if the block is missing or
+// invalid.
+const usb_peer_usbc_t *usb_peer_usbc(void) {
+    ora_get_peer_data_fn_t get_peer_data =
+        context.ora_lookup_fn(ORA_ID_GET_PEER_DATA);
+    const uint32_t *block = NULL;
+    if ((get_peer_data == NULL)
+        || (get_peer_data(USB_PEER_USBC_FORMAT, 0, &block) != ORA_RESULT_OK)) {
+        return NULL;
+    }
+    const usb_peer_usbc_t *usbc = (const usb_peer_usbc_t *)block;
+    if ((usbc->hdr.version < 1u) || (usbc->hdr.size < sizeof(usb_peer_usbc_t))) {
+        return NULL;
+    }
+    return usbc;
+}
 
 // Place the plugin's initialised data and clear its zeroed data.
 //
@@ -103,10 +158,10 @@ uint32_t tusb_time_millis_api(void) {
 }
 
 void usb_plugin_task(void) {
-    // ONEROM_CMD_SET_LED and ONEROM_CMD_GPIO_SET are both applied in the
-    // dispatch handler.  Only the timed release of a bounded GPIO hold is
-    // deferred to here - an LED mode that runs on is the firmware engine's to
-    // keep going, not this plugin's.
+    // ONEROM_CMD_SET_LED, ONEROM_CMD_GPIO_SET and ONEROM_CMD_SET_STANDBY are
+    // applied in the dispatch handler.  Only the timed release of a bounded
+    // GPIO hold is deferred to here - an LED mode that runs on is the firmware
+    // engine's to keep going, not this plugin's.
     gpio_release_expired_holds();
 }
 
@@ -200,11 +255,18 @@ void usb_init(ora_lookup_fn_t ora_lookup_fn, uint8_t entry_flags) {
 
     // After gpio_init_caps(), which clears the capability word.
     led_init_caps();
+    if (ora_lookup_fn(ORA_ID_SET_STANDBY) != NULL) {
+        context.features |= ONEROM_FEAT_STANDBY;
+    }
 
     // Resolved once here, with the rest of the one-time API resolution, since
     // none of it changes while the plugin runs.
+    serial_ports_init();
     log_drain_init();
+    // The Control selector owns CDC port 1 input.
+#if !ROMSEL_DIAGNOSTIC_DISABLE_SELECTOR
     romsel_init();
+#endif
 
     // Set up USB.  tinyusb will register its own IRQ handler, using the API
     // functions we provide.
@@ -242,7 +304,10 @@ void usb_main(
         usb_picoboot_task();
         usb_plugin_task();
         log_drain_task();
+#if !ROMSEL_DIAGNOSTIC_DISABLE_SELECTOR && !ROMSEL_DIAGNOSTIC_INIT_ONLY
         romsel_task();
+#endif
+        serial_port_2_task();
         yield(NULL);
 
         // Nothing in this loop waits on anything a host test can change, so
@@ -255,9 +320,8 @@ void usb_main(
     return;
 }
 
-// Firmware 0.8.1 resets the USB controller and allocates its endpoint DPRAM
-// before it starts plugins.  Resetting it again would destroy the log and
-// allocator state it just installed above the controller reservation.
+// The firmware resets the USB controller before starting the plugins.  A reset
+// here would lose the firmware's previous writes to USB DPRAM.
 bool rp2usb_app_reset_cb(void) {
     return false;
 }
@@ -292,10 +356,8 @@ bool tud_vendor_control_xfer_cb(
         return true;
     }
 
-    // Handle MS OS 2.0 descriptor request, for WCID on Windows 8.1+. Avoids
-    // the need for Zadig to set up WinUSB on Windows. The conservative
-    // diagnostic USB build intentionally omits this Windows-only path.
-#if !defined(ONEROM_USB_PI_CONSERVATIVE)
+    // Handle MS OS 2.0 descriptor request, for WCID on Windoows 8.1+.  Avoids
+    // the need for Zadig to setup WinUSB on Windows.
     if ((request->bRequest == VENDOR_REQUEST_MICROSOFT) &&
         (request->bmRequestType_bit.type == TUSB_REQ_TYPE_VENDOR)) {
         if (stage == CONTROL_STAGE_SETUP) {
@@ -311,20 +373,60 @@ bool tud_vendor_control_xfer_cb(
             return true;
         }
     }
-#endif
 
     return false;
 }
 
 // ---------------------------------------------------------------------------
-// The device's C library and interrupt glue
+// Interrupt glue
+//
+// tinyusb's RP2040 device controller driver (dcd_rp2040) calls the IRQ
+// functions below.  The host test build doesn't include that driver, so the
+// USB plugin tester calls usb_irq_handler() and irq_set_enabled() instead.
+// irq_add_shared_handler() and irq_remove_handler() do nothing, so they are
+// left out of the host test build.
+// ---------------------------------------------------------------------------
+
+// The plugin header's interrupt handler.  The USB controller and its
+// interrupt are reserved for this plugin at launch so the firmware calls this
+// with ORA_IRQ_USBCTRL_IRQ.
+static void usb_irq_handler(ora_irq_t irq) {
+    if (irq == ORA_IRQ_USBCTRL_IRQ) {
+        dcd_int_handler(0);
+    }
+}
+
+// This plugin's versions of the Pico SDK IRQ functions.  tinyusb registers only
+// its USB controller interrupt handler, which dcd_int_handler() calls, so
+// registering and removing a handler do nothing.
+#if !defined(ORA_HOST_TEST)
+void irq_add_shared_handler(uint32_t num, ora_irq_handler_t handler, uint8_t order) {
+    (void)num;
+    (void)handler;
+    (void)order;
+}
+
+void irq_remove_handler(uint32_t num, ora_irq_handler_t handler) {
+    (void)num;
+    (void)handler;
+}
+#endif // !ORA_HOST_TEST
+
+void irq_set_enabled(uint32_t num, bool enabled) {
+    ora_set_irq_enabled_fn_t set_irq_enabled = context.ora_lookup_fn(ORA_ID_SET_IRQ_ENABLED);
+    if ((set_irq_enabled == NULL)
+        || (set_irq_enabled((ora_irq_t)num, enabled ? 1 : 0, 0) != ORA_RESULT_OK)) {
+        ERR("Can't %s interrupt %u", enabled ? "enable" : "disable", (unsigned)num);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// The device's C library
 //
 // None of this belongs to a host test build.  The host has a C library of its
 // own, and defining these there would take over the process's — _exit above all,
-// which would turn an ordinary exit into a hang.  The IRQ shims are called only
-// by tinyusb's RP2040 device controller driver, which a host build does not
-// compile, and panic and __assert_func are the bare-metal ends of routines the
-// host libraries already provide.
+// which would turn an ordinary exit into a hang.  panic and __assert_func are the
+// bare-metal ends of routines the host libraries already provide.
 // ---------------------------------------------------------------------------
 
 #if !defined(ORA_HOST_TEST)
@@ -349,30 +451,6 @@ int _getpid(void) { return 1; }
 void panic(const char *fmt, ...) {
     (void)fmt;
     while (1);
-}
-
-// IRQ functions - dcd_rp2040 calls these but the plugin framework
-// owns IRQ registration. The USB IRQ is already registered before
-// tusb_init is called, so these can be no-ops.
-void irq_add_shared_handler(uint32_t num, ora_irq_handler_t handler, uint8_t order) {
-    (void)order;
-    ora_register_irq_fn_t register_irq = context.ora_lookup_fn(ORA_ID_REGISTER_IRQ);
-
-    // Pico SDK declares handlers as void* but we store them as function
-    // pointers.  This cast is safe because tinyusb always passes genuine
-    // function pointers here.
-    register_irq(num, handler);
-}
-
-void irq_remove_handler(uint32_t num, ora_irq_handler_t handler) {
-    (void)handler;
-    ora_register_irq_fn_t register_irq = context.ora_lookup_fn(ORA_ID_REGISTER_IRQ);
-    register_irq(num, NULL);
-}
-
-void irq_set_enabled(uint32_t num, bool enabled) {
-    ora_enable_irq_fn_t enable_irq = context.ora_lookup_fn(ORA_ID_ENABLE_IRQ);
-    enable_irq(num, enabled ? 1 : 0);
 }
 
 void __assert_func(const char *file, int line, const char *func, const char *expr) {

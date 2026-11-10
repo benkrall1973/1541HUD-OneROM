@@ -10,115 +10,80 @@ OBJDUMP := $(if $(TOOLCHAIN),$(TOOLCHAIN)/arm-none-eabi-objdump,arm-none-eabi-ob
 MAJOR_VERSION := 0
 MINOR_VERSION := 8
 PATCH_VERSION := 1
-BUILD_VERSION := 3
+BUILD_VERSION := 4
+WORK_BUILD := 4
 
-# Build against the repository's pinned local copies.  This avoids network
-# fetches and makes the HUD build reproducible in the Windows/WSL environment.
-# Keep this relative.  GNU Make parses the colon in a Windows absolute drive
-# path as Make syntax when TinyUSB object prerequisites are expanded.
-ONEROM_ROOT ?= ../../../../firmware-monitor/source/monitor-baseline-v0.8.1-upstream
-TINYUSB_DIR   := $(ONEROM_ROOT)/third_party/tinyusb
-PICOBOOTX_DIR := $(ONEROM_ROOT)/third_party/picobootx
-PICO_SDKLESS_DIR := $(ONEROM_ROOT)/third_party/pico-sdkless
 
-# Version of picobootx to build against.  Remove the picobootx/ directory after
-# changing this, so it is re-cloned.
-PICOBOOTX_VERSION ?= v0.6.0
-
-# Version of pico-sdkless to build against.  Remove the pico-sdkless/ directory
-# after changing this, so it is re-cloned.
-PICO_SDKLESS_VERSION ?= v0.1.1
-
-# Commit of the One ROM tinyusb fork to build against.  A commit rather than a
-# tag, because the fork tracks a project this one does not version.  Remove the
-# tinyusb/ directory after changing this, so it is re-cloned.
-TINYUSB_COMMIT ?= 05fb334d0
-
+# GNU ld 2.39+ warns about the flat plugin's deliberate RWX load segment.
+# The qualified GNU Arm 15.3.Rel1 linker understands the suppression; without
+# it --fatal-warnings converts the intentional layout into a failed build.
+ONEROM_ROOT ?= ../../../.work/official-v0.8.1/one-rom-v0.8.1
 ORA_DIR := $(ONEROM_ROOT)/firmware/ora
 ORA_INCLUDE := -I$(ORA_DIR)
-SDRR_INCLUDE := -I$(ONEROM_ROOT)/firmware/include -I$(ONEROM_ROOT)/firmware/generated
 PLUGIN_INCLUDE := -I.
+
+# Use the dependency checkouts made by the official v0.8.1 USB plugin.  The
+# official plugin owns their pinned revisions and clones them on its first
+# build; sharing those directories prevents this Control fork from silently
+# selecting a different USB stack.
+TINYUSB_DIR      ?= $(ONEROM_ROOT)/plugins/system/usb/tinyusb
+PICOBOOTX_DIR    ?= $(ONEROM_ROOT)/plugins/system/usb/picobootx
+PICO_SDKLESS_DIR ?= $(ONEROM_ROOT)/plugins/system/usb/pico-sdkless
 
 BUILD_DIR := build
 
-# The three dependencies below are cloned while this file is being read, before
-# any target runs, so a clone that takes a while is make appearing to hang with
-# nothing on screen.  Three things keep that from happening:
-#
-# - Each says what it is about to do, since $(shell) has no output until it
-#   finishes.
-# - git's own progress goes to stderr, which $(shell) does not capture, so it
-#   reaches the terminal as it happens.
-# - The exit status is checked.  A failed clone used to surface much later as a
-#   missing header, naming a file rather than the network.
-#
-# tinyusb is pinned to a commit rather than a tag, so `--depth 1 --branch`
-# cannot reach it.  `--filter=blob:none` fetches the history without the file
-# contents, which leaves an arbitrary commit checkout working on a fraction of
-# the data.  The other two are pinned to tags and take a shallow clone.
+# The source tree is built both under POSIX and native Windows.  GNU Make's
+# Windows build cannot execute POSIX `mkdir -p`/`rm -rf` recipes directly, so
+# keep the toolchain invocation identical but use native directory commands.
+ifeq ($(OS),Windows_NT)
+RWX_SEGMENT_FLAG ?= -Wl,--no-warn-rwx-segments
+SHELL := cmd.exe
+.SHELLFLAGS := /C
+MKDIR_P = if not exist "$(subst /,\,$(1))" mkdir "$(subst /,\,$(1))"
+RM_RF = if exist "$(subst /,\,$(1))" rmdir /S /Q "$(subst /,\,$(1))"
+else
+RWX_SEGMENT_FLAG ?= -Wl,--no-warn-rwx-segments
+MKDIR_P = mkdir -p $(1)
+RM_RF = rm -rf $(1)
+endif
 
-ifeq ($(wildcard $(TINYUSB_DIR)),)
-$(info Cloning tinyusb into $(TINYUSB_DIR) ...)
-TINYUSB_CLONE := $(shell git clone --filter=blob:none https://github.com/piersfinlayson/tinyusb.git $(TINYUSB_DIR) >&2; echo $$?)
-ifneq ($(TINYUSB_CLONE),0)
-$(error Failed to clone tinyusb - see the git output above)
-endif
-endif
-ifneq ($(wildcard $(TINYUSB_DIR)/.git),)
-TINYUSB_CHECKOUT := $(shell git -c advice.detachedHead=false -C $(TINYUSB_DIR) checkout --quiet $(TINYUSB_COMMIT) >&2; echo $$?)
-ifneq ($(TINYUSB_CHECKOUT),0)
-$(error Failed to check out tinyusb $(TINYUSB_COMMIT) - see the git output above)
-endif
+ifeq ($(wildcard $(TINYUSB_DIR)/src/tusb.c),)
+$(error Missing tracked TinyUSB source at $(TINYUSB_DIR))
 endif
 include tinyusb.mk
 
-ifeq ($(wildcard $(PICOBOOTX_DIR)),)
-$(info Cloning picobootx $(PICOBOOTX_VERSION) into $(PICOBOOTX_DIR) ...)
-PICOBOOTX_CLONE := $(shell git -c advice.detachedHead=false clone --depth 1 --branch $(PICOBOOTX_VERSION) https://github.com/piersfinlayson/picobootx.git $(PICOBOOTX_DIR) >&2; echo $$?)
-ifneq ($(PICOBOOTX_CLONE),0)
-$(error Failed to clone picobootx $(PICOBOOTX_VERSION) - see the git output above)
+ifeq ($(wildcard $(PICOBOOTX_DIR)/picobootx.mk),)
+$(error Missing tracked picobootx source at $(PICOBOOTX_DIR))
 endif
+ifeq ($(wildcard $(PICO_SDKLESS_DIR)/include/pico.h),)
+$(error Missing tracked pico-sdkless source at $(PICO_SDKLESS_DIR))
 endif
 include $(PICOBOOTX_DIR)/picobootx.mk
-
-ifeq ($(wildcard $(PICO_SDKLESS_DIR)),)
-$(info Cloning pico-sdkless $(PICO_SDKLESS_VERSION) into $(PICO_SDKLESS_DIR) ...)
-PICO_SDKLESS_CLONE := $(shell git -c advice.detachedHead=false clone --depth 1 --branch $(PICO_SDKLESS_VERSION) https://github.com/piersfinlayson/pico-sdkless.git $(PICO_SDKLESS_DIR) >&2; echo $$?)
-ifneq ($(PICO_SDKLESS_CLONE),0)
-$(error Failed to clone pico-sdkless $(PICO_SDKLESS_VERSION) - see the git output above)
-endif
-endif
-
 PICOBOOTX_SRC_C := $(addprefix $(PICOBOOTX_DIR)/,$(PICOBOOTX_SRC_C))
 PICOBOOTX_INCLUDE_DIRS := $(addprefix $(PICOBOOTX_DIR)/,$(PICOBOOTX_INCLUDE_DIRS))
 
-PLUGIN_BASE   := 0x10010000
-PLUGIN_PREFIX := 1541-OneROM-1541HUD-Monitor-USB-v$(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION).$(BUILD_VERSION)
+PLUGIN_BASE    := 0x10010000
+PLUGIN_VERSION := v$(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION).$(WORK_BUILD)
+PLUGIN_PREFIX  := 1541-OneROM-1541HUD-Monitor-USB-$(PLUGIN_VERSION)
 
 ELF := $(BUILD_DIR)/$(PLUGIN_PREFIX).elf
 BIN := $(BUILD_DIR)/$(PLUGIN_PREFIX).bin
 
-# Keep the default Makefile build aligned with the explicit V1 PowerShell
-# builder. usb_rom_select.c was retired; retaining it here made direct builds
-# fail even though it is not part of the HUD USB plugin.
-SRC := src/usb_descriptors.c src/usb_picobootx.c src/usb_rom.c src/usb_led.c src/usb_gpio.c src/usb_log.c src/usb_main_1541hud_v1_0_0.c
+SRC := src/usb_descriptors.c src/usb_picobootx.c src/usb_rom.c src/monitor_transport.c src/monitor_protocol.c src/usb_led.c src/usb_gpio.c src/usb_log.c src/usb_main.c
 
 CFLAGS := -mcpu=cortex-m33 -mthumb -mfloat-abi=hard -mfpu=fpv5-sp-d16 \
           -O2 -Wall -Wextra -Werror \
           -ffunction-sections -fdata-sections \
-          -g \
+          -MMD -MP -g \
 		  -DMAJOR_VERSION=$(MAJOR_VERSION) -DMINOR_VERSION=$(MINOR_VERSION) \
 		  -DPATCH_VERSION=$(PATCH_VERSION) -DBUILD_VERSION=$(BUILD_VERSION) \
-          $(SDRR_INCLUDE) $(ORA_INCLUDE) $(PLUGIN_INCLUDE) \
+		   \
+		  $(ORA_INCLUDE) $(PLUGIN_INCLUDE) \
 		  -Iinclude -I$(PICO_SDKLESS_DIR)/include \
           $(addprefix -I,$(TINYUSB_INCLUDE_DIRS)) \
 		  $(addprefix -I,$(PICOBOOTX_INCLUDE_DIRS)) \
 		  -std=c11 \
 		  $(EXTRA_CFLAGS)
-
-# Binutils 2.39 added --no-warn-rwx-segments.  Leave it opt-in so the
-# supported GCC 10.3 toolchain can link this plugin too.
-RWX_SEGMENT_FLAG ?=
 
 LDFLAGS := -nostdlib \
            -L $(ORA_DIR) \
@@ -138,20 +103,22 @@ ALL_OBJ     := $(PLUGIN_OBJ) $(TINYUSB_OBJ) $(PICOBOOTX_OBJ)
 all: $(BIN)
 
 $(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
-	@powershell.exe -NoProfile -Command "New-Item -ItemType Directory -Force -Path '$(dir $@)' | Out-Null"
+	@$(call MKDIR_P,$(dir $@))
 	@echo "Compiling $<..."
 	@$(CC) $(CFLAGS) -c $< -o $@
 
-$(ELF): $(ALL_OBJ) $(ORA_DIR)/plugin.h $(ORA_DIR)/api.h $(ORA_DIR)/system.h $(ORA_DIR)/plugin.ld $(ORA_DIR)/onerom_linker_constants_generated.ld
+$(ELF): $(ALL_OBJ) $(ORA_DIR)/plugin.h $(ORA_DIR)/api.h $(ORA_DIR)/system.h $(ORA_DIR)/plugin.ld
 	@echo "Linking..."
 	@$(CC) $(CFLAGS) $(LDFLAGS) $(ALL_OBJ) -lc -lgcc -o $@
 
 $(BIN): $(ELF)
 	@echo "Converting ELF to binary..."
 	@$(OBJCOPY) -O binary $< $@
+	@$(OBJDUMP) -s -j .plugin_header $(ELF) > $(BUILD_DIR)/$(PLUGIN_PREFIX).dis
+	@$(OBJDUMP) -d -S $(ELF) >> $(BUILD_DIR)/$(PLUGIN_PREFIX).dis
 
 $(BUILD_DIR):
-	@mkdir -p $@
+	@$(call MKDIR_P,$@)
 
 # ---------------------------------------------------------------------------
 # Host build
@@ -188,7 +155,7 @@ HOST_CFLAGS := -DORA_HOST_TEST=1 -DTEST_BUILD=1 -fshort-enums \
                -O1 -g -Wall -Wextra -Werror \
                -DMAJOR_VERSION=$(MAJOR_VERSION) -DMINOR_VERSION=$(MINOR_VERSION) \
                -DPATCH_VERSION=$(PATCH_VERSION) -DBUILD_VERSION=$(BUILD_VERSION) \
-               $(SDRR_INCLUDE) $(ORA_INCLUDE) $(PLUGIN_INCLUDE) \
+		       $(ORA_INCLUDE) $(PLUGIN_INCLUDE) \
                -Iinclude -I$(PICO_SDKLESS_DIR)/include \
                $(addprefix -I,$(TINYUSB_INCLUDE_DIRS)) \
                $(addprefix -I,$(PICOBOOTX_INCLUDE_DIRS)) \
@@ -199,25 +166,25 @@ HOST_CFLAGS := -DORA_HOST_TEST=1 -DTEST_BUILD=1 -fshort-enums \
 host: $(HOST_OBJ)
 
 $(HOST_BUILD_DIR):
-	@mkdir -p $@
+	@$(call MKDIR_P,$@)
 
 $(HOST_BUILD_DIR)/%.o: src/%.c | $(HOST_BUILD_DIR)
 	@echo "Compiling $< for host..."
 	@$(HOST_CC) $(HOST_CFLAGS) -c $< -o $@
 
 clean-host:
-	@rm -rf $(HOST_BUILD_DIR)
+	@$(call RM_RF,$(HOST_BUILD_DIR))
 
 clean: clean-host
 	@echo "Cleaning build artifacts..."
-	@rm -rf $(BUILD_DIR)
+	@$(call RM_RF,$(BUILD_DIR))
 
 distclean: clean
 	@echo "Removing cloned repositories..."
-	@rm -rf $(TINYUSB_DIR) $(PICOBOOTX_DIR) $(PICO_SDKLESS_DIR)
+	@$(call RM_RF,$(TINYUSB_DIR))
+	@$(call RM_RF,$(PICOBOOTX_DIR))
+	@$(call RM_RF,$(PICO_SDKLESS_DIR))
 
 # The host objects are listed too, or a header change would rebuild nothing on
 # the host side and a test would go on asserting against the last build.
-# Windows builds use absolute dependency paths for TinyUSB sources; GNU Make
-# parses their drive-letter colon as a target separator.  Do not include
-# generated dependency files in this portable plugin build.
+-include $(ALL_OBJ:.o=.d) $(HOST_OBJ:.o=.d)

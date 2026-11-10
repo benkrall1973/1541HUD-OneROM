@@ -25,9 +25,6 @@
 #ifndef USB_DESCRIPTORS_H_
 #define USB_DESCRIPTORS_H_
 
-#define ONE_ROM_USB_SYSTEM_PLUGIN_VID 0x1209
-#define ONE_ROM_USB_SYSTEM_PLUGIN_PID 0xF542
-
 enum
 {
   VENDOR_REQUEST_MICROSOFT = 1
@@ -35,7 +32,7 @@ enum
 
 extern uint8_t const desc_ms_os_20[];
 
-#define MS_OS_20_DESC_LEN  0xB2
+#define MS_OS_20_DESC_LEN  0xCE
 
 #define EPNUM_CDC_NOTIF   0x81
 #define EPNUM_CDC_OUT     0x02
@@ -43,5 +40,9 @@ extern uint8_t const desc_ms_os_20[];
 
 #define EPNUM_VENDOR_OUT  0x03
 #define EPNUM_VENDOR_IN   0x83
+
+#define EPNUM_CDC2_NOTIF  0x84
+#define EPNUM_CDC2_OUT    0x05
+#define EPNUM_CDC2_IN     0x85
 
 #endif /* USB_DESCRIPTORS_H_ */

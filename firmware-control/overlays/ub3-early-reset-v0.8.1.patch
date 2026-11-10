@@ -1,0 +1,26 @@
+diff --git a/firmware/src/rp235x.c b/firmware/src/rp235x.c
+--- a/firmware/src/rp235x.c
++++ b/firmware/src/rp235x.c
+@@ -313,6 +313,22 @@ void setup_initial_gpios(void) {
+         APIO_GPIO_INPUT_ONLY(ii);
+     }
+
++    // UB3 Control reset interlock.  SEL_B is reserved and wired through 1k
++    // to the 1541 C46 reset node.  Assert it before ROM service is restarted
++    // so the 1541 cannot fetch while the One ROM reboot is in progress.
++    // Other images retain upstream behaviour: this is active only when SEL_B
++    // (selector bit 1) is explicitly reserved in image metadata.
++    uint8_t reserved_sel = onerom_metadata_header_reserved_sel_pins(METADATA);
++    uint8_t reset_gpio = HW->gpio_sel[1];
++    if ((reserved_sel & (1u << 1)) && reset_gpio < MAX_GPIOS) {
++        SIO_GPIO_OUT_CLR_PIN(reset_gpio);
++        GPIO_CTRL(reset_gpio) = (GPIO_CTRL(reset_gpio) & ~(uint32_t)GPIO_CTRL_FUNC_MASK) |
++                                GPIO_CTRL_FUNC_SIO;
++        GPIO_PAD(reset_gpio) &= ~(PAD_OUTPUT_DISABLE | (1u << PAD_ISO_BIT));
++        GPIO_PAD(reset_gpio) |= PAD_INPUT;
++        SIO_GPIO_OE_SET_PIN(reset_gpio);
++    }
++
+ #if REAL_HARDWARE
+     // Set up the status LED pin (output, driven high = LED off).
+     setup_status_led();

@@ -14,24 +14,10 @@
 // ---------------------------------------------------------------------------
 // Flash handling
 //
-// Protect the first 128KB for now - firmware, metadata and system plugin
-// slot.
+// Protect the firmware, metadata and system plugin regions.
 // ---------------------------------------------------------------------------
-#define FLASH_PROTECTED_START   RP2350_FLASH_BASE
-#define FLASH_PROTECTED_END     (RP2350_FLASH_BASE + 128u * 1024u)
-
-// ---------------------------------------------------------------------------
-// Synthetic address range bases
-//
-// These are protocol-level constants and must not change without corresponding
-// changes to host tooling.
-// ---------------------------------------------------------------------------
-
-// 0x90000000: logical ROM read range.  Returns the original (un-mangled)
-// byte at the given logical ROM address, regardless of how the image is
-// stored in RAM.  Size is dynamic: determined by the ROM type currently
-// being served, retrieved via ctx at call time.
-#define APP_RANGE_LOGICAL_ROM_BASE  0x90000000u
+#define FLASH_PROTECTED_START   ORA_FLASH_CS0_BASE_ADDR
+#define FLASH_PROTECTED_END     ORA_USER_PLUGIN_BASE
 
 // ---------------------------------------------------------------------------
 // Range handler function types
