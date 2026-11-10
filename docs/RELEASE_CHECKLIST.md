@@ -51,7 +51,7 @@ an archaeological dig later.
 
 ## Publish
 
-- [ ] Create an annotated Git tag such as `v8.1.0-fire24g-r1`.
+- [ ] Create an annotated Git tag such as `v8.1-fire24g-baseline`.
 - [ ] Create a GitHub Release from that tag; attach the reviewed binaries.
 - [ ] Include board target, role, SHA-256, pinned upstream status, acceptance
   results, known limitations, and upgrade notes.

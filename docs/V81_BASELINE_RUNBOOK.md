@@ -1,7 +1,7 @@
 # v8.1 consolidated baseline
 
-This branch is the current public Fire-24G baseline. Older branches remain
-temporarily until branch cleanup. It combines Control, Monitor and HUD V51.
+This is the public default branch and the single active Fire-24G baseline.
+It combines Control, Monitor and HUD V51.
 
 | Component | Version |
 | --- | --- |
@@ -67,8 +67,15 @@ the firmware baseline intentionally retains the exact tested upstream snapshot.
 Host dependency refreshes require separate requalification. The older prototype
 Dependabot lockfile candidate is not substituted for that snapshot.
 
-Older branches stay until cleanup. Older pinned Monitor firmware is removed
-from this baseline; historical recovery artifacts remain privately backed up.
+The six older public branches were retired after their exact tips were
+archived privately under archive/public-2026-11-09/. The old r1 release and
+its original downloaded images are also backed up privately. The current
+release replaces the old pinned Monitor firmware. Historical recovery images
+remain private; this cleanup does not rewrite public Git history.
 Automatic drive power-off sensing and the separate C64 configurator release
 remain deferred. RBCP support stays present. RPM assumes standard DOS SYNC
 counts; nonstandard disk formats need separate qualification.
+
+Both complete source builds and the repeatable checker passed on 2026-11-09.
+See [clean source-build verification](CLEAN_SOURCE_BUILD.md) for prerequisites,
+commands, tool versions, results and the synthetic-image safety boundary.
