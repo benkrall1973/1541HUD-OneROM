@@ -28,7 +28,6 @@ members = [
     "protocol",
     "schema-gen",
     "signing-server",
-    "studio",
 ]
 default-members = [
     "app",
@@ -45,7 +44,6 @@ default-members = [
     "metadata-gen",
     "protocol",
     "schema-gen",
-    "studio",
 ]
 resolver = "2"
 

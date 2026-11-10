@@ -14,7 +14,8 @@ export ONEROM_CLI=/path/to/linux/onerom
 bash firmware-monitor/Build-Monitor-Fire24G-V0.8.1.sh
 ```
 
-The wrapper exports the pinned official source, applies the checked overlays,
+The wrapper exports the supported source, verifies the checked-in host fixes,
+applies the passive firmware overlay,
 builds the role core and both custom Monitor plugins, composes the complete
 image, and inspects it. For a combined Control/Monitor verification build that
 also builds its own Linux CLI, follow the

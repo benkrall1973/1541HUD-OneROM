@@ -35,6 +35,8 @@ $required = @(
     '1541hud/README.md',
     '1541hud/requirements.txt',
     'tools/maintenance/Check-Documentation.py',
+    'tools/maintenance/Verify-Source-Dependencies.py',
+    'source/one-rom-v0.8.1/1541HUD-SOURCE.json',
     'LICENSE',
     'NOTICE.md',
     'CONTRIBUTING.md',
@@ -119,12 +121,23 @@ if ($badPaths) {
 
 $cliRecord = Get-Content -Raw -LiteralPath (Join-Path $PackageRoot 'tools/windows-cli-manifest.json') | ConvertFrom-Json
 $hostPins = Get-Content -Raw -LiteralPath (Join-Path $PackageRoot 'overlays/host-dependencies-v0.8.1.json') | ConvertFrom-Json
+$sourceManifestPath = Join-Path $PackageRoot 'source/one-rom-v0.8.1/1541HUD-SOURCE.json'
+$sourcePins = Get-Content -Raw -LiteralPath $sourceManifestPath | ConvertFrom-Json
+& python (Join-Path $PackageRoot 'tools/maintenance/Verify-Source-Dependencies.py') (Join-Path $PackageRoot 'source/one-rom-v0.8.1')
+if ($LASTEXITCODE -ne 0) { throw 'Checked-in supported source verification failed.' }
+$expectedCliLock = $hostPins.lock_sha256
+if ($cliRecord.PSObject.Properties.Name -contains 'source_hardening_sha256') {
+    if ($cliRecord.source_hardening_sha256 -ne (Get-Sha256Hex -Path $sourceManifestPath)) {
+        throw 'Rebuilt CLI source provenance differs from the checked-in source manifest.'
+    }
+    $expectedCliLock = $sourcePins.files_sha256_lf.'rust/Cargo.lock'
+}
 $cliPath = Join-Path $PackageRoot 'tools/onerom-v0.6.0-hud1.exe'
 if ($cliRecord.file -ne 'onerom-v0.6.0-hud1.exe' -or
     $cliRecord.upstream_cli -ne '0.6.0' -or
     $cliRecord.target -ne 'x86_64-pc-windows-msvc' -or
     $cliRecord.overlay_sha256 -ne $hostPins.patch_sha256 -or
-    $cliRecord.lock_sha256 -ne $hostPins.lock_sha256 -or
+    $cliRecord.lock_sha256 -ne $expectedCliLock -or
     (Get-Item -LiteralPath $cliPath).Length -ne $cliRecord.bytes -or
     (Get-Sha256Hex -Path $cliPath) -ne $cliRecord.sha256) {
     throw 'Windows CLI binary, dependency overlay and provenance manifest disagree.'

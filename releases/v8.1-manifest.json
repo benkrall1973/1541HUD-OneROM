@@ -40,5 +40,16 @@
     "bytes": 7900672,
     "sha256": "FAACDDD0D050EC824A0766FABB110369F73A2031B49AF5882E5103DDBE02B734",
     "scope": "Windows release build and native CLI/ZIP regressions; offline image inspection plus recorded loose-board discovery, verified programming, USB-powered reboot and saved-setting checks. Actual drive and full USB power-cycle qualification remain pending."
+  },
+  "supported_source": {
+    "manifest": "source/one-rom-v0.8.1/1541HUD-SOURCE.json",
+    "sha256": "a80b52316042613e56da60369e794f5d672eff061cfe50471cf42cfb473ab3fd",
+    "lock_sha256": "8dd472bc6c9fdb1c87291f497ddf35ed835e618ef2124821ee661b514b5c137b",
+    "original_snapshot_ref": "v8.1-maintenance-2026-11-10",
+    "excluded_unsupported_trees": [
+      "rust/studio",
+      "prototypes/studiov2"
+    ],
+    "firmware_c_source_changed": false
   }
 }

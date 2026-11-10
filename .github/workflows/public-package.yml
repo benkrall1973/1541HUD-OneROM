@@ -16,14 +16,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate public package boundary
-        shell: pwsh
-        run: ./tools/maintenance/Test-Public-Package.ps1 -PackageRoot .
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Validate public package boundary
+        shell: pwsh
+        run: ./tools/maintenance/Test-Public-Package.ps1 -PackageRoot .
 
       - name: Check project documentation links
         shell: pwsh
@@ -62,7 +62,7 @@ jobs:
         run: |
           rustup update stable --no-self-update
           rustup default stable
-      - name: Export official source and apply host-only overlay
+      - name: Export supported source and verify host dependency pins
         run: |
           mkdir -p .buildtools/host-security-core
           git archive HEAD:source/one-rom-v0.8.1 | tar -x -C .buildtools/host-security-core
@@ -74,8 +74,8 @@ jobs:
       - name: Audit supported host dependency graph
         run: bash tools/maintenance/Audit-Host-Dependencies.sh "$PWD/.buildtools/host-security-core"
 
-      - name: Check Wayland scanner compatibility
-        run: cargo check --locked --manifest-path .buildtools/host-security-core/rust/Cargo.toml -p wayland-client -p wayland-protocols
+      - name: Verify supported source provenance
+        run: python3 tools/maintenance/Verify-Source-Dependencies.py .buildtools/host-security-core
 
   windows-cli:
     name: Build and test patched Windows CLI

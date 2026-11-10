@@ -1,3 +1,5 @@
+> **1541HUD supported-source subset:** Host dependency security fixes are incorporated here. Upstream Studio and Studio v2 prototype trees are excluded. Firmware C source is unchanged. See `1541HUD-SOURCE.json` and the project source-security documentation. The complete original snapshot is recoverable from project tag `v8.1-maintenance-2026-11-10`; upstream GUI/build instructions below are historical where they refer to excluded material.
+
 # One ROM
 
 ![Test coverage](https://img.shields.io/badge/Test%20coverage%3A-555)
@@ -9,7 +11,7 @@
 
 The most flexible and powerful ROM replacement for your retro computer.  A single Raspberry Pi
 RP2350-base board in the footprint of the original chip emulates 24, 28, 32 and
-40 pin mask ROMs, EPROMs, EEPROMs, bipolar PROMs and some SRAM — and then does
+40 pin mask ROMs, EPROMs, EEPROMs, bipolar PROMs and some SRAM â€” and then does
 things the original never could.  It serves several ROM sockets at once, switches
 images at runtime, reprograms over USB without leaving the socket, talks back to
 the machine it is installed in, and runs your own code as plugins.
@@ -24,11 +26,11 @@ maintained and developed.
 **Start at [onerom.org](https://onerom.org).**  That is where the project is
 explained and supported:
 
-- [What One ROM is and why](https://onerom.org) — the overview, with pictures
-- [Getting started](https://onerom.org/start/) — install it, program it, use it
-- [Buy one](https://onerom.org/buy) — known vendors, if you'd rather not fab
+- [What One ROM is and why](https://onerom.org) â€” the overview, with pictures
+- [Getting started](https://onerom.org/start/) â€” install it, program it, use it
+- [Buy one](https://onerom.org/buy) â€” known vendors, if you'd rather not fab
   your own
-- [Program from your browser](https://onerom.org/web) — no software to install
+- [Program from your browser](https://onerom.org/web) â€” no software to install
 
 **The rest of this README is for people who want to build One ROM, hack on it,
 or build things on top of it.**  If you just want a working ROM replacement, [onerom.org](https://onerom.org) will get you there faster.
@@ -37,16 +39,16 @@ or build things on top of it.**  If you just want a working ROM replacement, [on
 
 One ROM is designed to be extended in many different ways.
 
-| I want to… | Start here | Steps |
+| I want toâ€¦ | Start here | Steps |
 |------------|------------|------------|
 | Drive a device from scripts or my own tooling | [Programming a One ROM](#programming-a-one-rom), [CLI manual](docs/CLI-MANUAL.md) | Install and run the CLI |
 | Fab and assemble existing boards | [hardware/pcb](hardware/pcb/README.md) | Upload gerbers and BOM/POS files to a fab |
 | Commission boards I've made | [Commissioning](docs/COMMISSIONING.md) | Request an authorised signing key or submit a signing request for a board |
 | Build the firmware myself | [Building from source](#building-from-source) | Use `make` or the build container |
-| Use the header pins as GPIOs — reset the host, drive a line | [Driving the host](#driving-the-host--gpio-and-reset) | One command, plus a wire for host reset |
+| Use the header pins as GPIOs â€” reset the host, drive a line | [Driving the host](#driving-the-host--gpio-and-reset) | One command, plus a wire for host reset |
 | Add support for a chip type One ROM doesn't know | [Adding a chip type](docs/ADDING-CHIP-TYPES.md) | A JSON entry plus one line of Rust or a firmware and tooling update if no existing serving algorithm fits |
 | Add support for a new board revision | [rust/config/json](rust/config/json/README.md) | A new JSON file once the board is designed |
-| Write a plugin — from scratch, or from a working one | [Plugins](#plugins), [firmware/ora/examples](firmware/ora/examples) | C, against a stable API |
+| Write a plugin â€” from scratch, or from a working one | [Plugins](#plugins), [firmware/ora/examples](firmware/ora/examples) | C, against a stable API |
 | Talk to the retro machine from the ROM socket | [RBCP](#rbcp--talking-to-the-host-system) | 6502 and 68000 host code provided |
 | Build host-side tools of my own | [Rust crates](#rust-crates) | Rust, on published crates |
 | Read and test real ROM chips | [One ROM Lab](#one-rom-lab) | Flash Lab to a spare Fire board |
@@ -57,9 +59,9 @@ One ROM is designed to be extended in many different ways.
 
 One ROM comes in two families:
 
-- **Fire** — RP2350, in 24, 28, 32 and 40 pin variants, latest boards include an
+- **Fire** â€” RP2350, in 24, 28, 32 and 40 pin variants, latest boards include an
   RGB NeoPixel.  All development happens for these boards.
-- **Ice** — STM32F4, 24 pin only.  Legacy: still supported with 0.6.x firmware,
+- **Ice** â€” STM32F4, 24 pin only.  Legacy: still supported with 0.6.x firmware,
   but it is not being enhanced.  The 0.7.x firmware and the CLI do not
   support it.
 
@@ -88,11 +90,11 @@ KERNAL and the character ROM.</em></p>
 
 There are three tools, all doing the same job over USB:
 
-- **[One ROM Web](https://onerom.org/web)** — browser based, nothing to install,
+- **[One ROM Web](https://onerom.org/web)** â€” browser based, nothing to install,
   the best choice for most people.
-- **[One ROM CLI](https://onerom.org/cli)** — the full device tool, and what the
+- **[One ROM CLI](https://onerom.org/cli)** â€” the full device tool, and what the
   examples below use ([rust/cli](rust/cli)).
-- **[One ROM Studio](https://onerom.org/studio)** — native desktop GUI for
+- **[One ROM Studio](https://onerom.org/studio)** â€” native desktop GUI for
   Windows, macOS and Linux ([rust/studio](rust/studio)).
 
 The CLI is the complete interface: everything the device can do is reachable from
@@ -131,10 +133,10 @@ onerom peek live --address 0x100 --length 64
 onerom poke live --address 0x100 --byte 0xEA
 ```
 
-## Driving the host — GPIO and reset
+## Driving the host â€” GPIO and reset
 
 The image select and X pins are not just jumpers.  They are GPIOs, and
-One ROM will drive them for you — which means the ROM socket becomes a way to
+One ROM will drive them for you â€” which means the ROM socket becomes a way to
 manipulate the machine it is plugged into.
 
 Run a wire from a pin to the host's reset line and you can reset the machine
@@ -144,7 +146,7 @@ after flashing a new image:
 onerom control reset --pin sel_c
 ```
 
-`sel_c` is a common choice — more boards have it than have X pins, and it is 5V
+`sel_c` is a common choice â€” more boards have it than have X pins, and it is 5V
 tolerant where it exists.  Any pin works with `--pin`.
 
 <div align="center">
@@ -162,7 +164,7 @@ onerom inspect socket --chip-type 2364 --gpio
 ```
 
 The same GPIOs are available to plugins, so a plugin can drive them
-autonomously — hold the host in reset until something is ready, blink an
+autonomously â€” hold the host in reset until something is ready, blink an
 external LED on ROM activity, or drive whatever you have wired up.
 
 ## Plugins
@@ -174,7 +176,7 @@ Two run at once.  This is how One ROM gains functionality without needing to
 fork the core firmware.
 
 There are two types, **system** and **user**.  The difference is resources, not
-authorship — each is built for a different flash slot with a different RAM and
+authorship â€” each is built for a different flash slot with a different RAM and
 stack allocation, and you can write either.  System is intended for official One
 ROM plugins such as the USB stack, but nothing stops you replacing it with your
 own.
@@ -191,17 +193,17 @@ The firmware passes each plugin a lookup function at startup.  The plugin calls
 it with the ID of the facility it wants, and gets back a function pointer.
 Available that way: status LED and GPIO control, device and firmware metadata,
 logging, memory allocation, the ROM and RAM slots being served, and the address
-monitor that reports what the host is reading — which is what RBCP is built on.
+monitor that reports what the host is reading â€” which is what RBCP is built on.
 New IDs are only ever added, never changed, and each plugin declares the minimum
 firmware version it needs, which the firmware enforces before launching it.
 
 Start with [plugins/README.md](plugins/README.md) for how plugins are built and
 configured, [firmware/ora/api.h](firmware/ora/api.h) for the API, and
-[firmware/ora/examples](firmware/ora/examples) for worked examples — including
+[firmware/ora/examples](firmware/ora/examples) for worked examples â€” including
 one that patches the C64 kernal live and one that drives an LED from character
 ROM accesses.
 
-## RBCP — talking to the host system
+## RBCP â€” talking to the host system
 
 The [ROM Bus Control Protocol](https://github.com/piersfinlayson/rom-bus-control-protocol)
 is bidirectional communication between a retro machine and the ROM emulator
@@ -212,12 +214,12 @@ interprets them.
 That opens up things a ROM socket has no business being able to do:
 
 - remote debugging of code running on real hardware
-- ROM-based bootloaders — `grub` for the C64
+- ROM-based bootloaders â€” `grub` for the C64
 - dynamic patching of games and demos as they run
 
 The device side is the [host-control](plugins/user/host-control) plugin.  The
 specification lives in the RBCP repository, along with reference host
-implementations for 6502 and 68000 — generic routines plus sample C64 kernal and
+implementations for 6502 and 68000 â€” generic routines plus sample C64 kernal and
 Amiga Kickstart bootloaders.
 
 ## One ROM Lab
@@ -250,7 +252,7 @@ Build the base firmware:
 make
 ```
 
-That produces `firmware/build/onerom-rp235x.bin` — one binary, for every Fire
+That produces `firmware/build/onerom-rp235x.bin` â€” one binary, for every Fire
 board.  The ROM images, chip configuration and plugins are composed onto it by
 the host-side tools.  To flash *your* build rather than a downloaded release,
 pass it explicitly:
@@ -263,7 +265,7 @@ onerom program --config onerom-config/vic20-pal.json --base-firmware firmware/bu
 
 Worth knowing before you go digging in [firmware/](firmware):
 
-**It is fully bare metal.**  No SDK, no HAL — not pico-sdk, not a vendor library.
+**It is fully bare metal.**  No SDK, no HAL â€” not pico-sdk, not a vendor library.
 C with its own startup code and its own linker scripts to keep it lean.
 
 **Serving runs on PIO and DMA.**  The RP2350's PIO state machines watch the
@@ -288,14 +290,14 @@ and disassembles them so a generated program can be read back and checked.
 
 ## Regression tested off-hardware
 
-Every push runs the **real firmware C** — the source that ships on devices, not a
-model of it — compiled for the host and linked against
+Every push runs the **real firmware C** â€” the source that ships on devices, not a
+model of it â€” compiled for the host and linked against
 [epio](https://github.com/piersfinlayson/epio), a cycle-exact RP2350 PIO
 emulator, then driven over emulated bus cycles.
 
 The sweep is hundreds of test runs covering all Fire board revisions, all supported
-chip types, every configuration shape the firmware offers — single, banked,
-multi-chip, 16-bit — and every chip select polarity combination.  Every address
+chip types, every configuration shape the firmware offers â€” single, banked,
+multi-chip, 16-bit â€” and every chip select polarity combination.  Every address
 of every image is compared against an independent copy, which is 10s of
 millions of byte-level comparisons, plus checks that the data bus tristates for every
 non-selected control line combination.
@@ -305,11 +307,11 @@ conformance tests whose basis is the protocol specification rather than the
 implementation.
 
 CS-to-data latency is asserted to the exact cycle in **both**
-directions, so serving getting a cycle slower — or a cycle faster, which would
-mean the check had stopped discriminating — fails the build.
+directions, so serving getting a cycle slower â€” or a cycle faster, which would
+mean the check had stopped discriminating â€” fails the build.
 
-What it does not do today is anything analogue — voltage levels, bus loading,
-propagation delay at a real pin — or USB.  Those need a board, which is what
+What it does not do today is anything analogue â€” voltage levels, bus loading,
+propagation delay at a real pin â€” or USB.  Those need a board, which is what
 [One ROM Lab](#one-rom-lab) is for.
 
 ## Rust crates
@@ -319,24 +321,24 @@ published are on crates.io, for host-side Rust development.
 
 | Crate | Published | What it is for |
 |-------|:---------:|----------------|
-| [`onerom-gen`](rust/gen) | ✓ | Generates ROM images and firmware metadata.  The heart of the toolchain — turns a config plus some ROM files into something flashable. |
-| [`onerom-config`](rust/config) | ✓ | The config model: chip types, board definitions, pin maps, JSON schema. |
-| [`onerom-fw`](rust/fw) | ✓ | Fetches One ROM base firmware and ROM images. |
-| [`onerom-fw-parser`](rust/fw-parser) | ✓ | Reads metadata back out of a firmware binary — what chips, what board, what version. |
-| [`onerom-metadata`](rust/metadata) | ✓ | The embedded metadata schema itself. |
-| [`onerom-lab-metadata`](rust/lab-metadata) | ✓ | One ROM Lab's metadata structures. |
-| [`onerom-lab-parser`](rust/lab-parser) | ✓ | Reads One ROM Lab's metadata structures from a device or an image. |
-| [`onerom-metadata-gen`](rust/metadata-gen) | ✓ | Turns a metadata schema into C headers and Rust source. |
-| [`onerom-cli`](rust/cli) | ✓ | Everything the CLI does, minus the command line parsing.  Build on it rather than reimplementing USB device logic. The CLI binary is released at [onerom.org/cli](https://onerom.org/cli). |
-| [`onerom-app`](rust/app) | ✓ | Transport-free logic shared by the CLI, Studio and the web tools. |
+| [`onerom-gen`](rust/gen) | âœ“ | Generates ROM images and firmware metadata.  The heart of the toolchain â€” turns a config plus some ROM files into something flashable. |
+| [`onerom-config`](rust/config) | âœ“ | The config model: chip types, board definitions, pin maps, JSON schema. |
+| [`onerom-fw`](rust/fw) | âœ“ | Fetches One ROM base firmware and ROM images. |
+| [`onerom-fw-parser`](rust/fw-parser) | âœ“ | Reads metadata back out of a firmware binary â€” what chips, what board, what version. |
+| [`onerom-metadata`](rust/metadata) | âœ“ | The embedded metadata schema itself. |
+| [`onerom-lab-metadata`](rust/lab-metadata) | âœ“ | One ROM Lab's metadata structures. |
+| [`onerom-lab-parser`](rust/lab-parser) | âœ“ | Reads One ROM Lab's metadata structures from a device or an image. |
+| [`onerom-metadata-gen`](rust/metadata-gen) | âœ“ | Turns a metadata schema into C headers and Rust source. |
+| [`onerom-cli`](rust/cli) | âœ“ | Everything the CLI does, minus the command line parsing.  Build on it rather than reimplementing USB device logic. The CLI binary is released at [onerom.org/cli](https://onerom.org/cli). |
+| [`onerom-app`](rust/app) | âœ“ | Transport-free logic shared by the CLI, Studio and the web tools. |
 | [`onerom-studio`](rust/studio) | | The desktop GUI, released at [onerom.org/studio](https://onerom.org/studio). |
 | [`onerom-lab`](rust/lab) | | One ROM Lab, above. |
 | [`onerom-lab-bus`](rust/lab-bus) | | One ROM Lab's host bus timing. |
 | [`onerom-signing-server`](rust/signing-server) | | Signs commissioning instances. |
-| [`onerom-lens`](rust/lens) | | One ROM Lens — compiles the firmware emulator to WebAssembly and draws PIO and DMA activity as waveforms in a browser, cycle by cycle. |
+| [`onerom-lens`](rust/lens) | | One ROM Lens â€” compiles the firmware emulator to WebAssembly and draws PIO and DMA activity as waveforms in a browser, cycle by cycle. |
 | [`onerom-fw-emulator`](rust/fw-emulator) | | Compiles and runs the real firmware C on a host, PIOs and all. |
 | [`onerom-fw-tester`](rust/fw-tester) | | Drives the emulator with generated configurations and checks the results. |
-| [`onerom-plugin-tester`](rust/plugin-tester) | | The harness a plugin tester is built from — runs a plugin's own C against the emulated firmware. |
+| [`onerom-plugin-tester`](rust/plugin-tester) | | The harness a plugin tester is built from â€” runs a plugin's own C against the emulated firmware. |
 | [`onerom-rbcp-host`](rust/rbcp-host) | | An RBCP host. One ROM Lab uses it to query a One ROM over the ROM bus. |
 | [`onerom-rbcp-tester`](rust/rbcp-tester) | | Drives the host-control plugin over emulated ROM bus cycles, as an RBCP host would. |
 | [`onerom-usb-tester`](rust/usb-tester) | | Drives the USB system plugin's commands, log forwarding and GPIO control. |
@@ -355,7 +357,7 @@ wraps `onerom-gen` as WASM, and is what the
 |-----------|----------|
 | [`firmware/`](firmware) | The core firmware: C and Thumb assembly, bare metal.  `ora/` is the plugin API. |
 | [`plugins/`](plugins) | System and user plugins. |
-| [`rust/`](rust) | The Cargo workspace — CLI, Studio, generators, emulator, Lab, Lens. |
+| [`rust/`](rust) | The Cargo workspace â€” CLI, Studio, generators, emulator, Lab, Lens. |
 | [`hardware/pcb/`](hardware/pcb) | KiCad designs, per board revision, verified and unverified. |
 | [`onerom-config/`](onerom-config) | Ready-made JSON configs for some common systems, and the config schema. |
 | [`docs/`](docs) | Documentation, including the generated chip and compatibility references. |
@@ -384,8 +386,8 @@ wraps `onerom-gen` as WASM, and is what the
 The CLI manual, chip type and compatibility references are also published as
 PDFs, in A4 and US Letter, at [onerom.org/docs](https://onerom.org/docs/).
 
-More in [docs/](docs) — flash layout, voltage levels, using a Pi Pico as
-an SWD programmer — plus [INSTALL.md](INSTALL.md) for build dependencies and
+More in [docs/](docs) â€” flash layout, voltage levels, using a Pi Pico as
+an SWD programmer â€” plus [INSTALL.md](INSTALL.md) for build dependencies and
 [LICENSE.md](LICENSE.md).
 
 ## Videos
@@ -404,7 +406,7 @@ The hardware family:
 |------------|------------|
 | [rom-bus-control-protocol](https://github.com/piersfinlayson/rom-bus-control-protocol) | The RBCP specification, and 6502/68000 reference host implementations. |
 | [one-rom-site](https://github.com/piersfinlayson/one-rom-site) | onerom.org, including the browser programmer. |
-| [one-rom-images](https://github.com/piersfinlayson/one-rom-images) | images.onerom.org — firmware images, configs, plugin manifests. |
+| [one-rom-images](https://github.com/piersfinlayson/one-rom-images) | images.onerom.org â€” firmware images, configs, plugin manifests. |
 | [one-rom-wasm](https://github.com/piersfinlayson/one-rom-wasm) | WASM build of `onerom-gen`, for in-browser firmware generation. |
 | [picoboot](https://github.com/piersfinlayson/picoboot) | Host-side Rust crate for the RP2350 PICOBOOT USB interface. |
 | [picobootx](https://github.com/piersfinlayson/picobootx) | Device-side PICOBOOT extension, exposed by the USB plugin. |
@@ -423,7 +425,7 @@ Please include:
 
 ## Contributing
 
-Pull requests are welcome — firmware, tools, hardware and documentation.  If you
+Pull requests are welcome â€” firmware, tools, hardware and documentation.  If you
 write a plugin you think others would want to use, consider contributing it
 so it can be published.  The plugins publishing process is documented in
 [plugins/CONTRIBUTIONS](plugins/CONTRIBUTIONS.md)

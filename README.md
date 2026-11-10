@@ -38,9 +38,13 @@ time.
 > go.
 
 This repository is the public Fire-24G baseline built from the official
-OneROM v0.8.1 release, pinned at commit
+OneROM v0.8.1 release, based on commit
 `1b189260d85a5feced19e969399986f5f1d1cabe`, with the custom 1541HUD plugins
-and role-specific build overlays. The integration is community-tested.
+and role-specific firmware overlays. The checked-in host source already has
+the tested security updates; unused upstream Studio/prototype build trees
+are excluded. Firmware C source remains at the pinned baseline. See the
+[supported-source provenance](source/one-rom-v0.8.1/1541HUD-SOURCE.json).
+The integration is community-tested.
 See the [baseline runbook](docs/V81_BASELINE_RUNBOOK.md) for versions and test scope.
 It includes qualified source, wiring records, the 1541HUD Python
 application, ROM-free templates, and two ready-to-flash stock images. It
@@ -103,7 +107,7 @@ before connecting a board to the drive. In particular:
 | Item | Purpose |
 | --- | --- |
 | `releases/` | Ready-to-flash Fire-24G UB3 stock Control and UB4 Monitor images. |
-| `source/one-rom-v0.8.1/` | Exact signed official OneROM v0.8.1 source used by both build roles. |
+| `source/one-rom-v0.8.1/` | Supported source derived from official v0.8.1, with checked-in host security fixes and an explicit provenance manifest. |
 | `tools/onerom-v0.6.0-hud1.exe` | Patched OneROM CLI 0.6.0 for Windows composition, scan, inspection, and flashing. |
 | `1541hud/` | 1541HUD Python source, launcher, build script, and tests. |
 | `firmware-control/` | UB3 Control source and 1541HUD Control plugins. |
@@ -203,8 +207,9 @@ replacement for the compiler toolchain.
 
 The detailed procedures and build-script arguments are in
 [Fire-24G V8.1 Build and Installation](docs/FIRE24G_V81_BUILD_AND_INSTALL.md).
-Supported wrappers apply a separate [host dependency security overlay](docs/HOST_DEPENDENCY_OVERLAY.md)
-without changing the vendored official firmware source or published images.
+Supported wrappers verify the [checked-in host dependency security fixes](docs/HOST_DEPENDENCY_OVERLAY.md)
+before building. The historical overlay remains for provenance and older
+source exports. Published firmware images are unchanged.
 For a repeatable build of both roles without private ROM inputs, use the
 [clean source-build check](docs/CLEAN_SOURCE_BUILD.md).
 Run the package check before publishing a derivative:
@@ -215,6 +220,7 @@ Run the package check before publishing a derivative:
 
 ## Documentation map
 
+- [Supported-source security cleanup and alert handling](docs/SOURCE_SECURITY_CLEANUP_2026-11-10.md)
 - [Current maintenance review and retained limitations](docs/MAINTENANCE_REVIEW_2026-11-10.md)
 - [Release images and hashes](docs/PUBLIC_FIRE24G_RELEASES.md)
 - [Verified wiring and reset behavior](docs/FIRE24G-VERIFIED-WIRING.md)

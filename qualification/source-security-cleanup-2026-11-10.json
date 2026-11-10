@@ -1,0 +1,407 @@
+{
+  "date": "2026-11-10",
+  "scope": "active supported source workspace",
+  "before_alert_count": 28,
+  "before_alerts": [
+    {
+      "number": 28,
+      "created": "2026-11-04T22:23:36Z",
+      "package": "zip",
+      "path": "source/one-rom-v0.8.1/rust/fw/Cargo.toml",
+      "severity": "high",
+      "ghsa": "GHSA-9hj8-73fh-9963",
+      "summary": "zip: legacy Shrink/Reduce/Implode decoder: denial of service from attacker-controlled ZIP64 uncompressed size",
+      "patched": {
+        "identifier": "9.0.0"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/28"
+    },
+    {
+      "number": 27,
+      "created": "2026-11-04T22:23:36Z",
+      "package": "zip",
+      "path": "source/one-rom-v0.8.1/rust/fw/Cargo.toml",
+      "severity": "medium",
+      "ghsa": "GHSA-8hxf-qr8p-62x4",
+      "summary": "zip: AES Entry HMAC Authentication Bypass on Premature EOF",
+      "patched": {
+        "identifier": "9.0.0"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/27"
+    },
+    {
+      "number": 26,
+      "created": "2026-11-04T22:23:36Z",
+      "package": "zip",
+      "path": "source/one-rom-v0.8.1/rust/fw/Cargo.toml",
+      "severity": "high",
+      "ghsa": "GHSA-q7v9-x93c-xqv3",
+      "summary": "zip: Unbounded Symlink-Target Handling Can Abort Or Exhaust Memory During Extraction",
+      "patched": {
+        "identifier": "9.0.0"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/26"
+    },
+    {
+      "number": 25,
+      "created": "2026-11-04T22:23:35Z",
+      "package": "zip",
+      "path": "source/one-rom-v0.8.1/rust/fw/Cargo.toml",
+      "severity": "critical",
+      "ghsa": "GHSA-m665-v7pm-7grj",
+      "summary": "zip: Critical Parser Differential & Security Control Bypass via Dual-Header Inconsistencies (Zip Cloaking) Leading to Arbitrary File Overwrite & RCE",
+      "patched": {
+        "identifier": "9.0.5"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/25"
+    },
+    {
+      "number": 24,
+      "created": "2026-11-04T22:23:35Z",
+      "package": "zip",
+      "path": "source/one-rom-v0.8.1/rust/cli/Cargo.toml",
+      "severity": "high",
+      "ghsa": "GHSA-9hj8-73fh-9963",
+      "summary": "zip: legacy Shrink/Reduce/Implode decoder: denial of service from attacker-controlled ZIP64 uncompressed size",
+      "patched": {
+        "identifier": "9.0.0"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/24"
+    },
+    {
+      "number": 23,
+      "created": "2026-11-04T22:23:35Z",
+      "package": "zip",
+      "path": "source/one-rom-v0.8.1/rust/cli/Cargo.toml",
+      "severity": "high",
+      "ghsa": "GHSA-hjqx-j4rw-g7xv",
+      "summary": "zip: Arbitrary file write outside the extraction directory, because ZipArchive::extract validates symlink targets lexically. ",
+      "patched": {
+        "identifier": "9.0.0"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/23"
+    },
+    {
+      "number": 22,
+      "created": "2026-11-04T22:23:35Z",
+      "package": "zip",
+      "path": "source/one-rom-v0.8.1/rust/cli/Cargo.toml",
+      "severity": "medium",
+      "ghsa": "GHSA-8hxf-qr8p-62x4",
+      "summary": "zip: AES Entry HMAC Authentication Bypass on Premature EOF",
+      "patched": {
+        "identifier": "9.0.0"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/22"
+    },
+    {
+      "number": 21,
+      "created": "2026-11-04T22:23:35Z",
+      "package": "zip",
+      "path": "source/one-rom-v0.8.1/rust/cli/Cargo.toml",
+      "severity": "high",
+      "ghsa": "GHSA-q7v9-x93c-xqv3",
+      "summary": "zip: Unbounded Symlink-Target Handling Can Abort Or Exhaust Memory During Extraction",
+      "patched": {
+        "identifier": "9.0.0"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/21"
+    },
+    {
+      "number": 20,
+      "created": "2026-11-04T22:23:34Z",
+      "package": "zip",
+      "path": "source/one-rom-v0.8.1/rust/cli/Cargo.toml",
+      "severity": "critical",
+      "ghsa": "GHSA-m665-v7pm-7grj",
+      "summary": "zip: Critical Parser Differential & Security Control Bypass via Dual-Header Inconsistencies (Zip Cloaking) Leading to Arbitrary File Overwrite & RCE",
+      "patched": {
+        "identifier": "9.0.5"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/20"
+    },
+    {
+      "number": 19,
+      "created": "2026-11-04T22:23:34Z",
+      "package": "zip",
+      "path": "source/one-rom-v0.8.1/rust/Cargo.lock",
+      "severity": "high",
+      "ghsa": "GHSA-9hj8-73fh-9963",
+      "summary": "zip: legacy Shrink/Reduce/Implode decoder: denial of service from attacker-controlled ZIP64 uncompressed size",
+      "patched": {
+        "identifier": "9.0.0"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/19"
+    },
+    {
+      "number": 18,
+      "created": "2026-11-04T22:23:34Z",
+      "package": "zip",
+      "path": "source/one-rom-v0.8.1/rust/Cargo.lock",
+      "severity": "high",
+      "ghsa": "GHSA-hjqx-j4rw-g7xv",
+      "summary": "zip: Arbitrary file write outside the extraction directory, because ZipArchive::extract validates symlink targets lexically. ",
+      "patched": {
+        "identifier": "9.0.0"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/18"
+    },
+    {
+      "number": 17,
+      "created": "2026-11-04T22:23:34Z",
+      "package": "zip",
+      "path": "source/one-rom-v0.8.1/rust/Cargo.lock",
+      "severity": "medium",
+      "ghsa": "GHSA-8hxf-qr8p-62x4",
+      "summary": "zip: AES Entry HMAC Authentication Bypass on Premature EOF",
+      "patched": {
+        "identifier": "9.0.0"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/17"
+    },
+    {
+      "number": 16,
+      "created": "2026-11-04T22:23:34Z",
+      "package": "zip",
+      "path": "source/one-rom-v0.8.1/rust/Cargo.lock",
+      "severity": "high",
+      "ghsa": "GHSA-q7v9-x93c-xqv3",
+      "summary": "zip: Unbounded Symlink-Target Handling Can Abort Or Exhaust Memory During Extraction",
+      "patched": {
+        "identifier": "9.0.0"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/16"
+    },
+    {
+      "number": 15,
+      "created": "2026-11-04T22:23:33Z",
+      "package": "zip",
+      "path": "source/one-rom-v0.8.1/rust/Cargo.lock",
+      "severity": "critical",
+      "ghsa": "GHSA-m665-v7pm-7grj",
+      "summary": "zip: Critical Parser Differential & Security Control Bypass via Dual-Header Inconsistencies (Zip Cloaking) Leading to Arbitrary File Overwrite & RCE",
+      "patched": {
+        "identifier": "9.0.5"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/15"
+    },
+    {
+      "number": 14,
+      "created": "2026-11-04T22:23:33Z",
+      "package": "rustls",
+      "path": "source/one-rom-v0.8.1/rust/Cargo.lock",
+      "severity": "low",
+      "ghsa": "GHSA-w44r-93j7-qv28",
+      "summary": "rustls: An unauthenticated ServerHello poisons the per-name key-exchange record, so later ClientHellos carry only a classical X25519 share",
+      "patched": {
+        "identifier": "0.23.46"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/14"
+    },
+    {
+      "number": 13,
+      "created": "2026-11-04T22:23:33Z",
+      "package": "rustls",
+      "path": "source/one-rom-v0.8.1/rust/Cargo.lock",
+      "severity": "medium",
+      "ghsa": "GHSA-c8m5-c952-6cm4",
+      "summary": "Rustls: Session Debug formatting exposes TLS master secrets and resumption PSKs",
+      "patched": {
+        "identifier": "0.23.46"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/13"
+    },
+    {
+      "number": 12,
+      "created": "2026-11-04T22:23:33Z",
+      "package": "rustls",
+      "path": "source/one-rom-v0.8.1/rust/Cargo.lock",
+      "severity": "low",
+      "ghsa": "GHSA-h2v8-394m-p7vv",
+      "summary": "Rustls: Brotli certificate decompression can allocate an attacker-controlled amount of memory up to 1 GiB before authentication.",
+      "patched": {
+        "identifier": "0.23.46"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/12"
+    },
+    {
+      "number": 11,
+      "created": "2026-11-04T22:23:33Z",
+      "package": "rustls",
+      "path": "source/one-rom-v0.8.1/rust/Cargo.lock",
+      "severity": "medium",
+      "ghsa": "GHSA-2mjx-qc3c-rqvc",
+      "summary": "Rustls: TLS 1.3 handshake messages incorrectly accepted across encryption level boundaries",
+      "patched": {
+        "identifier": "0.23.45"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/11"
+    },
+    {
+      "number": 10,
+      "created": "2026-11-04T22:23:32Z",
+      "package": "lru",
+      "path": "source/one-rom-v0.8.1/rust/Cargo.lock",
+      "severity": "low",
+      "ghsa": "GHSA-rhfx-m35p-ff5j",
+      "summary": "`IterMut` violates Stacked Borrows by invalidating internal pointer",
+      "patched": {
+        "identifier": "0.16.3"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/10"
+    },
+    {
+      "number": 9,
+      "created": "2026-11-04T22:23:32Z",
+      "package": "zip",
+      "path": "source/one-rom-v0.8.1/prototypes/studiov2/Cargo.lock",
+      "severity": "high",
+      "ghsa": "GHSA-9hj8-73fh-9963",
+      "summary": "zip: legacy Shrink/Reduce/Implode decoder: denial of service from attacker-controlled ZIP64 uncompressed size",
+      "patched": {
+        "identifier": "9.0.0"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/9"
+    },
+    {
+      "number": 8,
+      "created": "2026-11-04T22:23:32Z",
+      "package": "zip",
+      "path": "source/one-rom-v0.8.1/prototypes/studiov2/Cargo.lock",
+      "severity": "high",
+      "ghsa": "GHSA-hjqx-j4rw-g7xv",
+      "summary": "zip: Arbitrary file write outside the extraction directory, because ZipArchive::extract validates symlink targets lexically. ",
+      "patched": {
+        "identifier": "9.0.0"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/8"
+    },
+    {
+      "number": 7,
+      "created": "2026-11-04T22:23:32Z",
+      "package": "zip",
+      "path": "source/one-rom-v0.8.1/prototypes/studiov2/Cargo.lock",
+      "severity": "medium",
+      "ghsa": "GHSA-8hxf-qr8p-62x4",
+      "summary": "zip: AES Entry HMAC Authentication Bypass on Premature EOF",
+      "patched": {
+        "identifier": "9.0.0"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/7"
+    },
+    {
+      "number": 6,
+      "created": "2026-11-04T22:23:32Z",
+      "package": "zip",
+      "path": "source/one-rom-v0.8.1/prototypes/studiov2/Cargo.lock",
+      "severity": "high",
+      "ghsa": "GHSA-q7v9-x93c-xqv3",
+      "summary": "zip: Unbounded Symlink-Target Handling Can Abort Or Exhaust Memory During Extraction",
+      "patched": {
+        "identifier": "9.0.0"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/6"
+    },
+    {
+      "number": 5,
+      "created": "2026-11-04T22:23:31Z",
+      "package": "zip",
+      "path": "source/one-rom-v0.8.1/prototypes/studiov2/Cargo.lock",
+      "severity": "critical",
+      "ghsa": "GHSA-m665-v7pm-7grj",
+      "summary": "zip: Critical Parser Differential & Security Control Bypass via Dual-Header Inconsistencies (Zip Cloaking) Leading to Arbitrary File Overwrite & RCE",
+      "patched": {
+        "identifier": "9.0.5"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/5"
+    },
+    {
+      "number": 4,
+      "created": "2026-11-04T22:23:31Z",
+      "package": "rustls",
+      "path": "source/one-rom-v0.8.1/prototypes/studiov2/Cargo.lock",
+      "severity": "low",
+      "ghsa": "GHSA-w44r-93j7-qv28",
+      "summary": "rustls: An unauthenticated ServerHello poisons the per-name key-exchange record, so later ClientHellos carry only a classical X25519 share",
+      "patched": {
+        "identifier": "0.23.46"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/4"
+    },
+    {
+      "number": 3,
+      "created": "2026-11-04T22:23:31Z",
+      "package": "rustls",
+      "path": "source/one-rom-v0.8.1/prototypes/studiov2/Cargo.lock",
+      "severity": "medium",
+      "ghsa": "GHSA-c8m5-c952-6cm4",
+      "summary": "Rustls: Session Debug formatting exposes TLS master secrets and resumption PSKs",
+      "patched": {
+        "identifier": "0.23.46"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/3"
+    },
+    {
+      "number": 2,
+      "created": "2026-11-04T22:23:31Z",
+      "package": "rustls",
+      "path": "source/one-rom-v0.8.1/prototypes/studiov2/Cargo.lock",
+      "severity": "low",
+      "ghsa": "GHSA-h2v8-394m-p7vv",
+      "summary": "Rustls: Brotli certificate decompression can allocate an attacker-controlled amount of memory up to 1 GiB before authentication.",
+      "patched": {
+        "identifier": "0.23.46"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/2"
+    },
+    {
+      "number": 1,
+      "created": "2026-11-04T22:23:31Z",
+      "package": "rustls",
+      "path": "source/one-rom-v0.8.1/prototypes/studiov2/Cargo.lock",
+      "severity": "medium",
+      "ghsa": "GHSA-2mjx-qc3c-rqvc",
+      "summary": "Rustls: TLS 1.3 handshake messages incorrectly accepted across encryption level boundaries",
+      "patched": {
+        "identifier": "0.23.45"
+      },
+      "url": "https://github.com/benkrall1973/1541HUD-OneROM/security/dependabot/1"
+    }
+  ],
+  "lock_pruning": {
+    "before": 901,
+    "after": 527,
+    "removed": 374,
+    "new_packages_or_versions": [],
+    "remaining_versions_preserved": true
+  },
+  "audit": {
+    "workspace_vulnerabilities": 0,
+    "unsoundness": 0,
+    "yanked": 0,
+    "unmaintained": [
+      {
+        "name": "bare-metal",
+        "version": "0.2.5",
+        "advisory": "RUSTSEC-2026-0110"
+      },
+      {
+        "name": "basic-toml",
+        "version": "0.1.10",
+        "advisory": "RUSTSEC-2026-0374"
+      },
+      {
+        "name": "paste",
+        "version": "1.0.15",
+        "advisory": "RUSTSEC-2024-0436"
+      },
+      {
+        "name": "proc-macro-error2",
+        "version": "2.0.1",
+        "advisory": "RUSTSEC-2026-0173"
+      }
+    ]
+  },
+  "source_manifest_sha256": "a80b52316042613e56da60369e794f5d672eff061cfe50471cf42cfb473ab3fd",
+  "firmware_images_changed": false
+}

@@ -1,100 +1,31 @@
 # Dependency-alert triage
 
-GitHub reports dependency severity for the affected package, not a verdict that
-the package is reachable in a released Fire-24G image. This record separates
-the advisory from the 1541HUD / OneROM exposure. Do not dismiss an alert merely
-because its current project exposure is limited.
+The active source package now includes the supported host security fixes. The complete original upstream snapshot is recoverable from the historical tag/private backup; unsupported Studio and Studio v2 prototype build trees are excluded from the current package. This fixes or removes affected dependency paths rather than dismissing alerts.
 
-## Release baseline
+## Pre-cleanup GitHub inventory
 
-The current baseline is the official OneROM v0.8.1 source pinned at
-`1b189260d85a5feced19e969399986f5f1d1cabe`. The custom integration supplies
-two firmware images; neither embeds the Rust host CLI or its archive parser.
-The alert numbers and candidate resolutions below are historical records from
-the preceding development baseline, not a current GitHub alert inventory.
+| Records | Dependency and paths | Resolution in current source |
+| --- | --- | --- |
+| 19 | ZIP in firmware/CLI manifests and workspace/prototype locks | Checked-in ZIP 9.5.0; excluded prototype tree removed |
+| 8 | Rustls in workspace/prototype locks | Checked-in Rustls 0.23.46; excluded prototype tree removed |
+| 1 | LRU through Studio's graphics stack | Studio excluded from workspace and package; LRU absent from pruned lock |
 
-## Supported source-build resolution
+The four critical ZIP entries describe the same advisory in four dependency files. The live inventory and source update are documented in [the cleanup record](SOURCE_SECURITY_CLEANUP_2026-11-10.md). Confirm GitHub has rescanned the new default-branch commit before reporting its open-alert count as cleared.
 
-The supported Control/Monitor wrappers apply a checksummed host-only overlay
-in their exported core trees. It selects ZIP 9.5.0, Rustls 0.23.46 and compatible
-security updates for ctutils, libz-sys, webpki-roots and quinn-proto. See
-HOST_DEPENDENCY_OVERLAY.md for versions, verification commands and limitations.
-The current overlay also updates Quick-XML through wayland-scanner, Git2,
-Tokio and event-listener, and removes the recorded yanked-package pins.
-The Windows CLI is rebuilt from this overlaid source as 0.6.0-hud1; the
-checked-in upstream snapshot remains unchanged. The prepared workspace has
-zero vulnerability records; supported CLI/metadata builds also have no
-unsoundness records. Upstream Studio-only LRU unsoundness and maintenance
-warnings remain visible. This is not a claim that all vendored GitHub alerts
-have disappeared. The tables below describe historical alert handling;
-HOST_DEPENDENCY_OVERLAY.md and the current qualification record supersede
-their old "keep open pending upgrade" status for supported host builds.
+## Validation and scope
 
-## Historical candidate resolution
+The active lock was pruned without adding or changing retained package versions. The audit rejects every vulnerability, yanked package and unsoundness record across that workspace. It does not suppress alerts or use an advisory ignore list. Four unmaintained-package warnings remain outside the CLI normal/build graph; maintenance warnings are not a guarantee of future support.
 
-The former `security/dependency-updates` branch recorded a runner-generated
-candidate resolution, not a released-image claim:
+The released Windows CLI was already built with patched dependencies and keeps its historical build provenance. The RP2350 C firmware does not embed the Rust ZIP/TLS libraries. Neither point licenses ignoring an affected build tool or distributing a vulnerable host executable.
 
-- both direct Zip constraints are `zip = "9.0.5"`; Cargo resolves one **Zip
-  9.4.0** package;
-- the workspace lock resolves **Rustls 0.23.46** (from 0.23.42);
-- GitHub Actions compiled `onerom-fw` and `onerom-cli` with **Rust/Cargo
-  1.93.0** on Linux.
+Use the current supported source and documented wrappers, trusted ROM/configuration inputs and verified image hashes. A historical upstream tag is provenance, not a supported host build. Patching archive libraries does not impose resource limits on arbitrary untrusted archives.
 
-Rust 1.88 was insufficient for the pinned V8.1 snapshot: upstream metadata
-uses `NonNull::from_ref`, and its expanded workspace includes tooling needing
-Rust 1.89–1.93. The public Control wrapper therefore now requires Cargo 1.93
-or newer. Full Control/Monitor source builds and any resulting image hardware
-acceptance remain required before adopting that dependency candidate. The
-official v0.8.1 firmware source is retained unchanged in the current baseline.
+## Before closing any future alert
 
-## Original-release alert classification
+1. Record the advisory, affected version and dependency path.
+2. Determine whether it affects firmware runtime, supported host builds, or excluded material.
+3. Update the actual active manifests/lockfile or remove an unused unsupported build tree while preserving its provenance.
+4. Run dependency audit, source verification, relevant regressions and full role builds.
+5. Confirm GitHub's refreshed dependency graph and keep historical release status explicit.
 
-| Alert | Dependency and location | Project exposure | Decision |
-| --- | --- | --- | --- |
-| #25 - ZIP parser differential / ZIP cloaking | `zip` through `source/one-rom-v0.8.1/rust/fw/Cargo.toml`; workspace lock resolves `zip 6.0.0`. The CLI separately resolves `zip 8.6.0`. | **Host-build only.** `onerom-fw` opens a ZIP in memory, selects one configured member with `by_name`, and copies it into a memory buffer. It does not call the ZIP crate's path-extraction API or write archive-selected paths to disk. Public UB3/UB4 build manifests use local tracked/owner-supplied inputs rather than remote ZIP sources. A builder can still be exposed if they deliberately build from an untrusted ZIP source. | **Keep open.** Upgrade to a patched ZIP release only as a tracked upstream-dependency overlay, then complete a clean WSL2/Linux build and hardware qualification before publishing a replacement image. |
-| #11 - Rustls TLS 1.3 handshake encryption-level boundary | `source/one-rom-v0.8.1/rust/Cargo.lock`; four Rustls advisories share this workspace lockfile. | **Host tooling only.** The qualified Control/Monitor build paths use `reqwest` with Rustls for outbound HTTPS when a user elects to retrieve remote material. The advisory describes a TLS 1.3 server-handshake condition. The vendored upstream `signing-server` can act as a TLS server, but it is not part of the qualified 1541HUD build path or either released firmware image. | **Keep open.** Update the workspace lockfile through a reviewed upstream-compatible Rustls/Reqwest resolution, then complete clean build and regression validation. Do not mark the installed UB3/UB4 firmware as affected. |
-
-## Rules for classifying remaining alerts
-
-1. **Released image runtime:** a dependency compiled into UB3/UB4 firmware and
-   reachable from installed-board input has highest priority.
-2. **Host build / CLI:** a dependency used only when composing, inspecting, or
-   flashing images is a builder-workstation risk. Document the untrusted input
-   condition and plan a qualified update.
-3. **Prototype, test, or development-only tree:** do not claim it affects a
-   release image. Keep it visible until its path and use are recorded; remove
-   or update it only when doing so does not alter the pinned source boundary.
-4. **Vendored upstream:** do not blindly apply Dependabot's update suggestion.
-   Record the upstream revision/change, Rust toolchain impact, build result,
-   package validation result, and hardware acceptance result.
-
-## Builder guidance until patched
-
-### Automated updater limitation recorded on 2026-11-09
-
-The v8.1 package/HUD/native firmware validation workflow passed. A separate
-GitHub-generated ZIP security-update job failed with dependency_file_not_supported:
-it targeted source/one-rom-v0.8.1/rust/fw, which has no independent lockfile.
-The Cargo workspace lockfile is at source/one-rom-v0.8.1/rust/Cargo.lock.
-This is an updater discovery problem, not a failure of either firmware build.
-A future dependency update should operate on the workspace root and follow
-the qualification rules below; this cleanup does not change the tested pins.
-
-- Use only local ROM pages and known inputs you are entitled to use.
-- Do not point a public build manifest at an untrusted ZIP URL or archive.
-- Verify a firmware image with `onerom firmware inspect` and SHA-256 before
-  flashing.
-- Treat the bundled stock release images and their documented hashes as the
-  supported public test baseline.
-
-## Required evidence before closing an alert
-
-- Exact advisory/CVE and affected path.
-- Confirmation of whether the released image, build wrapper, or only an
-  excluded prototype/test tree reaches the dependency.
-- Patch/upgrade commit and updated lockfile.
-- Clean package-validator result and relevant automated tests.
-- Fresh source-build record; for firmware-impacting changes, hardware
-  acceptance results too.
-
+See [host-source security policy](HOST_DEPENDENCY_OVERLAY.md) and [source provenance](../source/one-rom-v0.8.1/1541HUD-SOURCE.json).

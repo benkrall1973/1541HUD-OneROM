@@ -9,8 +9,8 @@ future repository and not a substitute for the build or wiring guides.
 | Area | Reason |
 | --- | --- |
 | `templates/`, `private-roms/` templates, `utilities/rom-pages/`, and `tools/maintenance/` | ROM-free templates, utilities, validator, and public-boundary records. |
-| `source/one-rom-v0.8.1` | Exact signed official upstream `v0.8.1` source used by both roles. Its build scripts retrieve their own pinned dependencies. |
-| `overlays/host-dependencies-v0.8.1.*` and host dependency helpers/tests | Checksummed host-only ZIP/TLS dependency updates applied to disposable source exports. The vendored upstream tree is preserved. |
+| `source/one-rom-v0.8.1` | Supported source derived from official `v0.8.1`, with checked-in host fixes, source provenance and unsupported GUI trees excluded. |
+| `overlays/host-dependencies-v0.8.1.*` and host dependency helpers/tests | Historical checksummed host patch and helpers. Current exports verify the incorporated fixes; the original snapshot is preserved in history/private backups. |
 | Active `1541HUD-USB-v0.8.1` and `1541HUD-Host-Control-v0.8.1` source | UB3 integration source. The wrapper builds these custom plugins against the official pinned core in an ignored work tree. |
 | `firmware-monitor` active Monitor plugins, `shared/1541hud_mailbox.h`, manifest, and two baseline Monitor inputs | UB4 passive-monitor integration source. The wrapper exports the pinned source into an isolated work directory and applies the passive-core overlay; the checked-in OneROM bootloader and stock C000 baseline input reproduce the public UB4 Monitor image without a hidden local kit. |
 | ROM-free private-input instructions and the UB3 CLI composition guide | Explain the two standard C/E socket layouts and the optional C/A/E DolphinDOS-style layout without distributing ROM bytes; users create a private composition manifest locally. |

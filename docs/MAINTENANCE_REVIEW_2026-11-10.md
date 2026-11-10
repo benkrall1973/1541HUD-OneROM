@@ -1,5 +1,10 @@
 # Public v8.1 maintenance review
 
+This records the preceding documentation-maintenance release. The subsequent
+[supported-source security cleanup](SOURCE_SECURITY_CLEANUP_2026-11-10.md)
+changes the active host-source packaging and supersedes the preserved-source
+alert boundary described below. Firmware images remain unchanged.
+
 This maintenance pass updates documentation and public packaging around the
 existing tested baseline. It does not change the firmware, plugins, vendored
 upstream source, Windows CLI executable or HUD application code.

@@ -39,6 +39,7 @@ record = dict(source_commit=subprocess.check_output(['git', '-C', str(root), 're
               cargo=subprocess.check_output(['cargo', '--version'], text=True).strip(),
               compiler=subprocess.check_output(['arm-none-eabi-gcc', '--version'], text=True).splitlines()[0],
               host_overlay_sha256=hashlib.sha256((root / 'overlays/host-dependencies-v0.8.1.patch').read_bytes()).hexdigest(),
+              source_hardening_sha256=hashlib.sha256((root / 'source/one-rom-v0.8.1/1541HUD-SOURCE.json').read_bytes()).hexdigest(),
               images=images, hardware_programmed=False)
 (check / 'build-verification.json').write_text(json.dumps(record, indent=2) + '\n')
 PY

@@ -9,9 +9,19 @@ the root [MIT License](LICENSE).
 
 ## OneROM upstream snapshot
 
-`source/one-rom-v0.8.1/` is a pinned snapshot of Piers Finlayson's OneROM
-official v0.8.1 release source at commit
+`source/one-rom-v0.8.1/` is the supported source derived from Piers Finlayson's
+official OneROM v0.8.1 release source at commit
 `1b189260d85a5feced19e969399986f5f1d1cabe` on `releases/0.8.1`.
+The tested host dependency fixes are now checked in. Unsupported upstream
+Studio and Studio v2 prototype build trees are excluded from the active
+package; the remaining lockfile was pruned without adding or changing any
+retained package version. Firmware C source remains unchanged.
+
+The original complete snapshot remains recoverable from project tag
+`v8.1-maintenance-2026-11-10` and the private recovery archive. The
+[source provenance manifest](source/one-rom-v0.8.1/1541HUD-SOURCE.json) records
+its tree hashes, changed host files and exclusions. Preserving a historical
+snapshot does not make its old host tools a supported build path.
 The custom integration and patched host CLI are community builds, not official
 upstream binary distributions. Its software/firmware and documentation are licensed under the
 upstream MIT license; its hardware material has its own CERN-OHL-W-2.0 terms.

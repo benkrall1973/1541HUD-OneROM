@@ -1,0 +1,33 @@
+{
+  "upstream_commit": "1b189260d85a5feced19e969399986f5f1d1cabe",
+  "original_project_ref": "v8.1-maintenance-2026-11-10",
+  "original_vendor_tree": "5131992e1119b147706adf2a747b4872ddc4f2ac",
+  "unchanged_firmware_tree": "17a00042c8d6a88d7720329f1583488f3053b875",
+  "policy": "Supported source contains the tested host security changes; original upstream snapshot is recoverable from the original project ref and private backup. Firmware C source is unchanged.",
+  "historical_overlay_sha256": "1c57b31237e2eec2a1deb78d18d677559464fe038906897641e272d95c379f1a",
+  "historical_cli_lock_sha256": "fdef097186cf3384b35b9efc9f9d7c51e705dca3c1c9549df8eabc6829048d11",
+  "excluded_unsupported_trees": [
+    "rust/studio",
+    "prototypes/studiov2"
+  ],
+  "packages": {
+    "zip": "9.5.0",
+    "rustls": "0.23.46",
+    "ctutils": "0.4.4",
+    "libz-sys": "1.1.31",
+    "webpki-roots": "1.0.10",
+    "quinn-proto": "0.11.18",
+    "git2": "0.21.0",
+    "built": "0.8.1",
+    "tokio": "1.54.1",
+    "chacha20": "0.10.2"
+  },
+  "files_sha256_lf": {
+    "Makefile": "3e63c6b497aef925810d91f5b6ce9cc9d388f35922dcab410640dc580be5e40c",
+    "rust/Cargo.toml": "f425428952100c81bce25b215425e1c50c09d15e8f95ee6d8e5335ddfed3c261",
+    "rust/fw/Cargo.toml": "c9400e869e18ec35385da53c9a645213bfbae6834da9f1a0a2198e990ddaa109",
+    "rust/cli/Cargo.toml": "28eb694813036b6be867dbc5b068c3dc8f8e56f4af35b88548ebeb810f6e7232",
+    "rust/Cargo.lock": "8dd472bc6c9fdb1c87291f497ddf35ed835e618ef2124821ee661b514b5c137b",
+    "README.md": "b3dd6bf3175c8aa434a54208eaf85bd2c4ed7c51384a9ced6c7b0712a6a08296"
+  }
+}

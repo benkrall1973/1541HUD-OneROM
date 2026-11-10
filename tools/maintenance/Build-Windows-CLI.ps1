@@ -43,7 +43,10 @@ $record = [ordered]@{
     name = '1541HUD Windows CLI'; upstream_cli = '0.6.0'; distribution = 'hud1'
     source_commit = (git rev-parse HEAD); upstream = '1b189260d85a5feced19e969399986f5f1d1cabe'
     rustc = (rustc --version); cargo = (cargo --version); target = 'x86_64-pc-windows-msvc'
+    # Retain the originating tested overlay hash; current exports already
+    # contain those changes and additionally record their supported-source pin.
     overlay_sha256 = (Get-FileHash overlays/host-dependencies-v0.8.1.patch -Algorithm SHA256).Hash
+    source_hardening_sha256 = (Get-FileHash (Join-Path $core '1541HUD-SOURCE.json') -Algorithm SHA256).Hash
     lock_sha256 = (Get-FileHash (Join-Path $core 'rust/Cargo.lock') -Algorithm SHA256).Hash
     file = (Split-Path $exe -Leaf); bytes = (Get-Item $exe).Length
     sha256 = (Get-FileHash $exe -Algorithm SHA256).Hash

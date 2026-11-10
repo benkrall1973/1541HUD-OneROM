@@ -31,4 +31,4 @@ for name in files:
 if errors:
     print('\n'.join(errors), file=sys.stderr)
     sys.exit(1)
-print(f'PASS: {count} project Markdown file targets resolve; vendored documentation unchanged.')
+print(f'PASS: {count} project Markdown file targets resolve; upstream document links excluded.')

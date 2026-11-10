@@ -224,10 +224,10 @@ generated:
 	@echo "=========================================="
 	@echo "Building onerom-metadata, to generate metadata header file"
 	@echo "-----"
-	@$(SCRUB_CARGO_ENV) cd rust && cargo build --$(CARGO_PROFILE) -p onerom-metadata
+	@$(SCRUB_CARGO_ENV) cd rust && cargo build --locked --$(CARGO_PROFILE) -p onerom-metadata
 
 fw-config-gen:
-	@$(SCRUB_CARGO_ENV) cd rust && cargo build --$(CARGO_PROFILE) -p fw-config-gen --target-dir target --quiet
+	@$(SCRUB_CARGO_ENV) cd rust && cargo build --locked --$(CARGO_PROFILE) -p fw-config-gen --target-dir target --quiet
 
 firmware: generated
 	@echo "=========================================="

@@ -35,8 +35,8 @@ with a Windows SDK. From the repository root:
 ./tools/maintenance/Build-Windows-CLI.ps1
 ```
 
-The script exports pristine source to .buildtools/windows-cli-core, applies
-and verifies the host overlay, runs release-profile ZIP/CLI regressions,
+The script exports supported source to .buildtools/windows-cli-core, verifies
+its checked-in host fixes and source provenance, runs release-profile ZIP/CLI regressions,
 builds the executable and inspects both published images offline. It creates
 the executable, hash/provenance manifest, dependency inventory and license
 notices in .buildtools/windows-cli-package. It never programs or reboots a

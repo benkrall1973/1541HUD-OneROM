@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
-# Apply only to a disposable export of the pinned official source.
+# Verify current supported source; retain legacy overlay support for old exports.
 set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 core="${1:?Usage: Apply-Host-Dependencies.sh <exported-core-directory>}"
+
+if [[ -f "$core/1541HUD-SOURCE.json" ]]; then
+  python3 "$root/tools/maintenance/Verify-Source-Dependencies.py" "$core"
+  exit 0
+fi
 overlay="$root/overlays/host-dependencies-v0.8.1.patch"
 for file in Makefile rust/fw/Cargo.toml rust/cli/Cargo.toml rust/studio/Cargo.toml rust/Cargo.lock; do
   sed -i 's/\r$//' "$core/$file"

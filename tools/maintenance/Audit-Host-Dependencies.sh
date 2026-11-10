@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Fail for workspace vulnerabilities/yanked packages and supported-host unsoundness.
+# Fail for any active workspace vulnerability, yanked package or unsoundness.
 set -euo pipefail
 core="${1:?Usage: Audit-Host-Dependencies.sh <prepared-core-directory> [advisory-db]}"
 db="${2:-$core/.host-rustsec-db}"
@@ -43,7 +43,7 @@ for kind, warnings in report.get('warnings', {}).items():
         scope = 'SUPPORTED HOST BUILD' if key in active else 'other workspace dependency'
         advisory = (warning.get('advisory') or {}).get('id', 'no advisory ID')
         print(kind, advisory, *key, scope)
-        if kind == 'yanked' or (kind == 'unsound' and key in active):
+        if kind in ('yanked', 'unsound'):
             failed.append(advisory)
 if failed:
     raise SystemExit('Dependency audit failed: ' + ', '.join(failed))
