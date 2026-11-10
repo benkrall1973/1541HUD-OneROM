@@ -69,3 +69,56 @@ jobs:
         run: cargo install cargo-audit --version 0.22.2 --locked
       - name: Audit supported host dependency graph
         run: bash tools/maintenance/Audit-Host-Dependencies.sh "$PWD/.buildtools/host-security-core"
+
+      - name: Check Wayland scanner compatibility
+        run: cargo test --locked --manifest-path .buildtools/host-security-core/rust/Cargo.toml -p wayland-scanner
+
+  windows-cli:
+    name: Build and test patched Windows CLI
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Select pinned Rust
+        shell: pwsh
+        run: |
+          rustup toolchain install 1.99.0 --profile minimal
+          rustup default 1.99.0
+      - name: Build and test Windows CLI
+        shell: pwsh
+        run: ./tools/maintenance/Build-Windows-CLI.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-cli-tested
+          path: .buildtools/windows-cli-package/
+          if-no-files-found: error
+
+  firmware-arm:
+    name: Full Fire-24G Control and Monitor ARM builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select pinned Rust
+        run: |
+          rustup toolchain install 1.99.0 --profile minimal
+          rustup default 1.99.0
+      - name: Install pinned Arm GNU toolchain
+        run: |
+          toolchain="$(bash source/one-rom-v0.8.1/ci/install-arm-toolchain.sh "$RUNNER_TEMP/arm-gnu" 15.3.rel1)"
+          echo "TOOLCHAIN=$toolchain" >> "$GITHUB_ENV"
+      - name: Build, compose and inspect both roles
+        run: |
+          set -o pipefail
+          mkdir -p .buildtools/source-check
+          bash tools/maintenance/Test-Source-Build.sh 2>&1 | tee .buildtools/source-check/full-build.log
+      - name: Keep build evidence, not flashable test images
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arm-build-evidence
+          path: |
+            .buildtools/source-check/full-build.log
+            .buildtools/source-check/build-verification.json
+          if-no-files-found: warn

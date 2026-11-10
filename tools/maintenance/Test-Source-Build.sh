@@ -27,4 +27,19 @@ bash "$root/consolidation/scripts/build-control-v0.8.1.sh" \
 export ONEROM_CLI="$root/firmware-control/.work/control-core-v0.8.1/one-rom-v0.8.1/rust/target/release/onerom"
 export OUTPUT_PATH="$check/monitor-build-check.bin"
 bash "$root/firmware-monitor/Build-Monitor-Fire24G-V0.8.1.sh"
+python3 - "$root" "$check" <<'PY'
+import hashlib, json, pathlib, subprocess, sys
+root, check = map(pathlib.Path, sys.argv[1:])
+images = []
+for name, scope in [('CONTROL-SYNTHETIC-DO-NOT-FLASH.bin', 'Synthetic ROM pages; never flash'),
+                    ('monitor-build-check.bin', 'Build verification only; not the hardware-accepted release image')]:
+    path = check / name
+    images.append(dict(file=name, bytes=path.stat().st_size, sha256=hashlib.sha256(path.read_bytes()).hexdigest(), scope=scope))
+record = dict(source_commit=subprocess.check_output(['git', '-C', str(root), 'rev-parse', 'HEAD'], text=True).strip(),
+              cargo=subprocess.check_output(['cargo', '--version'], text=True).strip(),
+              compiler=subprocess.check_output(['arm-none-eabi-gcc', '--version'], text=True).splitlines()[0],
+              host_overlay_sha256=hashlib.sha256((root / 'overlays/host-dependencies-v0.8.1.patch').read_bytes()).hexdigest(),
+              images=images, hardware_programmed=False)
+(check / 'build-verification.json').write_text(json.dumps(record, indent=2) + '\n')
+PY
 echo "PASS: both firmware roles built and inspected. No device was programmed."

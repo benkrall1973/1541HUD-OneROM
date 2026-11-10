@@ -6,8 +6,17 @@
     "ctutils": "0.4.4",
     "libz-sys": "1.1.31",
     "webpki-roots": "1.0.10",
-    "quinn-proto": "0.11.18"
+    "quinn-proto": "0.11.18",
+    "quick-xml": "0.41.0",
+    "wayland-scanner": "0.31.11",
+    "git2": "0.21.0",
+    "built": "0.8.1",
+    "tokio": "1.54.1",
+    "event-listener": "5.4.2",
+    "async-executor": "1.14.1",
+    "chacha20": "0.10.2",
+    "clipboard-win": "5.4.3"
   },
-  "lock_sha256": "02225ed0164e867056367ee6f579a9174345580256c5fc3beff6e9f25f55b771",
-  "patch_sha256": "d75a4a80f12e723c2aa22b558260b85f59297d2740184a0284a87567d9d6e94c"
+  "lock_sha256": "fdef097186cf3384b35b9efc9f9d7c51e705dca3c1c9549df8eabc6829048d11",
+  "patch_sha256": "1c57b31237e2eec2a1deb78d18d677559464fe038906897641e272d95c379f1a"
 }

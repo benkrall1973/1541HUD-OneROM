@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Audit the workspace and fail for vulnerabilities in the supported host build.
+# Fail for workspace vulnerabilities/yanked packages and supported-host unsoundness.
 set -euo pipefail
 core="${1:?Usage: Audit-Host-Dependencies.sh <prepared-core-directory> [advisory-db]}"
 db="${2:-$core/.host-rustsec-db}"
@@ -33,11 +33,19 @@ for record in records:
     key = (package['name'], package['version'])
     scope = 'SUPPORTED HOST BUILD' if key in active else 'other workspace dependency'
     print(record['advisory']['id'], *key, scope)
-    if key in active:
-        failed.append(record['advisory']['id'])
-print(f'Workspace vulnerabilities: {len(records)}; supported host build: {len(failed)}')
+    failed.append(record['advisory']['id'])
+print(f'Workspace vulnerabilities: {len(records)}; supported host build: {sum((r["package"]["name"], r["package"]["version"]) in active for r in records)}')
 print('Advisory warnings:', ', '.join(report.get('warnings', {})) or 'none')
+for kind, warnings in report.get('warnings', {}).items():
+    for warning in warnings:
+        package = warning['package']
+        key = (package['name'], package['version'])
+        scope = 'SUPPORTED HOST BUILD' if key in active else 'other workspace dependency'
+        advisory = (warning.get('advisory') or {}).get('id', 'no advisory ID')
+        print(kind, advisory, *key, scope)
+        if kind == 'yanked' or (kind == 'unsound' and key in active):
+            failed.append(advisory)
 if failed:
-    raise SystemExit('Supported host build contains vulnerable dependencies')
+    raise SystemExit('Dependency audit failed: ' + ', '.join(failed))
 PY
 git -C "$db" rev-parse HEAD
