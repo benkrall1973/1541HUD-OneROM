@@ -1,9 +1,9 @@
 {
-  "name": "1541-onerom-1541hud-monitor-usb-v0.8.1.4",
-  "display_name": "1541HUD Monitor USB v0.8.1.4",
+  "name": "1541-onerom-1541hud-monitor-usb-v0.8.1.5",
+  "display_name": "1541HUD Monitor USB v0.8.1.5",
   "description": "V8.1 exclusive-CDC transport with immediate LED-policy pending feedback for the passive 1541HUD Monitor mailbox.",
   "author": "Ben Krall and contributors",
   "source": "https://github.com/benkrall1973/1541-OneROM-Private",
   "license": "MIT",
-  "build_output": "build/1541-OneROM-1541HUD-Monitor-USB-v0.8.1.4.bin"
+  "build_output": "build/1541-OneROM-1541HUD-Monitor-USB-v0.8.1.5.bin"
 }

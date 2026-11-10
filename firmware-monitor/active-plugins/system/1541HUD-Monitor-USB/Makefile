@@ -10,8 +10,8 @@ OBJDUMP := $(if $(TOOLCHAIN),$(TOOLCHAIN)/arm-none-eabi-objdump,arm-none-eabi-ob
 MAJOR_VERSION := 0
 MINOR_VERSION := 8
 PATCH_VERSION := 1
-BUILD_VERSION := 4
-WORK_BUILD := 4
+BUILD_VERSION := 5
+WORK_BUILD := 5
 
 
 # GNU ld 2.39+ warns about the flat plugin's deliberate RWX load segment.

@@ -1200,6 +1200,7 @@ void hud1541_probe_main(ora_lookup_fn_t lookup,
    }
   }
   m->led_result = saved ? HUD1541_LED_RESULT_OK : HUD1541_LED_RESULT_FAIL;
+  __asm volatile("dmb sy" ::: "memory"); /* publish result before completion */
   m->led_applied_seq = pending_led_seq;
   pending_led_policy = 0u;
  }

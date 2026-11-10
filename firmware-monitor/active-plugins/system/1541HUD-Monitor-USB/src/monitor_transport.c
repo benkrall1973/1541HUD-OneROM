@@ -21,13 +21,36 @@ static hud_rx_t rx;
 static uint32_t hud1541_next_status_ms;
 static bool hud1541_cdc_was_connected;
 static bool hud1541_state_pending;
-static uint32_t hud1541_led_request_seq;
 static uint32_t hud1541_led_ack_seq;
 #define HUD1541_LED_POLICY_AUTO 0xA5u
 #define HUD1541_LED_POLICY_OFF  0x5Au
 static char *hud1541_append_str(char *p,char *e,const char*s){while(*s&&p<e)*p++=*s++;return p;}
 static char *hud1541_append_u32(char*p,char*e,uint32_t v){char t[10];uint32_t n=0;do{t[n++]=(char)('0'+v%10u);v/=10u;}while(v&&n<10);while(n&&p<e)*p++=t[--n];return p;}
 static char *hud1541_append_hex8(char*p,char*e,uint8_t v){static const char h[]="0123456789ABCDEF";if(p<e)*p++=h[v>>4];if(p<e)*p++=h[v&15];return p;}
+
+typedef enum { HUD_LED_PENDING, HUD_LED_SAVED, HUD_LED_FAILED } hud_led_save_t;
+static hud_led_save_t hud_led_save_state(volatile hud1541_mailbox_t *m) {
+ uint32_t request = m->led_request_seq;
+ uint32_t applied = m->led_applied_seq;
+ HUD_BARRIER(); /* acquire the result published before the applied sequence */
+ if (request != applied) return HUD_LED_PENDING;
+ uint32_t result = m->led_result;
+ if (result == 1u || (request == 0u && result == 0u)) return HUD_LED_SAVED;
+ if (result == 2u) return HUD_LED_FAILED;
+ return HUD_LED_PENDING;
+}
+
+static char *hud_led_reply(char *p, char *end, volatile hud1541_mailbox_t *m) {
+ hud_led_save_t state = hud_led_save_state(m);
+ p = hud1541_append_str(p, end, state == HUD_LED_SAVED ? "$HUDLED,OK,MODE=" :
+     state == HUD_LED_FAILED ? "$HUDLED,FAIL,MODE=" : "$HUDLED,PENDING,MODE=");
+ p = hud1541_append_str(p, end,
+     m->led_request_mode == HUD1541_LED_POLICY_OFF ? "OFF" : "AUTO");
+ if (state == HUD_LED_SAVED) return hud1541_append_str(p, end, ",SAVED=1\r\n");
+ if (state == HUD_LED_FAILED) return hud1541_append_str(p, end, ",SAVED=0\r\n");
+ return hud1541_append_str(p, end, m->last_motor ?
+     ",SAVED=0,WAIT=MOTOR_STOP\r\n" : ",SAVED=0,WAIT=CAPTURE_IDLE\r\n");
+}
 
 static uint32_t hud1541_track_last(uint32_t s){return s&0xFFu;}
 static uint32_t hud1541_track_write_valid(uint32_t s){return (s>>8)&1u;}
@@ -77,11 +100,9 @@ static void hud1541_serial_task(void){
  return;
  }
 
- if(m->led_applied_seq!=hud1541_led_ack_seq){
+ if(m->led_applied_seq!=hud1541_led_ack_seq && hud_led_save_state(m)!=HUD_LED_PENDING){
  p=line;
- p=hud1541_append_str(p,e,m->led_result==1u?"$HUDLED,OK,MODE=":"$HUDLED,FAIL,MODE=");
- p=hud1541_append_str(p,e,m->led_request_mode==HUD1541_LED_POLICY_OFF?"OFF":"AUTO");
- p=hud1541_append_str(p,e,m->led_result==1u?",SAVED=1\r\n":",SAVED=0\r\n");
+ p=hud_led_reply(p,e,m);
  if(!hud1541_cdc_try_send(line,(uint32_t)(p-line)))return;
  hud1541_led_ack_seq=m->led_applied_seq;
  }
@@ -256,17 +277,18 @@ static void transport_command(const char *line, void *arg) {
  char reply[112], *p = reply, *end = reply + sizeof(reply);
  if (command.kind == HUD_CMD_LED_QUERY || command.kind == HUD_CMD_LED_SET) {
   if (command.kind == HUD_CMD_LED_SET) {
+   uint32_t applied = m->led_applied_seq;
+   uint32_t sequence = m->led_request_seq + 1u;
+   if (sequence == 0u) sequence = 1u; /* zero is the boot-restored state */
+   if (sequence == applied) {
+    if (++sequence == 0u) sequence = 1u;
+   }
+   hud1541_led_ack_seq = applied; /* earlier completions are superseded */
    m->led_request_mode = command.value;
    HUD_BARRIER();
-   m->led_request_seq = ++hud1541_led_request_seq;
-   p = hud1541_append_str(p, end, "$HUDLED,PENDING,MODE=");
-  } else p = hud1541_append_str(p, end, "$HUDLED,OK,MODE=");
-  p = hud1541_append_str(p, end,
-      m->led_request_mode == HUD1541_LED_POLICY_OFF ? "OFF" : "AUTO");
-  if (command.kind == HUD_CMD_LED_QUERY)
-   p = hud1541_append_str(p, end, ",SAVED=1\r\n");
-  else p = hud1541_append_str(p, end, m->last_motor ?
-      ",SAVED=0,WAIT=MOTOR_STOP\r\n" : ",SAVED=0,WAIT=CAPTURE_IDLE\r\n");
+   m->led_request_seq = sequence;
+  }
+  p = hud_led_reply(p, end, m);
  } else if (command.kind == HUD_CMD_CONFIG) {
   m->flags = (m->flags & ~HUD1541_TELEM_FIELD) |
        (command.value << HUD1541_TELEM_SHIFT);

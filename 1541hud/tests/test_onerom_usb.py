@@ -706,6 +706,46 @@ class ControllerTransactionTests(unittest.TestCase):
         self.assertEqual(loaded.hud_serial, "MONITOR-456")
 
 
+class MonitorLedPersistenceRepliesTests(unittest.TestCase):
+    def target(self):
+        target = HUDApp.__new__(HUDApp)
+        target.monitor_led_off = False
+        target._monitor_led_save_pending = True
+        target._monitor_health_hold = True
+        target._monitor_health_rebaseline_pending = False
+        target.request_preview_redraw = lambda: None
+        class Status:
+            value = ""
+            def set(self, value):
+                self.value = value
+        target.usb_status = Status()
+        return target
+
+    def test_pending_query_keeps_save_and_capture_health_hold_pending(self):
+        target = self.target()
+        target.handle_monitor_led_reply("$HUDLED,PENDING,MODE=OFF,SAVED=0,WAIT=MOTOR_STOP")
+        self.assertTrue(target.monitor_led_off)
+        self.assertTrue(target._monitor_led_save_pending)
+        self.assertTrue(target._monitor_health_hold)
+        self.assertFalse(target._monitor_health_rebaseline_pending)
+        self.assertIn("motor stop", target.usb_status.value)
+
+    def test_success_releases_hold_and_rebaselines_after_confirmation(self):
+        target = self.target()
+        target.handle_monitor_led_reply("$HUDLED,OK,MODE=OFF,SAVED=1")
+        self.assertFalse(target._monitor_led_save_pending)
+        self.assertFalse(target._monitor_health_hold)
+        self.assertTrue(target._monitor_health_rebaseline_pending)
+
+    def test_failure_is_not_a_saved_policy_confirmation(self):
+        target = self.target()
+        target.handle_monitor_led_reply("$HUDLED,FAIL,MODE=OFF,SAVED=0")
+        self.assertFalse(target._monitor_led_save_pending)
+        self.assertFalse(target._monitor_health_hold)
+        self.assertFalse(target._monitor_health_rebaseline_pending)
+        self.assertIn("rejected", target.usb_status.value)
+
+
 if __name__ == "__main__":
     unittest.main()
 

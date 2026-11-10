@@ -42,6 +42,8 @@ jobs:
           /tmp/monitor-rpm
           gcc -O2 -std=c11 -fshort-enums -DORA_HOST_TEST -DHUD1541_DECODE_HOST_TEST -Wall -Wextra -Werror -Wno-unused-function -fsanitize=address,undefined -I source/one-rom-v0.8.1/firmware/ora firmware-monitor/tests/test_monitor_headers.c -o /tmp/monitor-headers
           /tmp/monitor-headers
+          gcc -O1 -std=c11 -fshort-enums -DORA_HOST_TEST -DBUILD_VERSION=5 -Wall -Wextra -Werror -fsanitize=address,undefined -I firmware-monitor/tests/stubs -I firmware-monitor/active-plugins/system/1541HUD-Monitor-USB/include -I source/one-rom-v0.8.1/firmware/ora firmware-monitor/tests/test_monitor_led.c firmware-monitor/active-plugins/system/1541HUD-Monitor-USB/src/monitor_protocol.c -o /tmp/monitor-led
+          /tmp/monitor-led
       - name: Control cooperative wait regression
         run: |
           gcc -O2 -DORA_HOST_TEST -fshort-enums -DMAJOR_VERSION=0 -DMINOR_VERSION=8 -DPATCH_VERSION=1 -DBUILD_VERSION=5 -DNV_ERASE_FN_MAX=80 -ffunction-sections -fdata-sections -I source/one-rom-v0.8.1/firmware/ora -I firmware-control/active-plugins/user/1541HUD-Host-Control-v0.8.1/src qualification/test-cooperative-knock.c -Wl,--gc-sections -o /tmp/control-knock
