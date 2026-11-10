@@ -54,6 +54,16 @@ official v0.8.1 firmware source is retained unchanged in the current baseline.
 
 ## Builder guidance until patched
 
+### Automated updater limitation recorded on 2026-11-09
+
+The v8.1 package/HUD/native firmware validation workflow passed. A separate
+GitHub-generated ZIP security-update job failed with dependency_file_not_supported:
+it targeted source/one-rom-v0.8.1/rust/fw, which has no independent lockfile.
+The Cargo workspace lockfile is at source/one-rom-v0.8.1/rust/Cargo.lock.
+This is an updater discovery problem, not a failure of either firmware build.
+A future dependency update should operate on the workspace root and follow
+the qualification rules below; this cleanup does not change the tested pins.
+
 - Use only local ROM pages and known inputs you are entitled to use.
 - Do not point a public build manifest at an untrusted ZIP URL or archive.
 - Verify a firmware image with `onerom firmware inspect` and SHA-256 before
