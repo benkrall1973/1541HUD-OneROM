@@ -5,3 +5,4 @@ firmware-control/overlays/*.patch text eol=lf whitespace=-blank-at-eol
 firmware-monitor/overlays/*.patch text eol=lf whitespace=-blank-at-eol
 overlays/*.patch text eol=lf whitespace=-blank-at-eol,-space-before-tab
 overlays/*.json text eol=lf
+tools/THIRD-PARTY-LICENSES.txt text eol=lf whitespace=-blank-at-eol
