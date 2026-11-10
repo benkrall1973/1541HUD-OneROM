@@ -189,6 +189,8 @@ replacement for the compiler toolchain.
 
 The detailed procedures and build-script arguments are in
 [Fire-24G V8.1 Build and Installation](docs/FIRE24G_V81_BUILD_AND_INSTALL.md).
+For a repeatable build of both roles without private ROM inputs, use the
+[clean source-build check](docs/CLEAN_SOURCE_BUILD.md).
 Run the package check before publishing a derivative:
 
 ```powershell
