@@ -138,7 +138,7 @@ workflow. Close 1541HUD first so it releases the board USB ports.
 
    ```powershell
    ./tools/onerom-v0.5.0.exe --serial <SERIAL> program `
-     --firmware ./releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.30.bin `
+     --firmware ./releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.32.bin `
      --verify
    ```
 

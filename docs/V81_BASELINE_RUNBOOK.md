@@ -7,7 +7,7 @@ It combines Control, Monitor and HUD V51.
 | --- | --- |
 | OneROM base | Official v0.8.1, commit 1b189260d85a5feced19e969399986f5f1d1cabe |
 | Control USB / Host-Control | 0.8.1.16 / 0.8.1.5 |
-| Monitor USB / capture | 0.8.1.4 / 0.8.1.30 |
+| Monitor USB / capture | 0.8.1.5 / 0.8.1.32 |
 | Desktop HUD | 0.8.0.51 |
 
 ## Improvements and test scope
@@ -27,10 +27,17 @@ capture gaps. RPM resumes only after a fresh valid physical header. Retesting
 recorded 145 STATUS samples with R=0 Q=0, 113 RPM reports at 300.53–300.68 and
 nine passing header checksums. No stale-zone 332–333 RPM spike was observed.
 
+Monitor .32 retains the RPM repair and adds checksum-gated sector coverage
+and truthful pending/saved/failed LED replies. The .31 drive log contained
+187 STATUS records with R=0 Q=0 and 122 RPM readings at 300.53–300.68.
+For .32, the user confirmed LED ON/OFF during disk reads and ON-state
+persistence after a complete power cycle. No .32 serial retest log was supplied;
+reply-state corner cases and bad-checksum rejection were tested natively.
+
 The public Monitor image uses default NV; the drive-tested image differed only
 in preserved device settings. Public packaging additionally replaces two
 absolute TinyUSB diagnostic filenames with equal-length portable strings.
-Exactly 334 diagnostic-prefix bytes change; all other default-image bytes,
+Exactly 212 diagnostic-prefix bytes change; all other default-image bytes,
 instructions, addresses and terminators are unchanged. The sanitizer is at
 tools/maintenance/Sanitize-Monitor-Diagnostics.ps1. The private archive retains
 the exact flashed image. The public stock Control image was recomposed

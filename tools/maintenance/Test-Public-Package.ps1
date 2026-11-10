@@ -79,7 +79,7 @@ $required = @(
     'utilities/rom-pages/Split-1541-RomPages.ps1',
     'tools/onerom-v0.5.0.exe',
     'releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0.8.1.bin',
-    'releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.30.bin',
+    'releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.32.bin',
     'private-roms/README.md',
     'private-roms/UB3-Control-DolphinDOS-CAE.json',
     'private-roms/UB3-Control-Lower-Socket.json',
@@ -101,7 +101,7 @@ $forbiddenPath = '(?i)(s-jiffy|sjiffydos|jiffydos|dolphindos|speeddos|\.bin$|\.u
 $badPaths = Get-ChildItem -LiteralPath $PackageRoot -Recurse -Force -File |
     Where-Object {
         $relative = $_.FullName.Substring($PackageRoot.Length + 1).Replace('\', '/')
-        $relative -notmatch '^(source/one-rom-v0\.8\.1/images/test/stub-(system|user)-plugin\.bin|private-roms/(UB3-Control-DolphinDOS-CAE|UB3-Control-Lower-Socket|UB3-Control-Upper-Socket|monitor-compose)\.json|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0\.8\.1\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.30\.bin|tools/onerom-v0\.5\.0\.exe|firmware-monitor/inputs/(1541-OneROM-Bootloader-Universal-v1\.1\.0|1541-c000\.325302-01)\.bin)$' -and $relative -match $forbiddenPath
+        $relative -notmatch '^(source/one-rom-v0\.8\.1/images/test/stub-(system|user)-plugin\.bin|private-roms/(UB3-Control-DolphinDOS-CAE|UB3-Control-Lower-Socket|UB3-Control-Upper-Socket|monitor-compose)\.json|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0\.8\.1\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.32\.bin|tools/onerom-v0\.5\.0\.exe|firmware-monitor/inputs/(1541-OneROM-Bootloader-Universal-v1\.1\.0|1541-c000\.325302-01)\.bin)$' -and $relative -match $forbiddenPath
     }
 if ($badPaths) {
     throw "Forbidden payload/history file(s) in public package:`n$($badPaths.FullName -join "`n")"

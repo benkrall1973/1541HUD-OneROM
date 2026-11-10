@@ -16,11 +16,11 @@
     {
       "role": "UB4 Monitor",
       "core": "0.8.1",
-      "usb": "0.8.1.4",
-      "user": "0.8.1.30",
-      "file": "onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.30.bin",
-      "test_scope": "Drive-tested code; default NV; two equal-length diagnostic filename replacements (334 bytes); all other bytes unchanged",
-      "sha256": "44E260C9E591EB9AE67DC9892CA7761ACE384171BF733110A34AA4F9B8CC80D2",
+      "usb": "0.8.1.5",
+      "user": "0.8.1.32",
+      "file": "onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.32.bin",
+      "test_scope": "User-confirmed LED control during reads and full power-cycle persistence; .31 capture log and native regressions retained. Public image uses default NV and two equal-length diagnostic filename replacements (212 bytes).",
+      "sha256": "475EB25252ADB9435BD7569297C6C16E72DD7830980B88DA9268EAEFC9BF43BD",
       "bytes": 229376
     }
   ]

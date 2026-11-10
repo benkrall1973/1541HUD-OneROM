@@ -1,7 +1,7 @@
 # Monitor 0.8.1.31 header-checksum test candidate
 
-Status: host regression tests passed; drive qualification pending. Do not
-replace the released 0.8.1.30 image until this candidate has been tested.
+Historical .31 retest record: the supplied drive log showed normal operation
+with R=0 Q=0 and stable RPM. The current .32 release retains this checksum repair.
 Monitor USB stays at 0.8.1.4; the mailbox ABI and V51 record formats are unchanged.
 
 ## Repair

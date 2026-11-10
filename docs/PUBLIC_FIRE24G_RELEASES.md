@@ -6,7 +6,7 @@ package. Both target **Fire-24G** hardware only.
 | Board | File | SHA-256 |
 | --- | --- | --- |
 | UB3 Control | `releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0.8.1.bin` | `734736EB8E2E990FFD101A3918E8834DBAA10F8173A1B876DDAD4AC75E378D40` |
-| UB4 Monitor | `releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.30.bin` | `44E260C9E591EB9AE67DC9892CA7761ACE384171BF733110A34AA4F9B8CC80D2` |
+| UB4 Monitor | `releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.32.bin` | `475EB25252ADB9435BD7569297C6C16E72DD7830980B88DA9268EAEFC9BF43BD` |
 
 See [the baseline runbook](V81_BASELINE_RUNBOOK.md) for component versions and test scope.
 The stock Control image was recomposed with the drive-tested components; this

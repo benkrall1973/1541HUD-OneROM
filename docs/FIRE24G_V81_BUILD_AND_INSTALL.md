@@ -10,7 +10,7 @@ their firmware, USB roles, or wiring.
 | Board | Role | Active firmware |
 | --- | --- | --- |
 | UB3 | Control | Official v0.8.1; USB 0.8.1.16 / Host-Control 0.8.1.5 |
-| UB4 | Monitor | 1541HUD Monitor `v0.8.1.30` |
+| UB4 | Monitor | 1541HUD Monitor `v0.8.1.32` |
 
 Windows COM numbers are not identities and may change after every reconnect.
 Bind 1541HUD by each board's USB serial as discovered locally; Windows COM
@@ -54,7 +54,7 @@ are intentionally not committed; install the pinned tool prerequisites below.
 | Component | Build command | Expected output |
 | --- | --- | --- |
 | UB3 Control, WSL2/Linux source build | `bash consolidation/scripts/build-control-v0.8.1.sh private-roms/<your-config>.json output/onerom-ub3-control-fire24g.bin` | `output/onerom-ub3-control-fire24g.bin` |
-| UB4 Monitor, WSL2/Linux source build | `TOOLCHAIN=/path/to/bin ONEROM_CLI=onerom bash firmware-monitor/Build-Monitor-Fire24G-V0.8.1.sh` | `firmware-monitor/releases/v8.1/candidates/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.30.bin` |
+| UB4 Monitor, WSL2/Linux source build | `TOOLCHAIN=/path/to/bin ONEROM_CLI=onerom bash firmware-monitor/Build-Monitor-Fire24G-V0.8.1.sh` | `firmware-monitor/releases/v8.1/candidates/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.32.bin` |
 
 Both wrappers use the root-level pinned source tree at `source/one-rom-v0.8.1`.
 Both wrappers export the official source into separate ignored work trees and

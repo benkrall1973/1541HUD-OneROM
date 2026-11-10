@@ -1,6 +1,6 @@
 # Monitor 0.8.1.32 / USB 0.8.1.5 LED persistence candidate
 
-Status: host tests passed; build and drive qualification pending. Control
+Status: build/host checks passed; user-confirmed drive tests accepted. Control
 firmware and the V51 application are unchanged. The image includes the .31
 checksum gate already exercised in the drive retest.
 
@@ -49,4 +49,7 @@ This does not test actual flash failure or cross-core hardware timing.
 
 Do not interrupt a flash write or damage hardware to induce failure. The
 failure-response path is covered by the host test. The candidate is not
-flashed or published automatically; update public releases after qualification.
+flashed without explicit authorization. The user subsequently confirmed LED
+control during disk reads and persistence after a full power cycle. These are
+user-reported hardware results; no .32 serial log was supplied. Host tests cover
+the precise pending/failure/supersession reply cases.
