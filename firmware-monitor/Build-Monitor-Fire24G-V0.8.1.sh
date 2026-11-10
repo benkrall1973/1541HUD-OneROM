@@ -13,6 +13,7 @@ export PATH="$TOOLCHAIN:$PATH"
 mkdir -p "$core" "$(dirname "$output")"
 # Export only tracked official source, excluding downloaded .git caches.
 git -C "$root" archive HEAD:source/one-rom-v0.8.1 | tar -x -C "$core"
+bash "$root/tools/maintenance/Apply-Host-Dependencies.sh" "$core"
 sed -i 's/\r$//' "$core/firmware/src/piodma/pio.c" "$core/firmware/src/plugin.c"
 patch --fuzz=0 -d "$core" -p1 < "$root/firmware-monitor/overlays/ub4-passive-v0.8.1.patch"
 make -C "$core" TOOLCHAIN="$TOOLCHAIN" EXTRA_C_FLAGS=-DHUD1541_PASSIVE_UB4 all

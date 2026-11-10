@@ -38,6 +38,7 @@ mkdir -p "$(dirname -- "$output")"
 # compiler caches so a second verification does not rebuild the entire CLI.
 mkdir -p "$core"
 git -C "$root" archive HEAD:source/one-rom-v0.8.1 | tar -x -C "$core"
+bash "$root/tools/maintenance/Apply-Host-Dependencies.sh" "$core"
 # The tracked Windows checkout carries CRLF in this source file; normalise the
 # disposable build copy before applying the POSIX patch.
 sed -i 's/\r$//' "$core/firmware/src/rp235x.c"
@@ -48,7 +49,7 @@ grep -Fq "UB3 Control reset interlock" "$core/firmware/src/rp235x.c" || {
   exit 1
 }
 make -C "$core" TOOLCHAIN="${TOOLCHAIN:-/usr/bin}" all
-(cd "$core/rust" && cargo build --release -p onerom-cli)
+(cd "$core/rust" && cargo build --locked --release -p onerom-cli)
 # The official USB plugin fetches its own explicitly pinned TinyUSB,
 # picobootx, and pico-sdkless inputs.  Build it once to populate and verify
 # those exact dependencies; the custom USB plugin then uses the same copies.
