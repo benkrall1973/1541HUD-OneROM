@@ -43,7 +43,7 @@
   },
   "supported_source": {
     "manifest": "source/one-rom-v0.8.1/1541HUD-SOURCE.json",
-    "sha256": "a80b52316042613e56da60369e794f5d672eff061cfe50471cf42cfb473ab3fd",
+    "sha256": "8f22b2c8d964466e98bfe79171499fc994b596c993f65daee59eb9d0e2d05ce9",
     "lock_sha256": "8dd472bc6c9fdb1c87291f497ddf35ed835e618ef2124821ee661b514b5c137b",
     "original_snapshot_ref": "v8.1-maintenance-2026-11-10",
     "excluded_unsupported_trees": [

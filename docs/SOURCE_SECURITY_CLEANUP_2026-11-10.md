@@ -11,6 +11,9 @@ the active source reflect the supported build, without dismissing alerts.
   dependency updates, including locked metadata/config-generator builds.
 - Exclude the unsupported `rust/studio` and `prototypes/studiov2` trees from
   the active public source; remove Studio from workspace membership.
+- Relocate the CLI's shared Windows icon from Studio into `rust/cli/assets`
+  and update the CLI build-script reference. The icon bytes are unchanged;
+  this preserves Windows resource compilation without restoring the GUI tree.
 - Prune the workspace lockfile with `cargo update --workspace --offline`.
   Its package count changes from 901 to 527. No package/version was added;
   all 527 retained package versions match the previously tested overlaid lock.

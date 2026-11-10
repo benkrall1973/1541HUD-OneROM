@@ -11,6 +11,9 @@ for relative,digest in expected['files_sha256_lf'].items():
     data=(core/relative).read_bytes().replace(b'\r\n',b'\n')
     if hashlib.sha256(data).hexdigest()!=digest:
         raise SystemExit('Supported source checksum mismatch: '+relative)
+for relative,digest in expected.get('files_sha256_binary',{}).items():
+    if hashlib.sha256((core/relative).read_bytes()).hexdigest()!=digest:
+        raise SystemExit('Supported resource checksum mismatch: '+relative)
 for relative in expected['excluded_unsupported_trees']:
     if (core/relative).exists():raise SystemExit('Unsupported build tree present: '+relative+'; remove the stale exported build directory and rebuild from current source')
 lock=(core/'rust/Cargo.lock').read_text()

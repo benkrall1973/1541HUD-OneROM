@@ -402,6 +402,7 @@
       }
     ]
   },
-  "source_manifest_sha256": "a80b52316042613e56da60369e794f5d672eff061cfe50471cf42cfb473ab3fd",
-  "firmware_images_changed": false
+  "source_manifest_sha256": "8f22b2c8d964466e98bfe79171499fc994b596c993f65daee59eb9d0e2d05ce9",
+  "firmware_images_changed": false,
+  "windows_resource_fix": "Shared upstream icon relocated byte-identically into CLI assets; build.rs reference corrected."
 }

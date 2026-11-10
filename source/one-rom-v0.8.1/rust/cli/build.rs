@@ -70,8 +70,6 @@ fn compile_windows_resources() {
     // Get absolute path to icon
     let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
     let icon_path = PathBuf::from(manifest_dir)
-        .join("..")
-        .join("studio")
         .join("assets")
         .join("onerom.ico")
         .display()

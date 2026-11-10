@@ -28,6 +28,17 @@
     "rust/fw/Cargo.toml": "c9400e869e18ec35385da53c9a645213bfbae6834da9f1a0a2198e990ddaa109",
     "rust/cli/Cargo.toml": "28eb694813036b6be867dbc5b068c3dc8f8e56f4af35b88548ebeb810f6e7232",
     "rust/Cargo.lock": "8dd472bc6c9fdb1c87291f497ddf35ed835e618ef2124821ee661b514b5c137b",
-    "README.md": "b3dd6bf3175c8aa434a54208eaf85bd2c4ed7c51384a9ced6c7b0712a6a08296"
-  }
+    "README.md": "b3dd6bf3175c8aa434a54208eaf85bd2c4ed7c51384a9ced6c7b0712a6a08296",
+    "rust/cli/build.rs": "51faeabd7774c0e33477550edece7c527dc1342871ac3c4356f7838dc7d2d4a4"
+  },
+  "files_sha256_binary": {
+    "rust/cli/assets/onerom.ico": "9d62d260df75d7f9308046e4b0c2314f2a52f656a4060df2bac87ba7cbff7aa2"
+  },
+  "relocated_shared_assets": [
+    {
+      "from": "rust/studio/assets/onerom.ico",
+      "to": "rust/cli/assets/onerom.ico",
+      "bytes_unchanged": true
+    }
+  ]
 }
