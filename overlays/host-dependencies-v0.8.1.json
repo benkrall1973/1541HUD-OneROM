@@ -1,0 +1,9 @@
+{
+  "upstream": "1b189260d85a5feced19e969399986f5f1d1cabe",
+  "packages": {
+    "zip": "9.5.0",
+    "rustls": "0.23.46"
+  },
+  "lock_sha256": "60e705acbedb86a3ba5d321e42ef7b49a55fa0b762d38837c8496ccc03d36d49",
+  "patch_sha256": "ca05d065aec361f8395c10120586bbe054279961cc72f50e63f31cc0ffc6de59"
+}
