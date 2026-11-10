@@ -12,8 +12,8 @@ history and coverage, so those displays could count a corrupt header. RPM
 already required checksum validity and was not affected by this reporting gap.
 
 HDRPHY now requires a valid checksum. Sampled HDRMETA diagnostics, including
-OK=0 for failures, retain their existing bounded rate. No malformed header is
-converted into a valid coverage event. PIO/DMA capture, timing, RPM calculations,
+OK=0 for failures, retain their existing bounded rate. Checksum-invalid headers
+no longer become coverage events. PIO/DMA capture, timing, RPM calculations,
 NV handling, GPIO wiring and Control firmware are unchanged.
 
 ## Host evidence
