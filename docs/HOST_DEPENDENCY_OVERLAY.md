@@ -9,6 +9,8 @@ The host overlay updates the ROM-fetching library and CLI to ZIP 9.5.0 and
 locks Rustls 0.23.46. Compatible lockfile updates also select ctutils 0.4.4,
 libz-sys 1.1.31, webpki-roots 1.0.10 and quinn-proto 0.11.18. The accompanying
 JSON records exact versions and SHA-256 hashes of the patch and resulting lock.
+Version selection follows the [ZIP release](https://github.com/zip-rs/zip2/releases/tag/v9.5.0)
+and the [RustSec Rustls advisories](https://rustsec.org/advisories/RUSTSEC-2026-0346).
 The helper verifies them after applying the patch with zero fuzz. Rust build
 commands use --locked so dependency resolution cannot change silently.
 
@@ -66,3 +68,24 @@ CLI/metadata dependency graph. Updating the separate tooling that uses it
 requires its own compatibility work; a workspace-wide clean audit is not
 claimed. Continue using trusted ROM/configuration inputs: patched dependencies
 do not provide resource limits for arbitrary archives.
+
+## Recorded results: 2026-11-09
+
+Both complete firmware builds, composition and inspection passed with the
+final overlay using Cargo 1.99.0 and Arm GNU 15.3.Rel1. Host tests passed 573
+checks with eight upstream tests ignored. USB-discovery suites were explicitly
+skipped because this WSL environment has no USB sysfs directory. All 48 HUD
+tests and public-package validation passed. No board was programmed.
+
+Cargo-audit 0.22.2 with advisory database commit
+d9cb059f3217db87aeccd190b81eaffe8cc29cb9 found 27 vulnerability records in the
+pristine workspace lock and two in the overlaid lock. The two remaining
+Quick-XML records are outside the supported host graph; that graph has zero
+vulnerability records in this snapshot. Unmaintained/unsound/yanked advisory
+warnings are still reported. These counts are advisory records, not a claim
+about exploitability of the installed drive firmware.
+
+Exact versions, patch/lock hashes and test scope are recorded in
+host-dependency-validation.json. Published firmware and the legacy Windows
+executable are unchanged; no release-image or Windows-binary replacement is
+claimed by these source-build results.

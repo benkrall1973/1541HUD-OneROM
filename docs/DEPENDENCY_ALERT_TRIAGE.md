@@ -13,7 +13,16 @@ two firmware images; neither embeds the Rust host CLI or its archive parser.
 The alert numbers and candidate resolutions below are historical records from
 the preceding development baseline, not a current GitHub alert inventory.
 
-## Candidate resolution under review
+## Supported source-build resolution
+
+The supported Control/Monitor wrappers apply a checksummed host-only overlay
+in their exported core trees. It selects ZIP 9.5.0, Rustls 0.23.46 and compatible
+security updates for ctutils, libz-sys, webpki-roots and quinn-proto. See
+HOST_DEPENDENCY_OVERLAY.md for versions, verification commands and limitations.
+The checked-in upstream snapshot and legacy bundled Windows CLI are unchanged.
+This is not a claim that all vendored GitHub alerts have disappeared.
+
+## Historical candidate resolution
 
 The former `security/dependency-updates` branch recorded a runner-generated
 candidate resolution, not a released-image claim:

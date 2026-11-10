@@ -64,7 +64,8 @@ The v8.1 branch starts from the public official-core upgrade and imports the
 tested firmware source without private history. The older boot-selection fix
 is superseded by Host-Control 0.8.1.5. Security branch history was reconciled;
 the firmware baseline intentionally retains the exact tested upstream snapshot.
-Host dependency refreshes require separate requalification. The older prototype
+The supported wrappers now apply the separately validated host dependency
+overlay described in HOST_DEPENDENCY_OVERLAY.md. The older prototype
 Dependabot lockfile candidate is not substituted for that snapshot.
 
 The six older public branches were retired after their exact tips were

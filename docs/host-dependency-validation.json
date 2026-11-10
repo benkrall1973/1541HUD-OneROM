@@ -1,0 +1,56 @@
+{
+  "date": "2026-11-09",
+  "upstream": "1b189260d85a5feced19e969399986f5f1d1cabe",
+  "packages": {
+    "zip": "9.5.0",
+    "rustls": "0.23.46",
+    "ctutils": "0.4.4",
+    "libz-sys": "1.1.31",
+    "webpki-roots": "1.0.10",
+    "quinn-proto": "0.11.18"
+  },
+  "patch_sha256": "d75a4a80f12e723c2aa22b558260b85f59297d2740184a0284a87567d9d6e94c",
+  "lock_sha256": "02225ed0164e867056367ee6f579a9174345580256c5fc3beff6e9f25f55b771",
+  "environment": {
+    "cargo": "1.99.0",
+    "arm_gnu": "15.3.Rel1",
+    "python": "3.10.12"
+  },
+  "host_tests": {
+    "passed": 573,
+    "failed": 0,
+    "ignored": 8,
+    "usb_suites_skipped": [
+      "args",
+      "scan"
+    ],
+    "excluded_suite": "firmware download integration tests"
+  },
+  "hud_tests_passed": 48,
+  "firmware_builds": {
+    "control": "passed synthetic composition and inspection",
+    "monitor": "passed composition and inspection",
+    "device_programmed": false
+  },
+  "audit": {
+    "tool": "cargo-audit 0.22.2",
+    "advisory_db": "d9cb059f3217db87aeccd190b81eaffe8cc29cb9",
+    "baseline_workspace_vulnerabilities": 27,
+    "overlaid_workspace_vulnerabilities": 2,
+    "supported_host_graph_vulnerabilities": 0,
+    "remaining": [
+      "RUSTSEC-2026-0194",
+      "RUSTSEC-2026-0195"
+    ],
+    "warnings": [
+      "unmaintained",
+      "unsound",
+      "yanked"
+    ]
+  },
+  "unchanged": [
+    "vendored official source",
+    "published firmware images",
+    "legacy bundled Windows CLI"
+  ]
+}

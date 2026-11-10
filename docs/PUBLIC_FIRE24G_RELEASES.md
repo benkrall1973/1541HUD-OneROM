@@ -36,6 +36,9 @@ X1 to UC4 pin 34, and X2 to UC4 pin 39. It does not control write protect.
 The repository bundles upstream OneROM CLI 0.5.0 at
 `tools/onerom-v0.5.0.exe`. No separate CLI download is required for the
 release-image workflow.
+This bundled Windows executable is unchanged by the host dependency overlay.
+For archive retrieval/composition, use the newly source-built CLI described in
+HOST_DEPENDENCY_OVERLAY.md; the overlay does not retrofit the bundled binary.
 
 1. Close 1541HUD so it releases the board CDC ports.
 2. Put only the intended board into BOOTSEL.

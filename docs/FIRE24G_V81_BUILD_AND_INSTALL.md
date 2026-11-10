@@ -57,9 +57,11 @@ are intentionally not committed; install the pinned tool prerequisites below.
 | UB4 Monitor, WSL2/Linux source build | `TOOLCHAIN=/path/to/bin ONEROM_CLI=onerom bash firmware-monitor/Build-Monitor-Fire24G-V0.8.1.sh` | `firmware-monitor/releases/v8.1/candidates/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.30.bin` |
 
 Both wrappers use the root-level pinned source tree at `source/one-rom-v0.8.1`.
-The Control wrapper copies the exact official v0.8.1 source into an ignored
-work tree, then builds the Control USB and Host-Control plugins before
-composing the owner-supplied manifest. The Monitor build exports an isolated core and applies the passive overlay
+Both wrappers export the official source into separate ignored work trees and
+apply the checksummed host-tool dependency overlay (ZIP/Rustls and associated
+security updates); see HOST_DEPENDENCY_OVERLAY.md. The source in Git stays
+unchanged. Control then builds its core/plugins and composes the owner-supplied
+manifest. Monitor additionally applies the passive core overlay
 with `HUD1541_PASSIVE_UB4`; do not build its plugins with a normal ROM-serving core.
 
 ### UB4 Monitor pinned inputs
@@ -101,6 +103,10 @@ for the OneROM CLI, USB inspection/flashing, and the 1541HUD application.
 - OneROM CLI 0.5.0 or compatible `onerom` executable. The validated Windows
   executable is included at `tools/onerom-v0.5.0.exe`; place it on `PATH` or
   pass its path to the build wrapper where needed.
+- For the patched archive/composition path, use the CLI built by the Control
+  wrapper. WSL/Linux builds need a Linux CLI; the combined source-build checker
+  builds and selects it automatically. The bundled Windows executable is not
+  rebuilt by the security overlay.
 - Rust/Cargo **1.93.0 or newer** for the pinned V8.1 Rust host tooling. The original 1.85 floor was only a wrapper check; it is not sufficient for the currently vendored source snapshot. The dependency-refresh branch validated `onerom-fw` and `onerom-cli` with Rust/Cargo 1.93.0 on Linux.
 
 The Monitor PowerShell entry point also accepts `-Toolchain` and

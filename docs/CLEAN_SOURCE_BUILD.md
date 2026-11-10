@@ -26,8 +26,11 @@ uses its tracked baseline inputs. Installed release images and their test
 scope remain documented in V81_BASELINE_RUNBOOK.md and the release manifest.
 
 The wrappers re-export tracked official source into separate ignored work
-trees before applying role-specific overlays. Dependency/compiler caches may
-be reused on later runs; a fresh clone establishes the initial source build.
+trees before applying role-specific overlays. Both wrappers also apply the checksummed host-tool
+dependency overlay described in HOST_DEPENDENCY_OVERLAY.md. The vendored
+official source stays unchanged; the exported Rust builds use --locked.
+Dependency/compiler caches may be reused on later runs; a fresh clone establishes
+the initial source build.
 Build date, Git metadata and diagnostic filenames can change image hashes.
 New builds do not replace the archived hardware-tested images automatically.
 
