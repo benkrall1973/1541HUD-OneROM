@@ -33,10 +33,17 @@
  * silently stealing capture hardware.  The passive core never starts ROM
  * serving PIO, so bus GPIOs remain inputs until claimed here.
  */
+#ifndef HUD1541_DECODE_HOST_TEST
 ORA_DEFINE_USER_PLUGIN(hud1541_probe_main, MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION, BUILD_VERSION, 0,8,1);
+#endif
 
 #define TIMER0_BASE 0x400B0000u
+#ifdef HUD1541_DECODE_HOST_TEST
+extern uint32_t hud1541_test_now_us;
+#define TIMER0_RAWL hud1541_test_now_us
+#else
 #define TIMER0_RAWL (*(volatile uint32_t *)(TIMER0_BASE + 0x28u))
+#endif
 
 /* Fire-24G UB4 Monitor harness: UC1 pin 37 (SYNC) enters through the
  * board's 5 V-tolerant SEL_B path, GPIO27.  SEL_D/GPIO24 is deliberately
@@ -463,7 +470,11 @@ static void queue_event(volatile hud1541_mailbox_t *m, uint32_t word) {
  return;
  }
  m->events[head] = word;
+#ifdef HUD1541_DECODE_HOST_TEST
+ __asm volatile("" ::: "memory");
+#else
  __asm volatile("dmb sy" ::: "memory");
+#endif
  m->event_head = next;
 }
 
@@ -907,7 +918,7 @@ static void decode_snapshot(volatile hud1541_mailbox_t *m,
    /* Physical-header evidence drives Recent Sectors and Sector Coverage.
     * Export every valid header. The heavier metadata/RPM reports are still
     * sampled to keep the 32-event mailbox bounded during reads. */
-   if (telemetry_mask(m) & HUD1541_TELEM_HEADERS)
+   if (checksum_valid && (telemetry_mask(m) & HUD1541_TELEM_HEADERS))
     queue_hdrphy_diag(m, *hdr_track, sec, now);
 
    /* The capture core can observe roughly 50 physical headers each second,
@@ -1015,6 +1026,7 @@ static void decode_snapshot(volatile hud1541_mailbox_t *m,
  }
 }
 
+#ifndef HUD1541_DECODE_HOST_TEST
 void hud1541_probe_main(ora_lookup_fn_t lookup,
  ora_plugin_type_t type,
  const ora_entry_args_t *args) {
@@ -1241,3 +1253,4 @@ void hud1541_probe_main(ora_lookup_fn_t lookup,
  }
  }
 }
+#endif

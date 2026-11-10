@@ -5,7 +5,7 @@ OBJCOPY := $(if $(TOOLCHAIN),$(TOOLCHAIN)/arm-none-eabi-objcopy,arm-none-eabi-ob
 MAJOR_VERSION := 0
 MINOR_VERSION := 8
 PATCH_VERSION := 1
-BUILD_VERSION := 30
+BUILD_VERSION := 31
 # Keep this relative for the native Windows GNU Make path; an absolute C:/
 # prefix is parsed as Make syntax in generated object prerequisites.
 ONEROM_ROOT ?= ../../../.work/official-v0.8.1/one-rom-v0.8.1
