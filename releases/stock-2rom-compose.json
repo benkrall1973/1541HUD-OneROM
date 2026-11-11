@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "name": "1541HUD Public Stock Two-ROM DOS 2.6",
+  "description": "Public UB3 Fire-24G Control image. Slot 0 is the C000 ROM with OneROM Universal E000 bootloader; slot 1 is the C000 ROM with stock 1541 DOS 2.6 E000.",
+  "chip_sets": [
+    {
+      "type": "single",
+      "chips": [
+        {
+          "file": "firmware-control/active-plugins/system/1541HUD-USB-v0.8.1/build/1541-OneROM-1541HUD-USB-v0.8.1.16.bin",
+          "type": "system_plugin",
+          "label": "1541HUD-USB-v0.8.1.16"
+        }
+      ]
+    },
+    {
+      "type": "single",
+      "chips": [
+        {
+          "file": "firmware-control/active-plugins/user/1541HUD-Host-Control-v0.8.1/build/1541-OneROM-1541HUD-Host-Control-v0.8.1.5.bin",
+          "type": "user_plugin",
+          "label": "1541HUD-Host-Control-v0.8.1.5"
+        }
+      ]
+    },
+    {
+      "type": "multi",
+      "chips": [
+        {
+          "file": "firmware-monitor/inputs/1541-c000.325302-01.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "description": "1541/1540 C000 8 KiB stock page 325302-01",
+          "label": "1541 STOCK C000 325302-01"
+        },
+        {
+          "file": "firmware-monitor/inputs/1541-OneROM-Bootloader-Universal-v1.1.0.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "description": "Universal OneROM bootloader page in the common slot",
+          "label": "OneROM Universal E000 v1.1.0"
+        }
+      ]
+    },
+    {
+      "type": "multi",
+      "description": "1541 stock DOS 2.6 profile",
+      "chips": [
+        {
+          "file": "firmware-monitor/inputs/1541-c000.325302-01.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "description": "Shared 1541/1540 C000 stock page 325302-01",
+          "label": "1541 STOCK DOS 2.6 (901229-06AA)"
+        },
+        {
+          "file": "http://www.zimmers.net/anonftp/pub/cbm/firmware/drives/new/1541/1541-e000.901229-06AA.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "description": "1541 E000 stock DOS 2.6 page 901229-06AA",
+          "label": "1541 STOCK E000 901229-06AA"
+        }
+      ]
+    }
+  ],
+  "reserved_pins": ["sel_b", "sel_c", "sel_d"]
+}

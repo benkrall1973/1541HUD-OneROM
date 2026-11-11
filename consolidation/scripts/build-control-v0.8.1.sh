@@ -9,6 +9,7 @@ if [[ $# -lt 1 || $# -gt 2 ]]; then
 fi
 
 root="$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)"
+cd "$root"
 config="$(CDPATH= cd -- "$(dirname -- "$1")" && pwd)/$(basename -- "$1")"
 output="${2:-$root/output/onerom-ub3-control-fire24g.bin}"
 upstream="$root/source/one-rom-v0.8.1"

@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-10",
+  "image": "releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0.8.1.bin",
+  "sha256": "A066F70C1B9636714C0D0A0694D4B981641DF3E1DDD024D0E210097697BCBAFD",
+  "hardware": "User's standard two-ROM 1541 setup with UB3 Control and UB4 Monitor",
+  "result": "PASS — user-confirmed drive test",
+  "confirmed": [
+    "Standard stock 1541 DOS boots",
+    "A game loads and the drive operates normally",
+    "IEC address setting saves",
+    "ROM selection setting saves",
+    "Write protection works",
+    "Drive reset works",
+    "Monitor and Control firmware operate correctly on the drive"
+  ],
+  "not_reported": [
+    "Full USB disconnect/reconnect power-cycle persistence for this exact image"
+  ],
+  "related_qualification": "qualification/stock-control-loose-2026-11-10.json",
+  "source_config": "releases/stock-2rom-compose.json"
+}

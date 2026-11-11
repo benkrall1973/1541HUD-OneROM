@@ -6,7 +6,8 @@ USB returned in running mode, the single stock slot was active, and a normal
 reboot succeeded. A pre-flash backup and serial-specific records are archived
 privately. No image was rebuilt or changed for this test.
 
-Image: releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0.8.1.bin
+Historical image, since replaced in the public package:
+`onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0.8.1.bin`
 
 SHA-256: 734736EB8E2E990FFD101A3918E8834DBAA10F8173A1B876DDAD4AC75E378D40
 
@@ -41,9 +42,15 @@ defect. SEL_B is allocated to reset in this profile, so IEC 10/11 are not
 supported. The tested image retains this defect; no untested replacement
 image has been substituted. A future correction should report MAX=9.
 
-## Remaining hardware qualification
+## Historical image scope
 
-This was a loose-board test with no drive bus. It does not validate:
+This record applies only to the earlier one-slot image with hash
+`734736EB8E2E990FFD101A3918E8834DBAA10F8173A1B876DDAD4AC75E378D40`.
+It is retained as history and is not the current public stock image. The
+subsequent two-slot stock DOS 2.6 image was tested in the drive; see
+[`STOCK_CONTROL_DRIVE_TEST_2026-11-10.md`](STOCK_CONTROL_DRIVE_TEST_2026-11-10.md).
+
+The earlier loose-board test did not validate:
 
 - Actual stock DOS startup, directory reads, or ROM operation in a 1541.
 - IEC bus communication at addresses 8/9.
@@ -53,6 +60,5 @@ This was a loose-board test with no drive bus. It does not validate:
 - Alternate ROM selection: this stock image has one fixed slot and no
   selectable replacement DOS profiles.
 
-The user will perform drive testing later. The prior custom-collection drive
-qualification remains separate evidence and is not promoted to a claim that
-this exact stock image has passed drive testing.
+The subsequent two-ROM test does not retroactively change these earlier
+loose-board results or their image hash.

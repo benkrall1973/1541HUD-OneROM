@@ -2,10 +2,10 @@
 
 This records the active configuration for the paired OneROM installation in
 the 1541 long board. Control core/plugins and Monitor operation were tested
-in the drive. The exact public stock Control composition passed 47 loose-board
-checks on 2026-11-10; its drive-operation and full-power-cycle qualification
-remain pending. See the [baseline runbook](V81_BASELINE_RUNBOOK.md) for the
-image-specific test scope.
+in the drive. The exact public stock two-ROM Control image passed the
+user-confirmed drive checks on 2026-11-10; full USB disconnect/reconnect
+persistence was not reported. See the [baseline runbook](V81_BASELINE_RUNBOOK.md)
+and [drive test record](STOCK_CONTROL_DRIVE_TEST_2026-11-10.md) for scope.
 
 UB3 is the state-changing **Control** board; UB4 is the electrically passive
 **Monitor** board. Do not exchange their firmware, USB roles, or wiring.
@@ -58,7 +58,8 @@ are intentionally not committed; install the pinned tool prerequisites below.
 
 | Component | Build command | Expected output |
 | --- | --- | --- |
-| UB3 Control, WSL2/Linux source build | `bash consolidation/scripts/build-control-v0.8.1.sh private-roms/<your-config>.json output/onerom-ub3-control-fire24g.bin` | `output/onerom-ub3-control-fire24g.bin` |
+| UB3 public stock two-ROM image | `bash consolidation/scripts/build-control-v0.8.1.sh releases/stock-2rom-compose.json output/onerom-ub3-control-fire24g.bin` | `output/onerom-ub3-control-fire24g.bin` |
+| UB3 custom lawful ROM set | `bash consolidation/scripts/build-control-v0.8.1.sh private-roms/<your-config>.json output/onerom-ub3-control-fire24g.bin` | `output/onerom-ub3-control-fire24g.bin` |
 | UB4 Monitor, WSL2/Linux source build | `TOOLCHAIN=/path/to/bin ONEROM_CLI=onerom bash firmware-monitor/Build-Monitor-Fire24G-V0.8.1.sh` | `firmware-monitor/releases/v8.1/candidates/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.32.bin` |
 
 Both wrappers use the root-level pinned source tree at `source/one-rom-v0.8.1`.
@@ -80,8 +81,10 @@ used to produce the supplied Monitor release image.
 | `firmware-monitor/inputs/1541-OneROM-Bootloader-Universal-v1.1.0.bin` | `7313B07F26FCC3778664B0C53F1AFF46AF883ED8B0A3CBF525EFC9BB40432B0E` |
 | `firmware-monitor/inputs/1541-c000.325302-01.bin` | `6FA7B07AFF92DA66B0A28A52BB3C82FFE310AB0FAD2CC473B40137A8D299C7E5` |
 
-The Monitor includes the stock C000 baseline page shown above.  Keep owner-supplied
-DOS pages for UB3 Control private under `private-roms/`.
+The Monitor and public stock UB3 composition use the tracked C000 and Universal
+E000 baseline pages shown above. The stock DOS 2.6 E000 page is fetched from
+the public URL in `releases/stock-2rom-compose.json`. Keep other owner-supplied
+DOS pages private under `private-roms/`.
 
 ### Supported source-build host: WSL2 or Linux
 

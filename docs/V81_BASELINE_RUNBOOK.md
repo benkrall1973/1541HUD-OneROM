@@ -40,11 +40,15 @@ absolute TinyUSB diagnostic filenames with equal-length portable strings.
 Exactly 212 diagnostic-prefix bytes change; all other default-image bytes,
 instructions, addresses and terminators are unchanged. The sanitizer is at
 tools/maintenance/Sanitize-Monitor-Diagnostics.ps1. The private archive retains
-the exact flashed image. The public stock Control image was recomposed
-with tested core/plugins and the stock pages already distributed here. That
-exact stock composition was flashed and passed 47 loose-board checks on
-2026-11-10 with CLI 0.6.0-hud1. Drive operation remains pending. The test record
-and the retained cosmetic IEC range-reporting defect are documented in
+the exact flashed image. The public stock Control two-ROM image was composed
+with the tested core/plugins, tracked baseline pages and standard DOS 2.6. The
+user flashed and tested that exact image in a 1541 on 2026-11-10: stock DOS
+booted, a game loaded, IEC address and ROM settings saved, write protection
+and reset worked, and Control/Monitor operated on the drive. Full USB
+disconnect/reconnect persistence was not reported. See
+STOCK_CONTROL_DRIVE_TEST_2026-11-10.md and its machine-readable record. The
+earlier one-slot image's 47 loose-board checks and cosmetic IEC
+range-reporting defect remain documented separately in
 STOCK_CONTROL_LOOSE_TEST_2026-11-10.md.
 The private drive ROM collection, device identifiers and recovery dumps stay
 private. Public image hashes and sizes are in releases/v8.1-manifest.json.

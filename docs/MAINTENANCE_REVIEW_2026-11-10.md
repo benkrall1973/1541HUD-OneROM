@@ -34,9 +34,10 @@ Windows CLI builds, native firmware regressions and package validation.
 
 The exact public stock Control image has 47 recorded loose-board checks;
 actual drive operation and complete USB power-cycle qualification remain
-pending. The cosmetic invalid-IEC response still advertises MAX=11 while
-accepting only 8/9. This maintenance release does not substitute a new image
-or claim those remaining tests have passed.
+pending at the time of that maintenance pass. The subsequent stock two-ROM
+drive test and its limits are recorded in
+STOCK_CONTROL_DRIVE_TEST_2026-11-10.md. The cosmetic invalid-IEC response still
+advertises MAX=11 while accepting only 8/9.
 
 Monitor .32 retains its recorded drive acceptance and existing test scope.
 The C64 configurator remains deferred. Prototype interface PCB work is backed

@@ -130,11 +130,11 @@ workflow. Close 1541HUD first so it releases the board USB ports.
 3. Confirm the displayed serial is the board you intend to flash.
 4. Flash exactly one image, replacing `<SERIAL>` with that board's serial.
 
-   **UB3 Control - stock DOS 2.6 test image**
+   **UB3 Control - stock two-ROM DOS 2.6 image**
 
    ```powershell
    ./tools/onerom-v0.6.0-hud1.exe --serial <SERIAL> program `
-     --firmware ./releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0.8.1.bin `
+     --firmware ./releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0.8.1.bin `
      --verify
    ```
 
