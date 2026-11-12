@@ -64,8 +64,8 @@ RustSec later issued an unsoundness advisory affecting rustix versions before
 source provenance manifest was refreshed, and the bundled Windows CLI and its
 dependency/license inventories were rebuilt from the supported source. The
 historical overlay remains unchanged because it records the earlier build.
-The updated dependency audit and full CI run are still required to qualify this
-follow-up.
+The updated dependency audit, source verification, Windows CLI regression job,
+firmware checks and both ARM builds passed in [CI run #51](https://github.com/benkrall1973/1541HUD-OneROM/actions/runs/43275461435).
 
 ## Release and hardware boundary
 

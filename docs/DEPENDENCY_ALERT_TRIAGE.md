@@ -14,7 +14,7 @@ The four critical ZIP entries describe the same advisory in four dependency file
 
 ## Validation and scope
 
-The active lock was pruned without adding or changing retained package versions at the time of the November 10 cleanup. On November 12, a newly issued rustix unsoundness advisory affected the pinned 1.1.4; the supported lock and bundled Windows CLI were updated to patched rustix 1.1.6. The audit rejects every vulnerability, yanked package and unsoundness record across that workspace. It does not suppress alerts or use an advisory ignore list. Four unmaintained-package warnings remain outside the CLI normal/build graph; maintenance warnings are not a guarantee of future support.
+The active lock was pruned without adding or changing retained package versions at the time of the November 10 cleanup. On November 12, a newly issued rustix unsoundness advisory affected the pinned 1.1.4; the supported lock and bundled Windows CLI were updated to patched rustix 1.1.6. CI run [#51](https://github.com/benkrall1973/1541HUD-OneROM/actions/runs/43275461435) passed the audit, source verification, Windows CLI regressions, firmware checks and ARM builds. The audit rejects every vulnerability, yanked package and unsoundness record across that workspace. It does not suppress alerts or use an advisory ignore list. Four unmaintained-package warnings remain outside the CLI normal/build graph; maintenance warnings are not a guarantee of future support.
 
 After the November 12 rustix advisory, the supported source lock and bundled Windows CLI were updated to rustix 1.1.6. The RP2350 C firmware does not embed the Rust ZIP/TLS libraries. Neither point licenses ignoring an affected build tool or distributing a vulnerable host executable.
 
