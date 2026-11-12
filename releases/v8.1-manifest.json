@@ -51,13 +51,13 @@
     "bytes": 7899136,
     "sha256": "09feb3207de9d490469db9a8a2730edcc6b500d2536c033af99751da88e9e876",
     "scope": "Rebuilt Windows release CLI from supported source with patched rustix 1.1.6 using the pinned Rust 1.99.0 MSVC toolchain. Regression tests and hardware programming were not run during this dependency repair.",
-    "source_hardening_sha256": "1bef554ec706f6d677a5fd1a622b2a62dbbc2b24ee525945939bf8ab0946670d",
-    "dependency_inventory_sha256": "fd1faef09b4278fb1454e8a48ccdf0b339684e727a02d08145d8511f9731c60a",
-    "third_party_licenses_sha256": "826a6df844081f833ac6e2ae64e35dd080778d73f728e1d9a8e0e793a5103812"
+    "source_hardening_sha256": "5041c2c9afb0ff91a3a6ce6fe35cc988ae02118c5afe448624ad05d64ece5316",
+    "dependency_inventory_sha256": "d32bdd6c924b0f24b6ce53b9650c1fab9284948283121ea25e3d76618f3bbd93",
+    "third_party_licenses_sha256": "ab5ea75ba76a274dbcc57a0f2e58c137fbbb657db65cd9b69fc345210621d879"
   },
   "supported_source": {
     "manifest": "source/one-rom-v0.8.1/1541HUD-SOURCE.json",
-    "sha256": "1bef554ec706f6d677a5fd1a622b2a62dbbc2b24ee525945939bf8ab0946670d",
+    "sha256": "5041c2c9afb0ff91a3a6ce6fe35cc988ae02118c5afe448624ad05d64ece5316",
     "lock_sha256": "6674dc0b8536fe150522a01c89e42bbd86adebfc240cc92dc28a15a141063c66",
     "original_snapshot_ref": "v8.1-maintenance-2026-11-10",
     "excluded_unsupported_trees": [
