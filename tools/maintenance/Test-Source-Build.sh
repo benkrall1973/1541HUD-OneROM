@@ -12,10 +12,12 @@ root, check = map(pathlib.Path, sys.argv[1:])
 page = check / 'SYNTHETIC-DO-NOT-FLASH.bin'
 page.write_bytes(bytes([255]) * 8192)
 sets = []
-for path, kind in [
-    ('firmware-control/active-plugins/system/1541HUD-USB-v0.8.1/build/1541-OneROM-1541HUD-USB-v0.8.1.16.bin', 'system_plugin'),
-    ('firmware-control/active-plugins/user/1541HUD-Host-Control-v0.8.1/build/1541-OneROM-1541HUD-Host-Control-v0.8.1.5.bin', 'user_plugin')]:
-    sets.append(dict(type='single', roms=[dict(file=str(root / path), type=kind)]))
+for plugin_dir, kind in [
+    ('firmware-control/active-plugins/system/1541HUD-USB-v0.8.1', 'system_plugin'),
+    ('firmware-control/active-plugins/user/1541HUD-Host-Control-v0.8.1', 'user_plugin')]:
+    plugin = root / plugin_dir
+    build_output = json.loads((plugin / 'plugin-meta.json').read_text())['build_output']
+    sets.append(dict(type='single', roms=[dict(file=str(plugin / build_output), type=kind)]))
 sets.append(dict(type='multi', roms=[dict(file=str(page), type='2364', cs1='active_low') for _ in range(3)]))
 config = dict(version=1, name='SYNTHETIC BUILD CHECK - DO NOT FLASH',
               description='Build verification only; contains synthetic ROM pages.',

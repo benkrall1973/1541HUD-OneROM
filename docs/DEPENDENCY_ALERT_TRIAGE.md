@@ -14,9 +14,9 @@ The four critical ZIP entries describe the same advisory in four dependency file
 
 ## Validation and scope
 
-The active lock was pruned without adding or changing retained package versions. The audit rejects every vulnerability, yanked package and unsoundness record across that workspace. It does not suppress alerts or use an advisory ignore list. Four unmaintained-package warnings remain outside the CLI normal/build graph; maintenance warnings are not a guarantee of future support.
+The active lock was pruned without adding or changing retained package versions at the time of the November 10 cleanup. On November 12, a newly issued rustix unsoundness advisory affected the pinned 1.1.4; the supported lock and bundled Windows CLI were updated to patched rustix 1.1.6. The audit rejects every vulnerability, yanked package and unsoundness record across that workspace. It does not suppress alerts or use an advisory ignore list. Four unmaintained-package warnings remain outside the CLI normal/build graph; maintenance warnings are not a guarantee of future support.
 
-The released Windows CLI was already built with patched dependencies and keeps its historical build provenance. The RP2350 C firmware does not embed the Rust ZIP/TLS libraries. Neither point licenses ignoring an affected build tool or distributing a vulnerable host executable.
+After the November 12 rustix advisory, the supported source lock and bundled Windows CLI were updated to rustix 1.1.6. The RP2350 C firmware does not embed the Rust ZIP/TLS libraries. Neither point licenses ignoring an affected build tool or distributing a vulnerable host executable.
 
 Use the current supported source and documented wrappers, trusted ROM/configuration inputs and verified image hashes. A historical upstream tag is provenance, not a supported host build. Patching archive libraries does not impose resource limits on arbitrary untrusted archives.
 

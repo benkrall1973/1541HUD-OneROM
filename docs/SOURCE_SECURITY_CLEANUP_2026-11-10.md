@@ -57,6 +57,16 @@ were removed during release cleanup; the machine-readable alert inventory and
 audit summary remain in `qualification/source-security-cleanup-2026-11-10.json`.
 This records the status at verification time; future advisories can change it.
 
+## Follow-up: RUSTSEC-2026-0486 (November 12, 2026)
+
+RustSec later issued an unsoundness advisory affecting rustix versions before
+1.1.6. The supported workspace lock was updated from 1.1.4 to 1.1.6, the
+source provenance manifest was refreshed, and the bundled Windows CLI and its
+dependency/license inventories were rebuilt from the supported source. The
+historical overlay remains unchanged because it records the earlier build.
+The updated dependency audit and full CI run are still required to qualify this
+follow-up.
+
 ## Release and hardware boundary
 
 Firmware C source, role overlays, custom plugin code and the published Control

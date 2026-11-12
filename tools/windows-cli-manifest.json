@@ -2,15 +2,18 @@
   "name": "1541HUD Windows CLI",
   "upstream_cli": "0.6.0",
   "distribution": "hud1",
-  "source_commit": "a0e254ac38921f897f6e1ca4a86966639f011502",
+  "source_commit": "5cb0b4ce76d9cfb40afa685bf62d4ee296523a4a",
   "upstream": "1b189260d85a5feced19e969399986f5f1d1cabe",
   "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)",
   "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)",
   "target": "x86_64-pc-windows-msvc",
   "overlay_sha256": "1C57B31237E2EEC2A1DEB78D18D677559464FE038906897641E272D95C379F1A",
-  "lock_sha256": "FDEF097186CF3384B35B9EFC9F9D7C51E705DCA3C1C9549DF8EABC6829048D11",
+  "lock_sha256": "6674dc0b8536fe150522a01c89e42bbd86adebfc240cc92dc28a15a141063c66",
   "file": "onerom-v0.6.0-hud1.exe",
-  "bytes": 7900672,
-  "sha256": "FAACDDD0D050EC824A0766FABB110369F73A2031B49AF5882E5103DDBE02B734",
-  "scope": "Windows release build, native CLI/ZIP regressions and offline inspection of both published images; no hardware programmed."
+  "bytes": 7899136,
+  "sha256": "09feb3207de9d490469db9a8a2730edcc6b500d2536c033af99751da88e9e876",
+  "scope": "Rebuilt Windows release CLI from supported source with patched rustix 1.1.6 using the pinned Rust 1.99.0 MSVC toolchain. Regression tests and hardware programming were not run during this dependency repair.",
+  "source_hardening_sha256": "1bef554ec706f6d677a5fd1a622b2a62dbbc2b24ee525945939bf8ab0946670d",
+  "dependency_inventory_sha256": "fd1faef09b4278fb1454e8a48ccdf0b339684e727a02d08145d8511f9731c60a",
+  "third_party_licenses_sha256": "826a6df844081f833ac6e2ae64e35dd080778d73f728e1d9a8e0e793a5103812"
 }

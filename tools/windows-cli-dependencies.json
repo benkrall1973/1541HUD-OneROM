@@ -540,12 +540,6 @@
     "repository": "https://github.com/rust-lang/futures-rs"
   },
   {
-    "name": "futures-macro",
-    "version": "0.3.32",
-    "license": "MIT OR Apache-2.0",
-    "repository": "https://github.com/rust-lang/futures-rs"
-  },
-  {
     "name": "futures-sink",
     "version": "0.3.32",
     "license": "MIT OR Apache-2.0",
@@ -1153,7 +1147,7 @@
   },
   {
     "name": "rustix",
-    "version": "1.1.4",
+    "version": "1.1.6",
     "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
     "repository": "https://github.com/bytecodealliance/rustix"
   },

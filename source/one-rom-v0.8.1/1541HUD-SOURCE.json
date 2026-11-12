@@ -20,14 +20,15 @@
     "git2": "0.21.0",
     "built": "0.8.1",
     "tokio": "1.54.1",
-    "chacha20": "0.10.2"
+    "chacha20": "0.10.2",
+    "rustix": "1.1.6"
   },
   "files_sha256_lf": {
     "Makefile": "3e63c6b497aef925810d91f5b6ce9cc9d388f35922dcab410640dc580be5e40c",
     "rust/Cargo.toml": "f425428952100c81bce25b215425e1c50c09d15e8f95ee6d8e5335ddfed3c261",
     "rust/fw/Cargo.toml": "c9400e869e18ec35385da53c9a645213bfbae6834da9f1a0a2198e990ddaa109",
     "rust/cli/Cargo.toml": "28eb694813036b6be867dbc5b068c3dc8f8e56f4af35b88548ebeb810f6e7232",
-    "rust/Cargo.lock": "8dd472bc6c9fdb1c87291f497ddf35ed835e618ef2124821ee661b514b5c137b",
+    "rust/Cargo.lock": "6674dc0b8536fe150522a01c89e42bbd86adebfc240cc92dc28a15a141063c66",
     "README.md": "b3dd6bf3175c8aa434a54208eaf85bd2c4ed7c51384a9ced6c7b0712a6a08296",
     "rust/cli/build.rs": "51faeabd7774c0e33477550edece7c527dc1342871ac3c4356f7838dc7d2d4a4"
   },

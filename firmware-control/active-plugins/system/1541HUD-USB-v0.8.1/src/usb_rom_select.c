@@ -1139,7 +1139,7 @@ static void process_line(char *line) {
         }
         if (!boot_iec_valid(address)) {
             cdc_write("$ROMTEST,IEC,FAIL,INVALID_ADDRESS,ADDRESS="); cdc_write_u32(address);
-            cdc_write(",MIN=8,MAX=11"); reply_end(); return;
+            cdc_write(",MIN=8,MAX=9"); reply_end(); return;
         }
         bool ok = write_boot_iec_address(address);
         if (ok) rgb_save_iec(address);
