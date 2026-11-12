@@ -40,11 +40,12 @@ test rerun. Releasing the pin to input is the intended firmware behavior.
 
 ## Known reporting defect
 
-An invalid IEC-address reply prints MIN=8,MAX=11 even though the production
-validator correctly accepts only 8 and 9. This is a cosmetic error-message
-defect. SEL_B is allocated to reset in this profile, so IEC 10/11 are not
-supported. The tested image retains this defect; no untested replacement
-image has been substituted. A future correction should report MAX=9.
+An invalid IEC-address reply from this historical image prints MIN=8,MAX=11
+even though the production validator correctly accepts only 8 and 9. SEL_B is
+allocated to reset in this profile, so IEC 10/11 are not supported. A later
+source-only correction changes the diagnostic to MAX=9; neither this tested
+image nor the published .16/.17 images were rebuilt for that correction. The
+error text does not change address validation or the recorded test results.
 
 ## Historical image scope
 

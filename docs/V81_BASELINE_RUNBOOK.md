@@ -57,8 +57,11 @@ booted, a game loaded, IEC address and ROM settings saved, write protection
 and reset worked, and Control/Monitor operated on the drive. Full USB
 disconnect/reconnect persistence was not reported. See
 STOCK_CONTROL_DRIVE_TEST_2026-11-10.md and its machine-readable record. The
-earlier one-slot image's 47 loose-board checks and cosmetic IEC
-range-reporting defect remain documented separately in
+earlier one-slot image's 47 loose-board checks remain documented separately.
+Its tested binary, like the checked-in .16 and .17 release images, may still
+report `MAX=11` for an invalid IEC address. The project USB plugin source now
+reports `MAX=9`, but the published images were not rebuilt for that text-only
+source correction. All these builds accept only IEC 8/9. See
 STOCK_CONTROL_LOOSE_TEST_2026-11-10.md.
 The private drive ROM collection, device identifiers and recovery dumps stay
 private. Public image hashes and sizes are in releases/v8.1-manifest.json.

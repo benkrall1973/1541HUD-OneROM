@@ -1,6 +1,6 @@
 # Supported host-source dependency security
 
-The active source at `source/one-rom-v0.8.1` already contains the tested host security fixes. It is derived from the pinned official v0.8.1 revision, not an unchanged copy of the complete upstream workspace. Firmware C source remains unchanged.
+The active source at `source/one-rom-v0.8.1` contains the tested host security fixes. It is derived from the pinned official v0.8.1 revision, not an unchanged copy of the complete upstream workspace. The upstream OneROM core C source remains pinned; the separate project Control USB plugin source has a post-release diagnostic-text correction documented in the release notes.
 
 ## Current build path
 
@@ -24,7 +24,7 @@ bash tools/maintenance/Test-Host-Dependencies.sh /path/to/prepared-core
 bash tools/maintenance/Audit-Host-Dependencies.sh /path/to/prepared-core
 ```
 
-The audit fails on any active workspace vulnerability, yanked package or unsoundness record; there is no advisory ignore list. Maintenance-status warnings are printed and classified. The November 12 lock update addresses the newly issued rustix unsoundness advisory. CI run [#51](https://github.com/benkrall1973/1541HUD-OneROM/actions/runs/43275461435) passed the updated dependency audit, source verification, CLI regressions and both ARM builds; four unmaintained-package warnings remain outside the supported CLI normal/build graph.
+The audit fails on any active workspace vulnerability, yanked package or unsoundness record; there is no advisory ignore list. Maintenance-status warnings are printed and classified. The November 12 lock update addresses the newly issued rustix unsoundness advisory. CI run [#52](https://github.com/benkrall1973/1541HUD-OneROM/actions/runs/43277779018) passed all five jobs, including the updated dependency audit, source verification, CLI regressions and both ARM builds; four unmaintained-package warnings remain outside the supported CLI normal/build graph.
 
 CI runs native Linux/Windows CLI and archive regressions, full ARM builds of both roles and all four custom plugins, and package/HUD/source checks. Synthetic Control test images are never published as flashable artifacts. Source builds do not replace the drive-accepted images automatically.
 

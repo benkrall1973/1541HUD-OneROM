@@ -47,8 +47,16 @@ write-protect override/sense. It has no JiffyDOS, SpeedDOS, DolphinDOS,
 RAMBoard, or S-JiffyDOS profile. Required wiring is SEL_A for IEC 8/9 and
 SEL_B through 1 kOhm for reset. Optional wiring is the documented SEL_C
 write-protect override transistor and SEL_D 22k/22k write-protect sense
-divider. Its known cosmetic invalid-address reply can display `MAX=11`,
-although only IEC addresses 8 and 9 are accepted.
+divider. The checked-in .16 and .17 binaries may display `MAX=11` in an
+invalid-address reply, although they accept only IEC addresses 8 and 9. The
+project USB plugin source now reports `MAX=9`; the release images were not
+rebuilt for that source-only diagnostic correction.
+
+The HUD and current OneROM Control plugin expose only the wired IEC 8/9
+selection. Commodore's [1541 User's Guide](https://s3.amazonaws.com/com.c64os.resources/weblog/sd2iecdocumentation/manuals/1541_Users_Guide.pdf)
+documents a separate temporary device-number change from the C64 using DOS
+`M-W`. That manual DOS operation is outside HUD/OneROM address control and has
+not been qualified here for alternate DOS images.
 
 For V0.8.0.53 Apply Only with Control USB plugin 0.8.1.17, use a
 data-capable cable with host VBUS +5 V blocked if a 1541-only power cycle must

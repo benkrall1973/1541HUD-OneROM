@@ -65,12 +65,21 @@ source provenance manifest was refreshed, and the bundled Windows CLI and its
 dependency/license inventories were rebuilt from the supported source. The
 historical overlay remains unchanged because it records the earlier build.
 The updated dependency audit, source verification, Windows CLI regression job,
-firmware checks and both ARM builds passed in [CI run #51](https://github.com/benkrall1973/1541HUD-OneROM/actions/runs/43275461435).
+firmware checks and both ARM builds passed in [CI run #52](https://github.com/benkrall1973/1541HUD-OneROM/actions/runs/43277779018).
+
+The November 12 source follow-up also corrected the invalid-IEC diagnostic
+range in the project Control USB plugin from `MAX=11` to `MAX=9`. It changes
+only the error text: IEC validation remains limited to addresses 8 and 9. The
+published `.16` and `.17` Control images were not rebuilt for this source-only
+correction and retain their existing hashes; those binaries may still display
+`MAX=11`. This does not change the recorded drive-test results.
 
 ## Release and hardware boundary
 
-Firmware C source, role overlays, custom plugin code and the published Control
-and Monitor image bytes are unchanged. The supplied Windows CLI 0.6.0-hud1
+At the time of the November 10 cleanup, the pinned upstream firmware C source,
+role overlays, custom plugin code and published Control/Monitor image bytes
+were unchanged. The later diagnostic-text correction is recorded above. The
+supplied Windows CLI 0.6.0-hud1
 was already built with patched host dependencies and is retained, with its
 original lock/overlay provenance. New source-built CLI candidates additionally
 record the supported-source manifest hash. No firmware flash is needed for

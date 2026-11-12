@@ -42,7 +42,9 @@ OneROM v0.8.1 release, based on commit
 `1b189260d85a5feced19e969399986f5f1d1cabe`, with the custom 1541HUD plugins
 and role-specific firmware overlays. The checked-in host source already has
 the tested security updates; unused upstream Studio/prototype build trees
-are excluded. Firmware C source remains at the pinned baseline. See the
+are excluded. The pinned upstream OneROM core source remains unchanged; the
+project Control USB plugin has a separate source-only diagnostic-text fix,
+described below. See the
 [supported-source provenance](source/one-rom-v0.8.1/1541HUD-SOURCE.json).
 The integration is community-tested.
 See the [baseline runbook](docs/V81_BASELINE_RUNBOOK.md) for versions and test scope.
@@ -56,6 +58,16 @@ The [latest verified release](https://github.com/benkrall1973/1541HUD-OneROM/rel
 contains the tested UB3 V51 baseline and UB4 Monitor images. The separate
 V53-compatible .17 Control candidate is documented and hash-checked in this
 repository's `releases/` directory.
+
+The Control USB source now reports the accepted IEC range as 8–9 when rejecting
+an invalid address. The published `.16` V51 baseline and `.17` V53 candidate
+images retain their recorded hashes and were not rebuilt for this text-only
+source change, so those binaries may still print `MAX=11`. Both still accept
+only IEC 8/9; the message does not change address behavior. A ROM set is one
+selectable profile and may contain up to three ROM chips, such as a C/A/E
+triplet. OneROM Fire supports up to 16 sets in a firmware image. The HUD can
+scroll through and select the sets exposed by the installed image; direct
+jumper selection is limited by the board's physical selector inputs.
 
 ## AI-assisted builds
 

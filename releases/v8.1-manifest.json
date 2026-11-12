@@ -9,7 +9,7 @@
       "usb": "0.8.1.16",
       "user": "0.8.1.5",
       "file": "onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0.8.1.bin",
-      "test_scope": "The original build was flashed and drive-tested; the published image differs only in two equal-length NUL-terminated TinyUSB diagnostic path strings, normalized to remove a local build path. The normalized artifact was not reflashed. The user confirmed standard DOS boot and game load, IEC address and ROM settings save, write-protect and reset operate, and Control/Monitor firmware work on the drive. Full USB disconnect/reconnect persistence was not reported.",
+      "test_scope": "The original build was flashed and drive-tested; the published image differs only in two equal-length NUL-terminated TinyUSB diagnostic path strings, normalized to remove a local build path. The normalized artifact was not reflashed. The user confirmed standard DOS boot and game load, IEC address and ROM settings save, write-protect and reset operate, and Control/Monitor firmware work on the drive. Full USB disconnect/reconnect persistence was not reported. This binary accepts only IEC 8/9 and may print MAX=11 for an invalid address; a later source-only correction to MAX=9 was not rebuilt into the image.",
       "sha256": "DB2A9F85E58A54341FB5C6572252069E4F8414717406A17DA294BB0E8A69B842",
       "bytes": 262144,
       "qualification": "qualification/stock-control-drive-2026-11-10.json"
@@ -20,7 +20,7 @@
       "usb": "0.8.1.17",
       "user": "0.8.1.5",
       "file": "onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0.8.1.17.bin",
-      "test_scope": "V0.8.0.53 Apply Only behavior was user-verified on the drive: live IEC address change worked without altering the selected DOS ROM or requiring a 1541 power cycle. The published candidate was reproducibly composed and passed offline firmware inspection. Its only post-test change was equal-length normalization of two NUL-terminated TinyUSB diagnostic path strings; that normalized artifact was not reflashed.",
+      "test_scope": "V0.8.0.53 Apply Only behavior was user-verified on the drive: live IEC address change worked without altering the selected DOS ROM or requiring a 1541 power cycle. The published candidate was reproducibly composed and passed offline firmware inspection. Its only post-test change was equal-length normalization of two NUL-terminated TinyUSB diagnostic path strings; that normalized artifact was not reflashed. This binary accepts only IEC 8/9 and may print MAX=11 for an invalid address; a later source-only correction to MAX=9 was not rebuilt into the image.",
       "sha256": "4798C3DD88B9018581E5285E529F6C69A678308AFD25202CF761E1ACF6AA55B8",
       "bytes": 262144,
       "qualification": "docs/STOCK_CONTROL_APPLY_ONLY_CANDIDATE_2026-11-10.md"
@@ -50,11 +50,11 @@
     "file": "onerom-v0.6.0-hud1.exe",
     "bytes": 7899136,
     "sha256": "09feb3207de9d490469db9a8a2730edcc6b500d2536c033af99751da88e9e876",
-    "scope": "Rebuilt from the supported source using patched rustix 1.1.6 and Rust 1.99.0 MSVC; Windows CLI regressions, public package checks, dependency audit, firmware checks and both ARM builds passed in CI run 43275461435. No hardware was programmed.",
+    "scope": "Rebuilt from the supported source using patched rustix 1.1.6 and Rust 1.99.0 MSVC; Windows CLI regressions, public package checks, dependency audit, firmware checks and both ARM builds passed in CI run 43277779018. No hardware was programmed.",
     "source_hardening_sha256": "5041c2c9afb0ff91a3a6ce6fe35cc988ae02118c5afe448624ad05d64ece5316",
     "dependency_inventory_sha256": "d32bdd6c924b0f24b6ce53b9650c1fab9284948283121ea25e3d76618f3bbd93",
     "third_party_licenses_sha256": "ab5ea75ba76a274dbcc57a0f2e58c137fbbb657db65cd9b69fc345210621d879",
-    "qualification_run": "https://github.com/benkrall1973/1541HUD-OneROM/actions/runs/43275461435"
+    "qualification_run": "https://github.com/benkrall1973/1541HUD-OneROM/actions/runs/43277779018"
   },
   "supported_source": {
     "manifest": "source/one-rom-v0.8.1/1541HUD-SOURCE.json",

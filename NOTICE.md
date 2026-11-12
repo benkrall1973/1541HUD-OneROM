@@ -15,16 +15,20 @@ official OneROM v0.8.1 release source at commit
 The tested host dependency fixes are now checked in. Unsupported upstream
 Studio and Studio v2 prototype build trees are excluded from the active
 package; the remaining lockfile was pruned without adding or changing any
-retained package version. Firmware C source remains unchanged.
+retained package version. The pinned upstream OneROM core C source remains
+unchanged; project-authored Control USB plugin source is maintained separately.
 
 The original complete snapshot remains recoverable from project tag
 `v8.1-maintenance-2026-11-10` and the private recovery archive. The
 [source provenance manifest](source/one-rom-v0.8.1/1541HUD-SOURCE.json) records
-its tree hashes, changed host files and exclusions. Preserving a historical
-snapshot does not make its old host tools a supported build path.
+its tree hashes, changed host files and exclusions. Project-authored Control
+USB plugin source is maintained separately under `firmware-control/`.
+Preserving a historical snapshot does not make its old host tools a supported
+build path.
 The custom integration and patched host CLI are community builds, not official
-upstream binary distributions. Its software/firmware and documentation are licensed under the
-upstream MIT license; its hardware material has its own CERN-OHL-W-2.0 terms.
+upstream binary distributions. Upstream software/firmware and documentation
+are licensed under the upstream MIT license; hardware material has its own
+CERN-OHL-W-2.0 terms.
 See `source/one-rom-v0.8.1/LICENSE.md` and the upstream project at
 <https://github.com/piersfinlayson/one-rom>.
 
@@ -35,9 +39,10 @@ license files must remain with any redistribution of the relevant source.
 
 ## Stock baseline inputs and excluded ROM collections
 
-The public package deliberately includes two named stock firmware images in
-`releases/`. The Control stock image contains Commodore 1541 DOS 2.6. The
-Monitor composition inputs in `firmware-monitor/inputs/` include the stock
+The public package deliberately includes three Fire-24G firmware images in
+`releases/`: the UB3 V51 stock baseline, the UB3 V53 Apply Only candidate, and
+the UB4 passive Monitor image. Both UB3 images contain Commodore 1541 DOS 2.6.
+The Monitor composition inputs in `firmware-monitor/inputs/` include the stock
 C000 page `1541-c000.325302-01.bin` and the OneROM Universal bootloader.
 The package validator checks these named inputs and images against recorded
 hashes. See [release contents](docs/PUBLIC_FIRE24G_RELEASES.md) and the

@@ -26,7 +26,7 @@ template described in UB3_CONTROL_CLI_COMPOSITION_GUIDE.md. The Monitor build
 uses its tracked baseline inputs. Installed release images and their test
 scope remain documented in V81_BASELINE_RUNBOOK.md and the release manifest.
 
-The wrappers export the tracked supported source into separate ignored work trees before applying role-specific firmware overlays. The host fixes are already checked in; the dependency helper verifies the current source manifest instead of reapplying them. See HOST_DEPENDENCY_OVERLAY.md. Original firmware C source is unchanged, and Rust builds use --locked.
+The wrappers export the tracked supported source into separate ignored work trees before applying role-specific firmware overlays. The host fixes are already checked in; the dependency helper verifies the current source manifest instead of reapplying them. See HOST_DEPENDENCY_OVERLAY.md. The pinned upstream OneROM core C source is unchanged. The project Control USB plugin is maintained separately and includes a later source-only diagnostic-text correction; existing release images were not rebuilt for it. Rust builds use `--locked`.
 Dependency/compiler caches may be reused on later runs; a fresh clone establishes
 the initial source build.
 Build date, Git metadata and diagnostic filenames can change image hashes.

@@ -38,8 +38,12 @@ The exact public stock Control image has 47 recorded loose-board checks;
 actual drive operation and complete USB power-cycle qualification remain
 pending at the time of that maintenance pass. The subsequent stock two-ROM
 drive test and its limits are recorded in
-STOCK_CONTROL_DRIVE_TEST_2026-11-10.md. The cosmetic invalid-IEC response still
-advertises MAX=11 while accepting only 8/9.
+STOCK_CONTROL_DRIVE_TEST_2026-11-10.md. At the time of this review, the
+cosmetic invalid-IEC response advertised MAX=11 while accepting only 8/9. On
+November 12, the project Control USB plugin source was corrected to report
+MAX=9. The published .16 and .17 images were not rebuilt for that diagnostic-
+only source change and may still print MAX=11; address validation remains
+limited to 8/9.
 
 Monitor .32 retains its recorded drive acceptance and existing test scope.
 The C64 configurator remains deferred. Prototype interface PCB work is backed

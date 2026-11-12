@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+Correct the invalid IEC-address diagnostic's reported maximum from 11 to 9.
+The validator already accepted only addresses 8 and 9; this changes reply text
+only. The checked-in .16 and .17 firmware images were not rebuilt for this
+source correction and may still report `MAX=11`.
+
 ## [1541HUD 0.8.1.12] - full Control qualification candidate
 
 Rebase USB source and headers on the official v0.8.1 implementation after the

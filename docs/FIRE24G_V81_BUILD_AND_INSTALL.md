@@ -80,7 +80,7 @@ are intentionally not committed; install the pinned tool prerequisites below.
 | UB4 Monitor, WSL2/Linux source build | `TOOLCHAIN=/path/to/bin ONEROM_CLI=onerom bash firmware-monitor/Build-Monitor-Fire24G-V0.8.1.sh` | `firmware-monitor/releases/v8.1/candidates/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.32.bin` |
 
 Both wrappers use the root-level pinned source tree at `source/one-rom-v0.8.1`.
-Both wrappers export the supported source into separate ignored work trees and verify its checked-in host fixes against the source manifest; see HOST_DEPENDENCY_OVERLAY.md. Firmware C source remains at the pinned baseline. Control then builds its core/plugins and composes the owner-supplied
+Both wrappers export the supported source into separate ignored work trees and verify its checked-in host fixes against the source manifest; see HOST_DEPENDENCY_OVERLAY.md. The pinned upstream OneROM core C source remains unchanged. The separate project Control USB plugin source has a later diagnostic-text correction that is not present in the checked-in release binaries. Control then builds its core/plugins and composes the owner-supplied
 manifest. Monitor additionally applies the passive core overlay
 with `HUD1541_PASSIVE_UB4`; do not build its plugins with a normal ROM-serving core.
 

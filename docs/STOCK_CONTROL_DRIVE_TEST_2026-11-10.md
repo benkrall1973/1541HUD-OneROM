@@ -13,10 +13,11 @@ published artifact was not reflashed after this diagnostic-only change.
 - Drive reset worked.
 - Monitor and Control firmware operated correctly on the drive.
 
-Known cosmetic reporting issue: an invalid IEC-address reply can display
-`MAX=11` even though the production validator only accepts addresses 8 and 9.
-The successful valid-address save test is unaffected; details remain in the
-earlier loose-board record.
+The tested image's invalid IEC-address reply can display `MAX=11` even though
+the validator only accepts addresses 8 and 9. A later source-only correction
+changes the diagnostic to `MAX=9`; the tested and published image was not
+rebuilt for it. The valid-address save test is unaffected; details remain in
+the earlier loose-board record.
 
 Image: `releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0.8.1.bin`
 

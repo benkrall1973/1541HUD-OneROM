@@ -47,6 +47,9 @@ UB3 explicitly. Automatic 1541 power-off sensing is not implemented.
 The V51 baseline's drive test is recorded in
 [`STOCK_CONTROL_DRIVE_TEST_2026-11-10.md`](STOCK_CONTROL_DRIVE_TEST_2026-11-10.md).
 The V53 Apply Only behavior was separately user-verified as described above.
-The only remaining artifact-level qualification caveat is that the public image
-was not reflashed after its equal-length diagnostic path strings were normalized;
-the firmware and executable bytes were unchanged.
+The public image was not reflashed after its equal-length diagnostic path
+strings were normalized; the firmware and executable bytes were unchanged.
+Separately, the project USB plugin source later corrected the invalid-address
+diagnostic from `MAX=11` to `MAX=9`. The published .16 and .17 images were not
+rebuilt for this source-only correction and may still display `MAX=11`; they
+continue to accept only IEC 8/9.
