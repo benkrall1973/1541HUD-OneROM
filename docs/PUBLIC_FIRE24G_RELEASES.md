@@ -37,10 +37,18 @@ V53 uses for runtime Apply Only without writing the saved NV2 address. Compose
 it from [`stock-2rom-apply-only-compose.json`](../releases/stock-2rom-apply-only-compose.json).
 The user verified V53 Apply Only on the drive: the live IEC address changed,
 the selected DOS ROM stayed working, and no 1541 power cycle was needed for the
-live change. The public binary later received only equal-length diagnostic-path
-string normalization and was not reflashed afterward. See the
+live change. The .17 image is now attached to the current GitHub Release. The
+public binary later received only equal-length diagnostic-path string
+normalization and was not reflashed afterward. See the
 [candidate record](STOCK_CONTROL_APPLY_ONLY_CANDIDATE_2026-11-10.md). Do not use
 V53 Apply Only with the older USB 0.8.1.16 baseline image.
+
+The GitHub Release's .16 asset is the original drive-tested binary (SHA-256
+`A066F70C1B9636714C0D0A0694D4B981641DF3E1DDD024D0E210097697BCBAFD`). The
+checked-in package image is its path-normalized copy (SHA-256
+`DB2A9F85E58A54341FB5C6572252069E4F8414717406A17DA294BB0E8A69B842`). The
+normalized package copy was not reflashed. The .17 GitHub Release asset matches
+the checked-in .17 image hash listed above.
 
 The UB3 image provides IEC 8/9, 350 ms active-low reset, and optional
 write-protect override/sense. It has no JiffyDOS, SpeedDOS, DolphinDOS,

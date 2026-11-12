@@ -17,7 +17,7 @@ future repository and not a substitute for the build or wiring guides.
 | V0.8.0.51 HUD baseline and V0.8.0.53 Apply Only candidate, launchers, tests, and HUD documentation | V0.8.0.53 uses runtime-only IEC address selection and requires UB3 USB plugin 0.8.1.17. Apply Only restoration after a 1541-only power cycle requires UB3 to lose power; use a data-capable cable with host VBUS +5 V blocked, or power-cycle UB3 explicitly. |
 | `docs/FIRE24G_V81_BUILD_AND_INSTALL.md`, `docs/FIRE24G_V81_ENGINEERING_DOSSIER.md`, and sanitized wiring/build documentation | Hardware integration, prerequisites, flash/recovery, GPIO, LED and acceptance contract. |
 | `utilities/dosname-rom-probe/` source and documentation | Optional diagnostic utility, after its provenance is checked. |
-| Three named Fire-24G images under `releases/` | UB3 Control stock two-ROM V51 baseline, separate stock two-ROM V53 Apply Only candidate, and UB4 passive Monitor image; the validator permits only these exact binaries. |
+| Three named Fire-24G images under `releases/` | UB3 Control stock two-ROM V51 baseline, separate stock two-ROM V53 Apply Only candidate, and UB4 passive Monitor image; the validator permits only these exact binaries. The V53 candidate is also attached to the current GitHub Release. |
 
 ## Explicit exclusions
 

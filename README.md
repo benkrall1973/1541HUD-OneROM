@@ -55,15 +55,15 @@ the UB4 Monitor image. It
 does not distribute optional third-party DOS collections beyond the documented
 stock baseline inputs/images. Supply your own lawful ROM pages for custom sets.
 The [latest verified release](https://github.com/benkrall1973/1541HUD-OneROM/releases/tag/v8.1-fire24g-stock-2rom-2026-11-10)
-contains the tested UB3 V51 baseline and UB4 Monitor images. The separate
-V53-compatible .17 Control candidate is documented and hash-checked in this
-repository's `releases/` directory.
+contains the UB3 V51 baseline, the V53-compatible .17 Apply Only image, and the
+UB4 Monitor image. The .16 release attachment is the original drive-tested
+build; the checked-in .16 package image is a path-normalized copy with a
+different hash. The .17 asset matches the checked-in package image.
 
 The Control USB source now reports the accepted IEC range as 8–9 when rejecting
-an invalid address. The published `.16` V51 baseline and `.17` V53 candidate
-images retain their recorded hashes and were not rebuilt for this text-only
-source change, so those binaries may still print `MAX=11`. Both still accept
-only IEC 8/9; the message does not change address behavior. A ROM set is one
+an invalid address. The release images do not include that later text-only
+source correction, so an invalid-address reply may still print `MAX=11`. The
+firmware accepts only IEC 8/9; the message does not change address behavior. A ROM set is one
 selectable profile and may contain up to three ROM chips, such as a C/A/E
 triplet. OneROM Fire supports up to 16 sets in a firmware image. The HUD can
 scroll through and select the sets exposed by the installed image; direct
