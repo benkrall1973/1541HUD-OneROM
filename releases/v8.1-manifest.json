@@ -20,7 +20,7 @@
       "usb": "0.8.1.17",
       "user": "0.8.1.5",
       "file": "onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0.8.1.17.bin",
-      "test_scope": "Reproducibly composed and passed offline firmware inspection. Exact public candidate image has not yet been separately drive-qualified; use with HUD V0.8.0.53 only for validation of ROMIEC_NOW Apply Only.",
+      "test_scope": "V0.8.0.53 Apply Only behavior was user-verified on the drive: live IEC address change worked without altering the selected DOS ROM or requiring a 1541 power cycle. The published candidate was reproducibly composed and passed offline firmware inspection. Its only post-test change was equal-length normalization of two NUL-terminated TinyUSB diagnostic path strings; that normalized artifact was not reflashed.",
       "sha256": "4798C3DD88B9018581E5285E529F6C69A678308AFD25202CF761E1ACF6AA55B8",
       "bytes": 262144,
       "qualification": "docs/STOCK_CONTROL_APPLY_ONLY_CANDIDATE_2026-11-10.md"

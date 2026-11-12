@@ -35,9 +35,12 @@ The separate V53 candidate uses the same two stock 1541 profiles with Control
 USB 0.8.1.17 and Host-Control 0.8.1.5. The USB plugin adds `ROMIEC_NOW`, which
 V53 uses for runtime Apply Only without writing the saved NV2 address. Compose
 it from [`stock-2rom-apply-only-compose.json`](../releases/stock-2rom-apply-only-compose.json).
-The image passes offline inspection; the exact public candidate binary has
-not been separately drive-qualified. See the [candidate record](STOCK_CONTROL_APPLY_ONLY_CANDIDATE_2026-11-10.md).
-Do not use V53 Apply Only with the older USB 0.8.1.16 baseline image.
+The user verified V53 Apply Only on the drive: the live IEC address changed,
+the selected DOS ROM stayed working, and no 1541 power cycle was needed for the
+live change. The public binary later received only equal-length diagnostic-path
+string normalization and was not reflashed afterward. See the
+[candidate record](STOCK_CONTROL_APPLY_ONLY_CANDIDATE_2026-11-10.md). Do not use
+V53 Apply Only with the older USB 0.8.1.16 baseline image.
 
 The UB3 image provides IEC 8/9, 350 ms active-low reset, and optional
 write-protect override/sense. It has no JiffyDOS, SpeedDOS, DolphinDOS,

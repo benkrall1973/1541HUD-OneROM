@@ -23,25 +23,30 @@ without writing NV2 and is required by HUD V0.8.0.53 Apply Only.
 
 Offline inspection confirmed the Fire-24G board type, both plugin versions,
 two ROM profiles, and the expected page labels. The exact public candidate
-binary has not been separately drive-qualified. Two equal-length TinyUSB
-diagnostic filename strings were normalized with
+V0.8.0.53 Apply Only behavior was also user-verified on the drive: the IEC
+address changed live, the selected DOS ROM remained working, and the 1541 did
+not need a power cycle for the live change. Two equal-length TinyUSB diagnostic
+filename strings were normalized with
 [`Sanitize-Control-Diagnostics.ps1`](../tools/maintenance/Sanitize-Control-Diagnostics.ps1)
-to remove a local build path; the image size and executable bytes are unchanged.
-Keep the USB 0.8.1.16 image as
-the established V51 baseline, and use this .17 candidate when validating V53.
+to remove a local build path after the drive test; the image size and executable
+bytes are unchanged. The normalized public artifact itself was not reflashed
+after that diagnostic-string-only edit. Keep the USB 0.8.1.16 image as the
+established V51 baseline; this .17 candidate pairs with V53.
 
 ## Power-cycle behavior
 
-Apply Only temporarily changes the live IEC address and leaves NV2 unchanged.
-If the 1541 is power-cycled while USB VBUS continues to power UB3, the temporary
-address remains until UB3 reboots. To keep USB data connected and make a drive
-power cycle also shut down UB3, use a data-capable cable or adapter that blocks
-host VBUS +5 V while passing D+/D− and ground. Alternatively, power-cycle UB3
-explicitly. Automatic 1541 power-off sensing is not implemented.
+Apply Only changes the live IEC address without changing the selected DOS ROM,
+writing NV2, or requiring a 1541 power cycle. If you want to verify that a
+1541-only power cycle restores the saved NV2 address while USB remains connected,
+UB3 must also lose power and reboot. Use a data-capable cable or adapter that
+blocks host VBUS +5 V while passing D+/D− and ground, or disconnect USB/power-cycle
+UB3 explicitly. Automatic 1541 power-off sensing is not implemented.
 
 ## Test boundary
 
 The V51 baseline's drive test is recorded in
 [`STOCK_CONTROL_DRIVE_TEST_2026-11-10.md`](STOCK_CONTROL_DRIVE_TEST_2026-11-10.md).
-That record does not qualify this .17 candidate image or the V53 Apply Only
-power-cycle workflow.
+The V53 Apply Only behavior was separately user-verified as described above.
+The only remaining artifact-level qualification caveat is that the public image
+was not reflashed after its equal-length diagnostic path strings were normalized;
+the firmware and executable bytes were unchanged.
