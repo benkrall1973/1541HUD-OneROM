@@ -39,6 +39,7 @@
 #define ROMSEL_LED_POLICY_AUTO     0xA5u
 #define ROMSEL_LED_POLICY_OFF      0x5Au
 #define ROMSEL_MAX_SELECTABLE      8u
+#define ROMSEL_IEC_SEL_A_INDEX     0u
 #ifndef ROMSEL_DIAGNOSTIC_NO_AUTO_NV
 #define ROMSEL_DIAGNOSTIC_NO_AUTO_NV 0
 #endif
@@ -102,6 +103,9 @@ static uint8_t s_wp_sense_gpio;
 static bool s_wp_sense_available;
 static uint8_t s_reset_gpio;
 static bool s_reset_available;
+static uint8_t s_iec_sel_a_gpio;
+static bool s_iec_sel_a_available;
+static uint8_t s_runtime_iec_address;
 static bool s_reset_pending;
 static bool s_reset_report_pending;
 static uint32_t s_reset_release_at_ms;
@@ -264,6 +268,33 @@ static uint8_t boot_iec_address(void) {
 
 static bool boot_iec_valid(uint8_t address) {
     return address >= 8u && address <= 9u;
+}
+
+// Resolve SEL_A from the board metadata. Apply Only uses this runtime setter
+// instead of writing NV2, so the selected address lasts only until OneROM's
+// next reboot. LOW selects IEC 8; INPUT releases the line for IEC 9.
+static bool iec_sel_a_discover(void) {
+    if (context.ora_lookup_fn == NULL || context.gpio_set == NULL ||
+        context.num_gpios == 0u) return false;
+    ora_get_metadata_uint_at_fn_t get_metadata_uint_at =
+        context.ora_lookup_fn(ORA_ID_GET_METADATA_UINT_AT);
+    if (get_metadata_uint_at == NULL) return false;
+
+    uint32_t gpio = 0u;
+    if (get_metadata_uint_at(ORA_METADATA_KEY_GPIO_SEL,
+                             ROMSEL_IEC_SEL_A_INDEX, &gpio) != ORA_RESULT_OK ||
+        gpio == 0xffu || gpio >= context.num_gpios) return false;
+    s_iec_sel_a_gpio = (uint8_t)gpio;
+    return true;
+}
+
+static bool iec_set_runtime_address(uint8_t address) {
+    if (!boot_iec_valid(address) || !s_iec_sel_a_available ||
+        context.gpio_set == NULL) return false;
+    uint8_t state = (address == 8u) ? ORA_GPIO_STATE_LOW : ORA_GPIO_STATE_INPUT;
+    if (context.gpio_set(s_iec_sel_a_gpio, state, 0u) != ORA_RESULT_OK) return false;
+    s_runtime_iec_address = address;
+    return true;
 }
 
 // SEL_B reaches C46/CR7 through the verified 1k resistor.  Assert only LOW, then release to
@@ -948,6 +979,19 @@ static void cmd_reset(void) {
     reply_end();
 }
 
+static void cmd_iec_now(uint8_t address) {
+    bool ok = boot_iec_valid(address) && iec_set_runtime_address(address);
+    uint8_t boot_address = boot_iec_address();
+    cdc_write("$ROMTEST,IEC_NOW,"); cdc_write(ok ? "OK" : "FAIL");
+    cdc_write(",ADDRESS="); cdc_write_u32(address);
+    cdc_write(",VERIFY="); cdc_write_u32(ok ? s_runtime_iec_address : 0u);
+    cdc_write(",BOOT_IEC="); cdc_write_u32(boot_address);
+    cdc_write(",VALID=");
+    cdc_write(ok && boot_iec_valid(boot_address) ? "1" : "0");
+    if (!ok) cdc_write(",ERROR=SEL_A_UNAVAILABLE_OR_IN_USE");
+    reply_end();
+}
+
 static void cmd_slot(uint8_t i) {
     if (!s_ready) {
         cdc_write("$ROMTEST,ERROR,API_NOT_READY"); reply_end(); return;
@@ -1078,6 +1122,16 @@ static void process_line(char *line) {
         cdc_write(",BOOT_IEC="); cdc_write_u32(address);
         cdc_write(",BOOT_IEC_VALID="); cdc_write(boot_iec_valid(address) ? "1" : "0");
         reply_end();
+    } else if (strncmp(line, "ROMIEC_NOW=", 11u) == 0) {
+        uint8_t address = 0u;
+        if (!parse_slot_arg(line + 11, &address)) {
+            cdc_write("$ROMTEST,IEC_NOW,FAIL,BAD_ARGUMENT"); reply_end(); return;
+        }
+        if (!boot_iec_valid(address)) {
+            cdc_write("$ROMTEST,IEC_NOW,FAIL,INVALID_ADDRESS,ADDRESS="); cdc_write_u32(address);
+            cdc_write(",MIN=8,MAX=9"); reply_end(); return;
+        }
+        cmd_iec_now(address);
     } else if (strncmp(line, "ROMIEC=", 7u) == 0) {
         uint8_t address = 0u;
         if (!parse_slot_arg(line + 7, &address)) {
@@ -1142,7 +1196,7 @@ static void process_line(char *line) {
         cdc_write(",STAGE="); cdc_write_u32(s_last_path_stage);
         reply_end();
     } else if (strcmp(line, "ROMHELP") == 0) {
-        cdc_write("$ROMTEST,HELP,ROMTEST? ROMLIST ROMSLOT ROMGET ROMSET ROMIEC(8..9) ROMRESET ROMXIP ROMWP? ROMWP=ON ROMWP=OFF ROMDIAGS ROMDIAGx");
+        cdc_write("$ROMTEST,HELP,ROMTEST? ROMLIST ROMSLOT ROMGET ROMSET ROMIEC(8..9) ROMIEC_NOW(8..9) ROMRESET ROMXIP ROMWP? ROMWP=ON ROMWP=OFF ROMDIAGS ROMDIAGx");
         reply_end();
     } else if (*line != '\0') {
         cdc_write("$ROMTEST,ERROR,UNKNOWN_COMMAND");
@@ -1167,6 +1221,9 @@ void romsel_init(void) {
     s_default_slot_pending = s_ready && !saved_valid(saved_slot());
     s_default_iec_pending = s_ready && !boot_iec_valid(boot_iec_address());
     s_default_retry_delay = 0u;
+    s_iec_sel_a_available = iec_sel_a_discover();
+    s_runtime_iec_address = boot_iec_valid(boot_iec_address())
+        ? boot_iec_address() : 8u;
 
     // SEL_C drives the external NPN write-protect override.  The safe state
     // is an actively driven LOW output: merely recording s_wp_on = false

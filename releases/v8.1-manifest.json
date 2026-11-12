@@ -9,10 +9,21 @@
       "usb": "0.8.1.16",
       "user": "0.8.1.5",
       "file": "onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0.8.1.bin",
-      "test_scope": "Exact image flashed and verified on a 1541. User confirmed standard DOS boot and game load, IEC address and ROM settings save, write-protect and reset operate, and Control/Monitor firmware work on the drive. Full USB disconnect/reconnect persistence was not reported. Earlier 47 loose-board checks are recorded separately.",
-      "sha256": "A066F70C1B9636714C0D0A0694D4B981641DF3E1DDD024D0E210097697BCBAFD",
+      "test_scope": "The original build was flashed and drive-tested; the published image differs only in two equal-length NUL-terminated TinyUSB diagnostic path strings, normalized to remove a local build path. The normalized artifact was not reflashed. The user confirmed standard DOS boot and game load, IEC address and ROM settings save, write-protect and reset operate, and Control/Monitor firmware work on the drive. Full USB disconnect/reconnect persistence was not reported.",
+      "sha256": "DB2A9F85E58A54341FB5C6572252069E4F8414717406A17DA294BB0E8A69B842",
       "bytes": 262144,
       "qualification": "qualification/stock-control-drive-2026-11-10.json"
+    },
+    {
+      "role": "UB3 Control stock 2-ROM V53 Apply Only candidate",
+      "core": "0.8.1",
+      "usb": "0.8.1.17",
+      "user": "0.8.1.5",
+      "file": "onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0.8.1.17.bin",
+      "test_scope": "Reproducibly composed and passed offline firmware inspection. Exact public candidate image has not yet been separately drive-qualified; use with HUD V0.8.0.53 only for validation of ROMIEC_NOW Apply Only.",
+      "sha256": "4798C3DD88B9018581E5285E529F6C69A678308AFD25202CF761E1ACF6AA55B8",
+      "bytes": 262144,
+      "qualification": "docs/STOCK_CONTROL_APPLY_ONLY_CANDIDATE_2026-11-10.md"
     },
     {
       "role": "UB4 Monitor",

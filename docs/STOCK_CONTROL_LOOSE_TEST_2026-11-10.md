@@ -30,6 +30,10 @@ All 47 final automated checks passed. The public machine-readable record is
 - Starting IEC 8 and AUTO LED policy restored and confirmed after another
   reboot; WP override OFF and stock slot active at completion.
 
+This test exercised the persistent `ROMIEC` save and CLI OneROM reboot path on
+a loose board. It did not test the V0.8.0.53 `ROMIEC_NOW` Apply Only behavior
+or whether a VBUS-powered UB3 loses power when the 1541 is switched off.
+
 An initial test incorrectly expected GPIO26 to drive high for IEC 9. That
 assertion was corrected against the production implementation and the full
 test rerun. Releasing the pin to input is the intended firmware behavior.

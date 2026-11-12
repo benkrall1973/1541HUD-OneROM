@@ -47,9 +47,15 @@ are excluded. Firmware C source remains at the pinned baseline. See the
 The integration is community-tested.
 See the [baseline runbook](docs/V81_BASELINE_RUNBOOK.md) for versions and test scope.
 It includes qualified source, wiring records, the 1541HUD Python
-application, ROM-free templates, and two ready-to-flash stock images. It
+application, ROM-free templates, and three stock Fire-24G images: the tested
+UB3 USB 0.8.1.16 baseline, a V53-compatible UB3 USB 0.8.1.17 candidate, and
+the UB4 Monitor image. It
 does not distribute optional third-party DOS collections beyond the documented
 stock baseline inputs/images. Supply your own lawful ROM pages for custom sets.
+The [latest verified release](https://github.com/benkrall1973/1541HUD-OneROM/releases/tag/v8.1-fire24g-stock-2rom-2026-11-10)
+contains the tested UB3 V51 baseline and UB4 Monitor images. The separate
+V53-compatible .17 Control candidate is documented and hash-checked in this
+repository's `releases/` directory.
 
 ## AI-assisted builds
 
@@ -98,15 +104,21 @@ before connecting a board to the drive. In particular:
   pin 12 directly to a OneROM GPIO.
 - UB4 is a passive monitor only. It must not be used to control write protect
   or serve the drive ROM.
-- ROM and IEC Apply+Save were tested with a normal powered USB cable. A full
-  USB power cycle is no longer required for those changes. Drive power-off
-  sensing was dropped from planned work; it is not required for this workflow.
+- For Apply Only tests where a 1541 power cycle must restore the saved IEC
+  address while USB data remains connected, use a data-capable USB cable with
+  host VBUS +5 V blocked. It must still pass D+/D− and ground. A normal powered
+  USB cable can keep UB3 alive when the drive is off, so its temporary SEL_A
+  address remains active. Alternatively, fully power-cycle UB3.
+- Apply+Save stores the boot address in NV2 and uses the controlled OneROM
+  reboot path. Do not confuse that with Apply Only, which changes SEL_A at
+  runtime and does not save NV2. Automatic 1541 power-off sensing is not
+  implemented.
 
 ## What is included
 
 | Item | Purpose |
 | --- | --- |
-| `releases/` | Ready-to-flash Fire-24G UB3 stock Control and UB4 Monitor images. |
+| `releases/` | Fire-24G UB3 stock Control baseline, V53 Apply Only candidate, and UB4 Monitor images. |
 | `source/one-rom-v0.8.1/` | Supported source derived from official v0.8.1, with checked-in host security fixes and an explicit provenance manifest. |
 | `tools/onerom-v0.6.0-hud1.exe` | Patched OneROM CLI 0.6.0 for Windows composition, scan, inspection, and flashing. |
 | `1541hud/` | 1541HUD Python source, launcher, build script, and tests. |
@@ -130,13 +142,16 @@ workflow. Close 1541HUD first so it releases the board USB ports.
 3. Confirm the displayed serial is the board you intend to flash.
 4. Flash exactly one image, replacing `<SERIAL>` with that board's serial.
 
-   **UB3 Control - stock two-ROM DOS 2.6 image**
+   **UB3 Control - stock two-ROM DOS 2.6 image for HUD V53 Apply Only**
 
    ```powershell
    ./tools/onerom-v0.6.0-hud1.exe --serial <SERIAL> program `
-     --firmware ./releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0.8.1.bin `
+     --firmware ./releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0.8.1.17.bin `
      --verify
    ```
+
+   For the established HUD V51 baseline, use
+   `onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0.8.1.bin` instead.
 
    **UB4 Monitor - passive telemetry image**
 
@@ -167,8 +182,14 @@ py -3 -c "import tkinter, serial; print('1541HUD dependencies ready')"
 Then run:
 
 ```text
-1541hud/source/Run-1541HUD-V0.8.0.51.cmd
+1541hud/source/Run-1541HUD-V0.8.0.53.cmd
 ```
+
+V0.8.0.53 is the Apply Only candidate and requires the matching UB3 image with
+Control USB plugin 0.8.1.17. Apply Only changes SEL_A without saving NV2; to
+have a 1541-only power cycle also restart UB3 and reload NV2 while USB data
+remains connected, use a data-capable cable with host VBUS +5 V blocked. The
+existing V0.8.0.51/USB 0.8.1.16 release remains the last qualified baseline.
 
 The application discovers OneROM boards by USB serial, not by an unstable COM
 number. Assign the Control and Monitor roles in **Settings**, then use the

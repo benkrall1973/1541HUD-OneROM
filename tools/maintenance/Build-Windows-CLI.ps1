@@ -34,8 +34,8 @@ $exe = Join-Path $output 'onerom-v0.6.0-hud1.exe'
 Copy-Item (Join-Path $core 'rust/target/release/onerom.exe') $exe
 & $exe --version
 Check-Exit
-# Inspect both published images offline. No USB scan, program or reboot occurs.
-foreach ($image in @('releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0.8.1.bin', 'releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.32.bin')) {
+# Inspect all checked-in images offline. No USB scan, program or reboot occurs.
+foreach ($image in @('releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0.8.1.bin', 'releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0.8.1.17.bin', 'releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.32.bin')) {
     & $exe firmware inspect --firmware $image
     Check-Exit
 }
@@ -50,7 +50,7 @@ $record = [ordered]@{
     lock_sha256 = (Get-FileHash (Join-Path $core 'rust/Cargo.lock') -Algorithm SHA256).Hash
     file = (Split-Path $exe -Leaf); bytes = (Get-Item $exe).Length
     sha256 = (Get-FileHash $exe -Algorithm SHA256).Hash
-    scope = 'Windows release build, native CLI/ZIP regressions and offline inspection of both published images; no hardware programmed.'
+    scope = 'Windows release build, native CLI/ZIP regressions and offline inspection of all three checked-in Fire-24G images; no hardware programmed.'
 }
 $record | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $output 'windows-cli-manifest.json') -Encoding utf8
 python tools/maintenance/Package-CLI-Licenses.py $core $output

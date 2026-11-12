@@ -10,8 +10,8 @@ OBJDUMP := $(if $(TOOLCHAIN),$(TOOLCHAIN)/arm-none-eabi-objdump,arm-none-eabi-ob
 MAJOR_VERSION := 0
 MINOR_VERSION := 8
 PATCH_VERSION := 1
-BUILD_VERSION := 16
-WORK_BUILD := 16
+BUILD_VERSION := 17
+WORK_BUILD := 17
 
 # Optional test-only C flags, for example ROMSEL_DIAGNOSTIC_FLAGS=-DROMSEL_XIP_TEST=1.
 # Kept separate so production builds remain byte-for-byte governed by the

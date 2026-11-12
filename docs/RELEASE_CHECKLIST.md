@@ -37,8 +37,13 @@ so later maintainers can identify the exact published configuration.
 - [ ] Verify write-protect OFF/ON/OFF if the optional circuit is fitted.
 - [ ] Verify `ROMRESET`, wait for release, then perform an immediate directory
   read without an IEC stall.
-- [ ] Test Apply+Save while OneROM remains powered by normal USB, then confirm saved NV
-  configuration reloads.
+- [ ] Test Apply+Save with UB3 USB-powered, then confirm controlled OneROM reboot
+  activates the saved NV2 address without removing USB power.
+- [ ] Test Apply Only at a different address, then power-cycle the 1541 while
+  USB data stays connected through a cable with host VBUS +5 V blocked. Confirm
+  UB3 also restarts and loads the saved NV2 address. Alternatively power-cycle
+  UB3 explicitly. A standard powered USB cable may keep UB3 alive and retain
+  the temporary SEL_A address.
 
 ### UB4 Monitor
 

@@ -18,8 +18,10 @@ upstream source, Windows CLI executable or HUD application code.
   optional third-party DOS collections remain excluded.
 - Update the active Monitor plugin README to v0.8.1.32 and the supported
   complete-role build wrapper; repair relocated Host-Control reference links.
-- State consistently that automatic power sensing was dropped from planned
-  work, because saved settings reload through the USB-powered reboot path.
+- State that automatic drive power-off sensing is not implemented. Document
+  the distinction between Apply+Save's controlled OneROM reboot and Apply
+  Only's runtime SEL_A change; a VBUS-blocking data cable is needed if a
+  drive-only power cycle must also power-cycle UB3 and reload NV2.
 - Document the specified KSC2383YTA E-C-B pin numbering and physical WP status
   masking while override is active.
 - Add a project Markdown file-target check to CI. Pinned upstream documents

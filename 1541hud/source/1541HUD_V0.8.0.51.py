@@ -3500,7 +3500,7 @@ class OneROM1541HUDApp(tk.Tk):
         self.after(900, lambda: self.attempt_role_reconnect("controller"))
 
     def finish_rom_apply_after_reconnect(self) -> None:
-        """Wait for the reset cycle that began before the OneROM reboot."""
+        """Restore temporary boot settings or finish the post-reboot wait."""
         self._rom_apply_after_id = None
         if self._rom_apply is None:
             return
@@ -3512,6 +3512,15 @@ class OneROM1541HUDApp(tk.Tk):
             self._rom_apply_after_id = self.after(350, self.finish_rom_apply_after_reconnect)
             return
         is_iec_apply = str(self._rom_apply.get("mode", "")).startswith("iec_")
+        mode = str(self._rom_apply.get("mode", ""))
+        if mode in {"apply", "iec_apply"}:
+            # Apply Only has to write its target to NV temporarily so OneROM's
+            # reboot loads that setting. Restore the previous boot value as soon
+            # as the Control board is back and its startup ROMGET has completed.
+            # Waiting through the seven-second drive-reset window leaves the
+            # temporary value vulnerable to another reboot or a HUD disconnect.
+            self.complete_rom_apply_after_reset()
+            return
         self.controller_card_feedback["boot_iec" if is_iec_apply else "startup_rom"] = "ONEROM LOADED - WAITING FOR 1541"
         self.control_status.set("OneROM loaded saved settings; waiting for the protected 1541 reset cycle.")
         self._rom_apply_after_id = self.after(7000, self.complete_rom_apply_after_reset)
@@ -3592,7 +3601,7 @@ class OneROM1541HUDApp(tk.Tk):
         self.update_live_hud_fields()
 
     def complete_rom_apply_after_reset(self) -> None:
-        """Finish persistent apply or restore NV0 after a temporary apply."""
+        """Finish saved apply or restore prior boot settings for Apply Only."""
         self._rom_apply_after_id = None
         operation = self._rom_apply
         if operation is None:

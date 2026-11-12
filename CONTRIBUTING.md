@@ -6,7 +6,7 @@ way.
 
 ## Before opening a change
 
-1. Start from current `main` and use a focused branch.
+1. Start from the current `v8.1` branch and use a focused branch.
 2. Do not include ROMs, ROM-derived images, personal manifests, device serials,
    local paths, disk images, or generated build output.
 3. Read the wiring and safety constraints before changing GPIO, reset,

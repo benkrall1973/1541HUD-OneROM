@@ -50,10 +50,12 @@ Full CI builds both firmware roles and their custom plugins, runs Linux and
 Windows CLI/archive regressions and audits the active lockfile. All five CI
 jobs passed for commit `b89524acfcf15ca13fc343584e8655871eb9497b`.
 On 2026-11-10, GitHub independently confirmed all 28 alerts as fixed, with
-zero open alerts and zero dismissals. The published
-[security cleanup release](https://github.com/benkrall1973/1541HUD-OneROM/releases/tag/v8.1-source-security-2026-11-10-r1)
-includes `dependabot-closure.json` as evidence. This records the status at
-verification time; future advisories can change it.
+zero open alerts and zero dismissals. The source tag
+[`v8.1-source-security-2026-11-10-r1`](https://github.com/benkrall1973/1541HUD-OneROM/tree/v8.1-source-security-2026-11-10-r1)
+preserves the code snapshot. The superseded Release post and its attachments
+were removed during release cleanup; the machine-readable alert inventory and
+audit summary remain in `qualification/source-security-cleanup-2026-11-10.json`.
+This records the status at verification time; future advisories can change it.
 
 ## Release and hardware boundary
 
@@ -64,5 +66,7 @@ original lock/overlay provenance. New source-built CLI candidates additionally
 record the supported-source manifest hash. No firmware flash is needed for
 this source/package cleanup.
 
-Stock Control drive/full-power-cycle qualification, C64 configurator work,
-and physical prototype-PCB qualification remain separate outstanding work.
+The exact public stock two-ROM Control image passed the documented drive test
+on 2026-11-10. Full USB disconnect/reconnect persistence was not reported.
+The C64 configurator and physical prototype-PCB qualification remain outside
+the current public release scope.

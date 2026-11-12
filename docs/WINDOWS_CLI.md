@@ -37,7 +37,7 @@ with a Windows SDK. From the repository root:
 
 The script exports supported source to .buildtools/windows-cli-core, verifies
 its checked-in host fixes and source provenance, runs release-profile ZIP/CLI regressions,
-builds the executable and inspects both published images offline. It creates
+builds the executable and inspects all three checked-in Fire-24G images offline. It creates
 the executable, hash/provenance manifest, dependency inventory and license
 notices in .buildtools/windows-cli-package. It never programs or reboots a
 device. CI runs this same script on Windows.
@@ -45,5 +45,7 @@ device. CI runs this same script on Windows.
 The executable is unsigned. Native build and offline tests do not qualify
 USB driver behavior on every Windows installation. Loose-board USB, flashing,
 reboot and saved IEC/LED checks passed on the maintainer's Windows host on
-2026-11-10; see STOCK_CONTROL_LOOSE_TEST_2026-11-10.md. Full drive behavior
-still needs a 1541, and a complete USB power-cycle test remains pending.
+2026-11-10; see STOCK_CONTROL_LOOSE_TEST_2026-11-10.md. The exact public stock
+Control image also passed the documented 1541 drive test. Full USB
+disconnect/reconnect persistence for that image was not reported; see
+STOCK_CONTROL_DRIVE_TEST_2026-11-10.md.

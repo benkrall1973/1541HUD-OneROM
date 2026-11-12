@@ -17,6 +17,12 @@ UB3 is the state-changing **Control** board; UB4 is the electrically passive
 | UB3 | Control | Official v0.8.1; USB 0.8.1.16 / Host-Control 0.8.1.5 |
 | UB4 | Monitor | 1541HUD Monitor `v0.8.1.32` |
 
+For HUD V0.8.0.53 Apply Only, use the separate two-ROM stock candidate with
+Control USB 0.8.1.17. The USB 0.8.1.16 image above remains the established V51
+baseline. Candidate image contents, hash, build recipe, and qualification
+boundary are recorded in `PUBLIC_FIRE24G_RELEASES.md` and
+`STOCK_CONTROL_APPLY_ONLY_CANDIDATE_2026-11-10.md`.
+
 Windows COM numbers are not identities and may change after every reconnect.
 Bind 1541HUD by each board's USB serial as discovered locally; Windows COM
 numbers are not identities and must not be documented as a deployment contract.
@@ -38,6 +44,17 @@ numbers are not identities and must not be documented as a deployment contract.
 
 UB4 has **no write-protect wiring or write-protect authority**. Write-protect
 override and physical status are UB3-only features.
+
+### USB VBUS and IEC address restoration
+
+For Apply Only testing, the HUD changes SEL_A without saving NV2. If a
+1541-only power cycle must restore the saved address while USB data stays
+connected, use a data-capable USB cable/adapter that blocks host VBUS +5 V
+while passing D+/D− and ground. With a normal powered cable, VBUS can keep UB3
+running while the drive is off, so its temporary IEC address remains selected.
+Alternatively, fully power-cycle UB3. Apply+Save stores NV2 and is intended to
+activate it through the controlled OneROM reboot path. Automatic drive
+power-off sensing is not implemented.
 
 ### Reset and write-protect rules
 

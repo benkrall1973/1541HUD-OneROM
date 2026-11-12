@@ -1,9 +1,10 @@
 {
   "date": "2026-11-10",
   "image": "releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0.8.1.bin",
-  "sha256": "A066F70C1B9636714C0D0A0694D4B981641DF3E1DDD024D0E210097697BCBAFD",
+  "sha256": "DB2A9F85E58A54341FB5C6572252069E4F8414717406A17DA294BB0E8A69B842",
   "hardware": "User's standard two-ROM 1541 setup with UB3 Control and UB4 Monitor",
-  "result": "PASS — user-confirmed drive test",
+  "result": "PASS — original build user-confirmed; publication image had diagnostic strings normalized without reflash",
+  "distribution_note": "The published artifact normalizes two equal-length NUL-terminated TinyUSB diagnostic path strings to remove a local build path. This exact normalized binary was not reflashed; its functional firmware bytes are unchanged.",
   "confirmed": [
     "Standard stock 1541 DOS boots",
     "A game loads and the drive operates normally",

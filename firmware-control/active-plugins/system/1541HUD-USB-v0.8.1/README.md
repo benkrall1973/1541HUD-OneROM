@@ -19,7 +19,7 @@ The wrapper copies the root-level official v0.8.1 source into that work tree.
 The output is:
 
 ```text
-build/1541-OneROM-1541HUD-USB-v0.8.1.16.bin
+build/1541-OneROM-1541HUD-USB-v0.8.1.17.bin
 ```
 
 Pair it with the official v0.8.1 core, the UB3 early-reset build overlay, and
@@ -28,14 +28,24 @@ cooperative idle wait; no idle-yield core patch is required.
 
 ## V8.1 HUD transport
 
-Build `v0.8.1.16` includes the V8.1 USB-DPRAM reservation required by the
+Build `v0.8.1.17` includes the V8.1 USB-DPRAM reservation required by the
 firmware before it can place its DPRAM log and allocator pool. It also enables
 the exclusive-serial property so the Control
 protocol owns the CDC stream; core logs are retrieved through picoboot/DPRAM
 instead of interleaving with HUD replies. Selector replies are queued and
 drained across USB task passes, since a TinyUSB flush begins a transfer rather
 than immediately freeing the 64-byte FIFO. This is required for reliable
-`ROMGET`, `ROMSET`, and `ROMIEC` feedback in 1541HUD V0.8.0.22.
+`ROMGET`, `ROMSET`, and `ROMIEC` feedback in 1541HUD. It adds `ROMIEC_NOW`,
+which changes SEL_A at runtime without writing boot-address NV2; the HUD then
+resets the 1541 without rebooting OneROM. A OneROM reboot restores the saved
+NV2 address.
+
+Because Apply Only leaves UB3 running, power-cycling only the 1541 does not
+restore NV2 while USB VBUS continues to power UB3. To keep USB data connected
+and have a drive power cycle also restart UB3, use a data-capable cable or
+adapter that blocks host VBUS +5 V while passing D+/D− and ground. Otherwise,
+power-cycle UB3 explicitly. Apply+Save follows the separate persistent save
+and controlled OneROM reboot path.
 
 ## Persisted front-panel LED policy
 

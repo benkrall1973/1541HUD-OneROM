@@ -14,17 +14,17 @@ future repository and not a substitute for the build or wiring guides.
 | Active `1541HUD-USB-v0.8.1` and `1541HUD-Host-Control-v0.8.1` source | UB3 integration source. The wrapper builds these custom plugins against the official pinned core in an ignored work tree. |
 | `firmware-monitor` active Monitor plugins, `shared/1541hud_mailbox.h`, manifest, and two baseline Monitor inputs | UB4 passive-monitor integration source. The wrapper exports the pinned source into an isolated work directory and applies the passive-core overlay; the checked-in OneROM bootloader and stock C000 baseline input reproduce the public UB4 Monitor image without a hidden local kit. |
 | ROM-free private-input instructions and the UB3 CLI composition guide | Explain the two standard C/E socket layouts and the optional C/A/E DolphinDOS-style layout without distributing ROM bytes; users create a private composition manifest locally. |
-| `1541hud/source/1541HUD_V0.8.0.51.py`, launcher, tests, and current HUD documentation | The qualified desktop operator tool. |
+| V0.8.0.51 HUD baseline and V0.8.0.53 Apply Only candidate, launchers, tests, and HUD documentation | V0.8.0.53 uses runtime-only IEC address selection and requires UB3 USB plugin 0.8.1.17. Apply Only restoration after a 1541-only power cycle requires UB3 to lose power; use a data-capable cable with host VBUS +5 V blocked, or power-cycle UB3 explicitly. |
 | `docs/FIRE24G_V81_BUILD_AND_INSTALL.md`, `docs/FIRE24G_V81_ENGINEERING_DOSSIER.md`, and sanitized wiring/build documentation | Hardware integration, prerequisites, flash/recovery, GPIO, LED and acceptance contract. |
 | `utilities/dosname-rom-probe/` source and documentation | Optional diagnostic utility, after its provenance is checked. |
-| Two named stock Fire-24G release images under `releases/` | Ready-to-flash UB3 Control stock-test and UB4 passive Monitor images; the validator permits only these exact binaries. |
+| Three named Fire-24G images under `releases/` | UB3 Control stock two-ROM V51 baseline, separate stock two-ROM V53 Apply Only candidate, and UB4 passive Monitor image; the validator permits only these exact binaries. |
 
 ## Explicit exclusions
 
 | Area | Why it is excluded |
 | --- | --- |
 | `roms/` payloads and additional ROM-derived page images | Excluded except for the explicitly named, hash-checked stock baseline inputs above. |
-| Any composed `.bin` except the two named stock Fire-24G release images | Custom or third-party DOS payloads must not be distributed. |
+| Any composed `.bin` except the three named Fire-24G images | Custom or third-party DOS payloads must not be distributed. |
 | `firmware-*/releases/`, historical EXEs, `outputs/`, `work/`, and build kits | Generated artifacts, old candidates, or third-party material not yet cleared for public redistribution. |
 | `c64-onerom-configurator/` | Deferred until its Control-board discovery issue is separately repaired and qualified. |
 | S-JiffyDOS files and tests | Experimental, unqualified, and explicitly outside the current product scope. |
@@ -58,5 +58,5 @@ not permission to redistribute additional ROMs. See [notices](../NOTICE.md).
 
 - License/provenance status of the DOSNAME D64/PRG utility before publication.
 - C64 configurator repair and release.
-- Additional public prebuilt firmware beyond the two named stock releases.
+- Additional public prebuilt firmware beyond the named stock baseline, V53 candidate, and Monitor images.
 

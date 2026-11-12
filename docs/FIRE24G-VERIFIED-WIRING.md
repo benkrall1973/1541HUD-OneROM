@@ -35,14 +35,21 @@ not refer to the project names “UB3 Control OneROM” and “UB4 Monitor OneRO
 Use the matching Lower or Upper two-page composition template; do not apply
 the 74LS138 C/A/E image to this direct two-page wiring.
 
-## USB-powered operation
+## USB data and VBUS power
 
-Use a normal USB data cable, including one that supplies 5 V. ROM and IEC
-Apply+Save were tested while OneROM remained powered by USB. No data-only
-cable or USB power blocker is required for these saved settings.
-This does not add automatic drive power-off sensing. That feature was dropped
-from planned work because the USB-powered reboot workflow meets the settings
-reload requirement.
+For an Apply Only test that must return to the saved IEC address after cycling
+1541 power while keeping USB data connected, use a data-capable USB cable or
+adapter that blocks host VBUS +5 V but passes D+/D− and ground. This lets UB3
+lose power with the drive and reload NV2 at its next startup. A normal USB
+cable that supplies +5 V can keep UB3 alive while the 1541 is off; SEL_A then
+retains the temporary address. Fully power-cycling UB3 also reloads NV2.
+
+Apply+Save writes the selected address to NV2 and is intended to use the
+controlled OneROM reboot path without disconnecting USB. Apply Only changes
+SEL_A at runtime and does not write NV2. Automatic drive power-off sensing is
+not implemented, so a drive-only power cycle cannot reset a still-powered UB3.
+The historical stock-image Apply+Save test used a USB-powered OneROM; it does
+not validate Apply Only power-cycle restoration on a VBUS-powered UB3.
 
 ## C46 reset path
 

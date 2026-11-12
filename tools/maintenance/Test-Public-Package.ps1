@@ -47,11 +47,13 @@ $required = @(
     'docs/UB3_CONTROL_CLI_COMPOSITION_GUIDE.md',
     'docs/THIRD_PARTY_DOS_PAGE_PREPARATION.md',
     'docs/PUBLIC_FIRE24G_RELEASES.md',
+    'docs/STOCK_CONTROL_APPLY_ONLY_CANDIDATE_2026-11-10.md',
     'docs/PUBLIC_PACKAGE_MANIFEST.md',
     'docs/RELEASE_CHECKLIST.md',
     'docs/VALIDATION_MATRIX.md',
     'docs/DEPENDENCY_ALERT_TRIAGE.md',
     'tools/maintenance/Test-Public-Package.ps1',
+    'tools/maintenance/Sanitize-Control-Diagnostics.ps1',
     'tools/maintenance/Apply-Host-Dependencies.sh',
     'tools/maintenance/Test-Host-Dependencies.sh',
     'tools/maintenance/Audit-Host-Dependencies.sh',
@@ -80,6 +82,10 @@ $required = @(
     'source/one-rom-v0.8.1/firmware/Makefile',
     'source/one-rom-v0.8.1/plugins/system/usb/Makefile',
     '1541hud/source/1541HUD_V0.8.0.51.py',
+    '1541hud/source/1541HUD_V0.8.0.53.py',
+    '1541hud/source/Run-1541HUD-V0.8.0.53.cmd',
+    '1541hud/Build-1541HUD-V0.8.0.53.ps1',
+    'releases/stock-2rom-apply-only-compose.json',
     '1541hud/tests/test_onerom_usb.py',
     'utilities/rom-pages/Split-1541-RomPages.ps1',
     'tools/onerom-v0.6.0-hud1.exe',
@@ -90,7 +96,8 @@ $required = @(
     'tools/maintenance/Package-CLI-Licenses.py',
     'tools/maintenance/Prepare-Host-Fixtures.py',
     'docs/WINDOWS_CLI.md',
-    'releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0.8.1.bin',
+    'releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0.8.1.bin',
+    'releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0.8.1.17.bin',
     'releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.32.bin',
     'private-roms/README.md',
     'private-roms/UB3-Control-DolphinDOS-CAE.json',
@@ -113,7 +120,7 @@ $forbiddenPath = '(?i)(s-jiffy|sjiffydos|jiffydos|dolphindos|speeddos|\.bin$|\.u
 $badPaths = Get-ChildItem -LiteralPath $PackageRoot -Recurse -Force -File |
     Where-Object {
         $relative = $_.FullName.Substring($PackageRoot.Length + 1).Replace('\', '/')
-        $relative -notmatch '^(source/one-rom-v0\.8\.1/images/test/stub-(system|user)-plugin\.bin|private-roms/(UB3-Control-DolphinDOS-CAE|UB3-Control-Lower-Socket|UB3-Control-Upper-Socket|monitor-compose)\.json|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-test-v0\.8\.1\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.32\.bin|tools/onerom-v0\.6\.0-hud1\.exe|firmware-monitor/inputs/(1541-OneROM-Bootloader-Universal-v1\.1\.0|1541-c000\.325302-01)\.bin)$' -and $relative -match $forbiddenPath
+        $relative -notmatch '^(source/one-rom-v0\.8\.1/images/test/stub-(system|user)-plugin\.bin|private-roms/(UB3-Control-DolphinDOS-CAE|UB3-Control-Lower-Socket|UB3-Control-Upper-Socket|monitor-compose)\.json|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0\.8\.1\.bin|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0\.8\.1\.17\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.32\.bin|tools/onerom-v0\.6\.0-hud1\.exe|firmware-monitor/inputs/(1541-OneROM-Bootloader-Universal-v1\.1\.0|1541-c000\.325302-01)\.bin)$' -and $relative -match $forbiddenPath
     }
 if ($badPaths) {
     throw "Forbidden payload/history file(s) in public package:`n$($badPaths.FullName -join "`n")"

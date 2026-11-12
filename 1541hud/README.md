@@ -1,10 +1,19 @@
 # 1541HUD Windows application
 
-The qualified application source is `source/1541HUD_V0.8.0.51.py`. Its V51
-application version is independent of the OneROM v0.8.1 firmware version.
-The public package includes the Python application and launcher, not a
-prebuilt standalone HUD EXE. `tools/onerom-v0.6.0-hud1.exe` is the separate
-OneROM command-line tool.
+V0.8.0.51 is the last hardware-qualified application baseline. The new
+`source/1541HUD_V0.8.0.53.py` candidate applies IEC addresses through the
+firmware's volatile `ROMIEC_NOW` command, so Apply Only changes SEL_A without
+writing NV2. The temporary address remains while UB3 stays powered. If cycling
+the 1541 must also restart UB3 and reload NV2 while USB data remains connected,
+use a data-capable USB cable with host VBUS +5 V blocked, or fully power-cycle
+UB3. Use the stock two-ROM image with Control USB plugin v0.8.1.17 for V53;
+the older v0.8.1.16 stock image is for the V51 baseline. If a 1541-only power
+cycle must restore the saved address while USB data remains connected, UB3
+must also lose power: use a data-capable cable with host VBUS +5 V blocked, or
+power-cycle UB3 explicitly. V0.8.0.52 is superseded. The HUD version is independent
+of OneROM firmware v0.8.1. The
+public package includes Python source and launchers, not a prebuilt standalone
+HUD EXE. `tools/onerom-v0.6.0-hud1.exe` is the separate OneROM CLI.
 
 ## Install and launch
 
@@ -14,7 +23,7 @@ automated HUD regression job uses Python 3.12. From the repository root:
 ```powershell
 py -3 -m pip install -r ./1541hud/requirements.txt
 py -3 -c "import tkinter, serial; print('1541HUD dependencies ready')"
-./1541hud/source/Run-1541HUD-V0.8.0.51.cmd
+./1541hud/source/Run-1541HUD-V0.8.0.53.cmd
 ```
 
 Tkinter is part of the Python installation; do not install an unrelated
@@ -24,7 +33,7 @@ command and the application:
 
 ```powershell
 python -m pip install -r ./1541hud/requirements.txt
-python ./1541hud/source/1541HUD_V0.8.0.51.py
+python ./1541hud/source/1541HUD_V0.8.0.53.py
 ```
 
 Do not install pyserial into a different Python installation from the one
@@ -51,7 +60,7 @@ the drive and capture wiring. See the [qualification boundary](../docs/VALIDATIO
 py -3 -m unittest discover -s ./1541hud/tests -v
 ```
 
-The optional `Build-1541HUD-V0.8.0.51.ps1` script packages a standalone EXE
+The optional `Build-1541HUD-V0.8.0.53.ps1` script packages a standalone EXE
 with Nuitka. That developer workflow additionally requires Nuitka and its
 supported Windows C/C++ compiler toolchain; neither is required to run the
 Python source. Install the runtime requirements first. This documentation

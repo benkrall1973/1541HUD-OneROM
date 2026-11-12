@@ -10,12 +10,22 @@ It combines Control, Monitor and HUD V51.
 | Monitor USB / capture | 0.8.1.5 / 0.8.1.32 |
 | Desktop HUD | 0.8.0.51 |
 
+HUD V0.8.0.53 is a separate Apply Only candidate and requires the stock UB3
+two-ROM candidate with Control USB 0.8.1.17. Do not pair V53 Apply Only with
+the USB 0.8.1.16 baseline image. Candidate installation and test boundaries
+are in `PUBLIC_FIRE24G_RELEASES.md`.
+
 ## Improvements and test scope
 
 Control preserves NV boot selection, UB3 reset interlock, cooperative USB/NV
 save handling, IEC 8/9, C46 reset, optional WP override/feedback and RBCP.
 The native C000 page plus decoded A000/E000 pages retain the 74LS138 mapping.
 ROM and IEC Apply+Save were drive-tested while USB continuously powered OneROM.
+Apply Only is a separate runtime-only operation: it changes SEL_A without
+writing NV2. If a 1541-only power cycle must restore NV2 while the USB data
+connection stays attached, use a data-capable cable with host VBUS +5 V blocked
+(D+/D− and ground must remain connected), or fully power-cycle UB3. A normal
+powered USB cable can keep UB3 alive and preserve the temporary address.
 
 Monitor uses the official plugin API and USB pins. Its passive core does not
 start ROM-serving PIO, refuses leaving standby and restricts GPIO output to
@@ -87,10 +97,13 @@ archived privately under archive/public-2026-11-09/. The old r1 release and
 its original downloaded images are also backed up privately. The current
 release replaces the old pinned Monitor firmware. Historical recovery images
 remain private; this cleanup does not rewrite public Git history.
-Automatic drive power-off sensing was dropped: saved ROM and IEC address
-settings are reapplied on reboot while USB remains powered. The separate C64
-configurator release remains deferred. RBCP support stays present. RPM assumes standard DOS SYNC
-counts; nonstandard disk formats need separate qualification.
+Automatic drive power-off sensing is not implemented. Apply+Save persists NV0
+(ROM slot) and NV2 (IEC address) and uses a controlled OneROM reboot; Apply
+Only changes the live selector without saving. A drive-only power cycle does
+not reload NV2 if USB VBUS keeps UB3 powered. For that behavior, use a
+data-capable VBUS-blocking cable or fully power-cycle UB3. The separate C64
+configurator release remains deferred. RBCP support stays present. RPM assumes
+standard DOS SYNC counts; nonstandard disk formats need separate qualification.
 
 Both complete source builds and the repeatable checker passed on 2026-11-09.
 See [clean source-build verification](CLEAN_SOURCE_BUILD.md) for prerequisites,

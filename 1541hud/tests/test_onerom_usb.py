@@ -6,7 +6,7 @@ from pathlib import Path
 import importlib.util
 import sys
 
-module_path = Path(__file__).resolve().parents[1] / "source" / "1541HUD_V0.8.0.51.py"
+module_path = Path(__file__).resolve().parents[1] / "source" / "1541HUD_V0.8.0.53.py"
 spec = importlib.util.spec_from_file_location("onerom_hud", module_path)
 touchscreen = importlib.util.module_from_spec(spec)
 assert spec and spec.loader

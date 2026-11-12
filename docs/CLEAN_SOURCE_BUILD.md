@@ -14,8 +14,9 @@ bash tools/maintenance/Test-Source-Build.sh
 ```
 
 This builds the official core, custom Control plugins, host CLI, passive
-Monitor core and custom Monitor plugins, then composes and inspects both
-images. It uses the CLI built from the checkout to compose Monitor. The
+Monitor core and custom Monitor plugins, then composes and inspects the
+synthetic Control and Monitor verification images. It uses the CLI built from
+the checkout to compose Monitor. The
 Control test pages are synthetic; its image must never be installed in a
 drive. Outputs are ignored under .buildtools/source-check. No command in this
 check scans, programs or reboots a device.
@@ -44,7 +45,8 @@ The Full Fire-24G Control and Monitor ARM builds job runs the combined checker
 on Ubuntu with Rust/Cargo 1.99.0 and Arm GNU 15.3.Rel1. It uses the upstream
 toolchain installer and verifies the downloaded archive against Arm's checksum
 before extraction. Both role cores and all four custom plugins are compiled;
-both images are composed and inspected with the source-built CLI.
+the Windows CLI build workflow inspects the three checked-in release images,
+and the public-package check verifies their recorded hashes.
 
 The job uploads full-build.log and build-verification.json with source commit,
 tool versions and composed-image hashes. It deliberately does not publish the
