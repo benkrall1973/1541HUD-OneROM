@@ -8,7 +8,8 @@ future repository and not a substitute for the build or wiring guides.
 
 | Area | Reason |
 | --- | --- |
-| `templates/`, `private-roms/` templates, `utilities/rom-pages/`, and `tools/maintenance/` | ROM-free templates, utilities, validator, and public-boundary records. |
+| `templates/`, `private-roms/` templates, `utilities/rom-pages/`, and `tools/maintenance/` | Templates, utilities, validator, and public-boundary records. |
+| `docs/rom-library/` | Stock DOS and C64 KERNAL, tested SpeedDOS+ pages/KERNAL, DolphinDOS 2 source/license/reference/pages/KERNAL, plus JiffyDOS/S-JiffyDOS documentation and project-authored patch/build source without licensed JiffyDOS payloads. See `ASSETS.md` for provenance limits. |
 | `source/one-rom-v0.8.1` | Supported source derived from official `v0.8.1`, with checked-in host fixes, source provenance and unsupported GUI trees excluded. |
 | `overlays/host-dependencies-v0.8.1.*` and host dependency helpers/tests | Historical checksummed host patch and helpers. Current exports verify the incorporated fixes; the original snapshot is preserved in history/private backups. |
 | Active `1541HUD-USB-v0.8.1` and `1541HUD-Host-Control-v0.8.1` source | UB3 integration source. The wrapper builds these custom plugins against the official pinned core in an ignored work tree. |
@@ -23,11 +24,11 @@ future repository and not a substitute for the build or wiring guides.
 
 | Area | Why it is excluded |
 | --- | --- |
-| `roms/` payloads and additional ROM-derived page images | Excluded except for the explicitly named, hash-checked stock baseline inputs above. |
-| Any composed `.bin` except the three named Fire-24G images | Custom or third-party DOS payloads must not be distributed. |
+| `roms/` and arbitrary ROM payloads | Only exact files under `docs/rom-library/stock-dos-2.6/`, `speeddos-plus/`, and `dolphindos-2/` are included; the validator hash-checks this allowlist. |
+| Any composed firmware `.bin` except the three named Fire-24G images | Custom OneROM firmware images must not be added. ROM-library inputs are not composed firmware images. |
 | `firmware-*/releases/`, historical EXEs, `outputs/`, `work/`, and build kits | Generated artifacts, old candidates, or third-party material not yet cleared for public redistribution. |
 | `c64-onerom-configurator/` | Deferred until its Control-board discovery issue is separately repaired and qualified. |
-| S-JiffyDOS files and tests | Experimental, unqualified, and explicitly outside the current product scope. |
+| Licensed JiffyDOS ROMs and C64 KERNALs; S-JiffyDOS generated images/pages | JiffyDOS is commercial software. Public folders contain documentation and project-authored source only; builders supply licensed inputs. |
 | USB serial numbers, local paths, SSH helpers, and local diagnostics | Operator/machine-specific information. |
 
 The package validator at `tools/maintenance/Test-Public-Package.ps1` enforces
@@ -39,9 +40,9 @@ maintainers must still review proposed additions.
 A public build can compile the firmware bases and project plugins once the
 documented toolchain prerequisites are supplied. The UB4 Monitor composition
 is fully reproducible from its tracked baseline inputs. UB3 Control image
-composition still requires owner-supplied lawful ROM inputs and a private
-composition manifest. The public package defines a `private-roms/` directory
-ignored by Git; it does not contain or fetch third-party DOS ROMs.
+composition still requires ROM inputs and a private composition manifest. The
+public package defines a `private-roms/` directory ignored by Git; JiffyDOS
+inputs remain owner-supplied and are not fetched by the build tools.
 
 At minimum the templates need:
 
@@ -50,12 +51,14 @@ At minimum the templates need:
 
 The public documentation must say which files are needed, where they are
 expected, their exact 8 KiB size, and their private-build SHA-256 reference.
-Do not add optional DOS ROM download links or payloads. The existing named
-stock baseline inputs and release images are explicit package exceptions,
-not permission to redistribute additional ROMs. See [notices](../NOTICE.md).
+Do not add JiffyDOS binaries or generated S-JiffyDOS outputs. The curated
+stock, SpeedDOS+, and DolphinDOS files are explicitly enumerated and
+hash-checked. See [notices](../NOTICE.md) and the
+[asset list](rom-library/ASSETS.sha256).
 
 ## Deferred scope
 
+- Exact source/build provenance for the checked-in SpeedDOS+ profile.
 - License/provenance status of the DOSNAME D64/PRG utility before publication.
 - C64 configurator repair and release.
 - Additional public prebuilt firmware beyond the named stock baseline, V53 candidate, and Monitor images.

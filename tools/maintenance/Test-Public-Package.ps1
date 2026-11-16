@@ -49,6 +49,23 @@ $required = @(
     'docs/PUBLIC_FIRE24G_RELEASES.md',
     'docs/STOCK_CONTROL_APPLY_ONLY_CANDIDATE_2026-11-10.md',
     'docs/PUBLIC_PACKAGE_MANIFEST.md',
+    'docs/rom-library/README.md',
+    'docs/rom-library/ASSETS.md',
+    'docs/rom-library/ASSETS.sha256',
+    'docs/rom-library/stock-dos-2.6/README.md',
+    'docs/rom-library/speeddos-plus/README.md',
+    'docs/rom-library/dolphindos-2/README.md',
+    'docs/rom-library/jiffydos/README.md',
+    'docs/rom-library/s-jiffydos/README.md',
+    'docs/rom-library/dolphindos-2/source/1541.asm',
+    'docs/rom-library/dolphindos-2/source/kernal.asm',
+    'docs/rom-library/dolphindos-2/source/LICENSE',
+    'docs/rom-library/dolphindos-2/source/Makefile',
+    'docs/rom-library/dolphindos-2/source/README-upstream.md',
+    'docs/rom-library/s-jiffydos/source/one-rom-autostart/autostart.s',
+    'docs/rom-library/s-jiffydos/source/one-rom-autostart/autostart.cfg',
+    'docs/rom-library/s-jiffydos/source/one-rom-autostart/Makefile',
+    'docs/rom-library/s-jiffydos/source/one-rom-autostart/test_autostart.py',
     'docs/RELEASE_CHECKLIST.md',
     'docs/VALIDATION_MATRIX.md',
     'docs/DEPENDENCY_ALERT_TRIAGE.md',
@@ -116,11 +133,46 @@ foreach ($name in $forbiddenDirectories) {
     }
 }
 
-$forbiddenPath = '(?i)(s-jiffy|sjiffydos|jiffydos|dolphindos|speeddos|\.bin$|\.uf2$|\.exe$|\.d64$|\.prg$)'
+$forbiddenPath = '(?i)(\.bin$|\.rom$|\.uf2$|\.exe$|\.d64$|\.prg$)'
+$romAssetManifestPath = Join-Path $PackageRoot 'docs/rom-library/ASSETS.sha256'
+$romAssetEntries = @{}
+foreach ($line in Get-Content -LiteralPath $romAssetManifestPath) {
+    if ($line -notmatch '^([0-9a-fA-F]{64})\s+(.+)$') {
+        throw "Malformed ROM library checksum line: $line"
+    }
+    $relative = 'docs/rom-library/' + $Matches[2].Replace('\', '/')
+    if ($romAssetEntries.ContainsKey($relative)) { throw "Duplicate ROM library asset: $relative" }
+    $romAssetEntries[$relative] = $Matches[1].ToUpperInvariant()
+}
+$actualRomFiles = Get-ChildItem -LiteralPath (Join-Path $PackageRoot 'docs/rom-library') -Recurse -Force -File |
+    Where-Object { $_.Extension -in '.bin', '.rom', '.d64', '.prg' } |
+    ForEach-Object { $_.FullName.Substring($PackageRoot.Length + 1).Replace('\', '/') }
+if ((@($actualRomFiles | Sort-Object) -join "`n") -ne (@($romAssetEntries.Keys | Sort-Object) -join "`n")) {
+    throw 'ROM library binary files and checksum manifest do not match exactly.'
+}
+foreach ($relative in $romAssetEntries.Keys) {
+    if ($relative -match '(?i)(jiffydos|s-jiffy|sjiffydos)') {
+        throw "Licensed/generated JiffyDOS payload is forbidden in the public ROM library: $relative"
+    }
+    $asset = Join-Path $PackageRoot $relative
+    if (-not (Test-Path -LiteralPath $asset) -or (Get-Sha256Hex -Path $asset) -ne $romAssetEntries[$relative]) {
+        throw "ROM library asset hash mismatch: $relative"
+    }
+    if ($relative -notmatch '(?i)dolphindos-2/reference/.*\.rom$' -and
+        (Get-Item -LiteralPath $asset).Length -ne 8192) {
+        throw "ROM library page/KERNAL is not 8192 bytes: $relative"
+    }
+    if ($relative -match '(?i)dolphindos-2/reference/.*\.rom$' -and
+        (Get-Item -LiteralPath $asset).Length -ne 32768) {
+        throw "DolphinDOS reference image is not 32768 bytes: $relative"
+    }
+}
 $badPaths = Get-ChildItem -LiteralPath $PackageRoot -Recurse -Force -File |
     Where-Object {
         $relative = $_.FullName.Substring($PackageRoot.Length + 1).Replace('\', '/')
-        $relative -notmatch '^(source/one-rom-v0\.8\.1/images/test/stub-(system|user)-plugin\.bin|private-roms/(UB3-Control-DolphinDOS-CAE|UB3-Control-Lower-Socket|UB3-Control-Upper-Socket|monitor-compose)\.json|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0\.8\.1\.bin|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0\.8\.1\.17\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.32\.bin|tools/onerom-v0\.6\.0-hud1\.exe|firmware-monitor/inputs/(1541-OneROM-Bootloader-Universal-v1\.1\.0|1541-c000\.325302-01)\.bin)$' -and $relative -match $forbiddenPath
+        $relative -notmatch '^(source/one-rom-v0\.8\.1/images/test/stub-(system|user)-plugin\.bin|private-roms/(UB3-Control-DolphinDOS-CAE|UB3-Control-Lower-Socket|UB3-Control-Upper-Socket|monitor-compose)\.json|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0\.8\.1\.bin|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0\.8\.1\.17\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.32\.bin|tools/onerom-v0\.6\.0-hud1\.exe|firmware-monitor/inputs/(1541-OneROM-Bootloader-Universal-v1\.1\.0|1541-c000\.325302-01)\.bin)$' -and
+        $relative -notmatch '^docs/rom-library/(stock-dos-2\.6|speeddos-plus|dolphindos-2)/.*\.(bin|rom)$' -and
+        $relative -match $forbiddenPath
     }
 if ($badPaths) {
     throw "Forbidden payload/history file(s) in public package:`n$($badPaths.FullName -join "`n")"

@@ -49,11 +49,13 @@ described below. See the
 The integration is community-tested.
 See the [baseline runbook](docs/V81_BASELINE_RUNBOOK.md) for versions and test scope.
 It includes qualified source, wiring records, the 1541HUD Python
-application, ROM-free templates, and three stock Fire-24G images: the tested
+application, ROM-composition templates, a curated DOS/KERNAL library, and three Fire-24G images: the tested
 UB3 USB 0.8.1.16 baseline, a V53-compatible UB3 USB 0.8.1.17 candidate, and
-the UB4 Monitor image. It
-does not distribute optional third-party DOS collections beyond the documented
-stock baseline inputs/images. Supply your own lawful ROM pages for custom sets.
+the UB4 Monitor image. The ROM library includes stock DOS 2.6, the tested
+SpeedDOS+ profile, and DolphinDOS 2.0 source/pages/KERNAL. JiffyDOS and
+S-JiffyDOS directories contain patch/build documentation and project source,
+but no licensed JiffyDOS inputs or generated S-JiffyDOS pages. See the
+[ROM and KERNAL catalog](docs/rom-library/README.md) for exact contents.
 The [latest verified release](https://github.com/benkrall1973/1541HUD-OneROM/releases/tag/v8.1-fire24g-stock-2rom-2026-11-10)
 contains the UB3 V51 baseline, the V53-compatible .17 Apply Only image, and the
 UB4 Monitor image. The .16 release attachment is the original drive-tested
@@ -136,7 +138,8 @@ before connecting a board to the drive. In particular:
 | `1541hud/` | 1541HUD Python source, launcher, build script, and tests. |
 | `firmware-control/` | UB3 Control source and 1541HUD Control plugins. |
 | `firmware-monitor/` | UB4 passive Monitor source and plugins. |
-| `templates/` | ROM-free templates for owner-supplied Lower, Upper, C/A/E, and Monitor inputs. |
+| `templates/` | Templates for Lower, Upper, C/A/E, and Monitor inputs. |
+| `docs/rom-library/` | Curated stock, SpeedDOS+, and DolphinDOS assets; JiffyDOS/S-JiffyDOS documentation and source only. |
 | `docs/` | Wiring, engineering, build, release, and ROM-preparation references. |
 
 ## Quick start: flash the supplied images
@@ -219,16 +222,22 @@ CLI, not a standalone 1541HUD application.
 The supplied firmware is intentionally a stock test baseline. To build a
 custom DOS image, use ROM files that you are legally entitled to use:
 
-1. Read the [ROM page preparation guide](docs/THIRD_PARTY_DOS_PAGE_PREPARATION.md).
-2. Select the matching template in `templates/`:
+1. Start with the [DOS and KERNAL catalog](docs/rom-library/README.md) to
+   choose a profile and its C64-side KERNAL pairing.
+2. Read the [ROM page preparation guide](docs/THIRD_PARTY_DOS_PAGE_PREPARATION.md).
+3. Select the matching template in `templates/`:
    - Lower socket: C/E pages
    - Upper socket: E/C pages
    - C/A/E: three-page layout for the documented 74LS138 wiring
-3. Copy the template and your ROM pages into ignored `private-roms/` paths.
-4. Follow the [UB3 Control composition guide](docs/UB3_CONTROL_CLI_COMPOSITION_GUIDE.md).
+4. Copy the template and your ROM pages into ignored `private-roms/` paths.
+5. Follow the [UB3 Control composition guide](docs/UB3_CONTROL_CLI_COMPOSITION_GUIDE.md).
 
-Do not commit ROM images, completed private manifests, disk images, or custom
-firmware binaries back to a public fork.
+The repository's [ROM library](docs/rom-library/README.md) contains the
+documented stock, SpeedDOS+, and DolphinDOS profile inputs. JiffyDOS and
+S-JiffyDOS folders contain patch/build notes and project source only; never
+commit licensed JiffyDOS files or generated JiffyDOS/S-JiffyDOS pages. Keep
+private manifests, disk images, and custom composed firmware binaries out of
+the public repository.
 
 ## Building from source
 

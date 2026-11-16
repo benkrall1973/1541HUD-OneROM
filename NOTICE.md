@@ -37,16 +37,23 @@ See `source/one-rom-v0.8.1/LICENSE.md` and the upstream project at
 Vendored dependencies retain their own licenses and copyright notices. Their
 license files must remain with any redistribution of the relevant source.
 
-## Stock baseline inputs and excluded ROM collections
+## ROM library
 
-The public package deliberately includes three Fire-24G firmware images in
-`releases/`: the UB3 V51 stock baseline, the UB3 V53 Apply Only candidate, and
-the UB4 passive Monitor image. Both UB3 images contain Commodore 1541 DOS 2.6.
-The Monitor composition inputs in `firmware-monitor/inputs/` include the stock
-C000 page `1541-c000.325302-01.bin` and the OneROM Universal bootloader.
-The package validator checks these named inputs and images against recorded
-hashes. See [release contents](docs/PUBLIC_FIRE24G_RELEASES.md) and the
+The curated `docs/rom-library/` contains stock Commodore DOS 2.6 drive pages
+and C64 KERNAL, SpeedDOS+ profile pages and host KERNAL, and DolphinDOS 2
+source, license, reference image, pages, and host KERNAL. Exact sizes and
+SHA-256 values are recorded in `docs/rom-library/ASSETS.sha256`; the public
+package validator enforces the binary allowlist and hashes. DolphinDOS source
+retains the upstream Unlicense. The SpeedDOS+ files are included as the
+specific profile assets accepted for this project; their exact build is not
+reproducible from source in this repository. See the
 [package boundary](docs/PUBLIC_PACKAGE_MANIFEST.md).
+
+The package also includes three Fire-24G firmware images in `releases/`: the
+UB3 V51 stock baseline, the UB3 V53 Apply Only candidate, and the UB4 passive
+Monitor image. The Monitor composition inputs include the OneROM Universal
+bootloader and the stock C000 page. See
+[release contents](docs/PUBLIC_FIRE24G_RELEASES.md).
 
 The root MIT license covers project-authored integration materials; it does
 not grant rights to the Commodore ROM payload or other third-party material.
@@ -54,8 +61,9 @@ Inclusion in the baseline and hash verification are not a separate license
 grant. The upstream bootloader and other dependencies retain their applicable
 upstream notices.
 
-Optional JiffyDOS, SpeedDOS, DolphinDOS and other private DOS collections,
-their ROM-derived pages, and custom composed images are excluded. Builders
-must supply ROM pages they are entitled to use. A template or documentation
-reference does not grant permission to copy or redistribute those ROMs.
+JiffyDOS is licensed commercial software. No JiffyDOS drive image, C64 KERNAL,
+extracted page, S-JiffyDOS generated image/page, or composed JiffyDOS image is
+included. The `jiffydos/` and `s-jiffydos/` folders contain documentation and
+project-authored patch/build source only. Builders must supply licensed
+JiffyDOS inputs. The root MIT license does not cover third-party ROM contents.
 

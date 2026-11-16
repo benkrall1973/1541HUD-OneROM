@@ -6,10 +6,11 @@ This is the supported public procedure for building a Fire-24G **UB3 Control**
 image. It uses the OneROM command-line interface (CLI). The legacy GUI
 configurator is not part of this procedure.
 
-The public repository supplies documented stock baseline inputs/images, but
-not the optional third-party DOS collections. For custom sets, provide only
-ROM images you are entitled to use. Do not commit those
-images or a completed private manifest to a public repository.
+The public repository includes selected stock DOS 2.6, SpeedDOS+, and
+DolphinDOS 2.0 profile inputs; see the [ROM library](rom-library/README.md).
+It does not include licensed JiffyDOS images or generated S-JiffyDOS pages.
+For other custom sets, provide only ROM images you are entitled to use. Keep
+licensed inputs and completed private manifests out of public repositories.
 
 ## Choose the hardware layout
 

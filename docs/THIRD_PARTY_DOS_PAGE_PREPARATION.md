@@ -1,7 +1,9 @@
 # Third-party DOS page preparation
 
-This project does not distribute SpeedDOS or DolphinDOS 2 ROM bytes. It does
-provide a local page splitter for owners who have lawfully obtained an image.
+The public ROM library includes selected stock DOS 2.6, SpeedDOS+, and
+DolphinDOS 2.0 profile pages. This guide covers additional inputs, including
+licensed JiffyDOS files supplied by the builder. It does not include JiffyDOS
+ROM data or generated S-JiffyDOS pages.
 
 `utilities/rom-pages/Split-1541-RomPages.ps1` writes exact 8192-byte pages and
 prints SHA-256 hashes. It never downloads ROMs.
