@@ -7,6 +7,10 @@ cbafb4265044b2144219222a7cc64ab6dfd3ee498e6da446185a6fbf0f6bf765  dolphindos-2/r
 6fa7b07aff92da66b0a28a52bb3c82ffe310ab0fad2cc473b40137a8d299c7e5  speeddos-plus/drive-pages/C000-DFFF.bin
 0eaef7867e0db1453104e9be075b42bd51ac032a26a8dbe97c565c6188a24d32  speeddos-plus/drive-pages/E000-FFFF.bin
 891104faf5ea91ac04137a6fd979f209ef1e0f493ef482ae3a39fbae8738ef73  speeddos-plus/host-kernel/C64-KERNAL-SpeedDOS-Plus-English.bin
+97d1ceeea125e0d7c4560e4c212a5c24c3cc3da82a6844738f8829a4d45fba5f  speeddos-plus/source-images/1541both_sd
+6fa7b07aff92da66b0a28a52bb3c82ffe310ab0fad2cc473b40137a8d299c7e5  speeddos-plus/source-images/1541lower
+0eaef7867e0db1453104e9be075b42bd51ac032a26a8dbe97c565c6188a24d32  speeddos-plus/source-images/1541upper_sd
+891104faf5ea91ac04137a6fd979f209ef1e0f493ef482ae3a39fbae8738ef73  speeddos-plus/source-images/kernal_en_sd
 9430ff3b4bb833c28c928189fadb66d4f58dcac7851cd6bb337990f7f41bd3fc  stock-dos-2.6/drive-1541-ii/A000-BFFF.bin
 75dfa93128e0d38df3eaf638afb3628660a16af9074e46fb962332da3289b19a  stock-dos-2.6/drive-1541-ii/C000-DFFF.bin
 9430ff3b4bb833c28c928189fadb66d4f58dcac7851cd6bb337990f7f41bd3fc  stock-dos-2.6/drive-1541-ii/E000-FFFF.bin

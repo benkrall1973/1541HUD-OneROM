@@ -9,7 +9,7 @@ future repository and not a substitute for the build or wiring guides.
 | Area | Reason |
 | --- | --- |
 | `templates/`, `private-roms/` templates, `utilities/rom-pages/`, and `tools/maintenance/` | Templates, utilities, validator, and public-boundary records. |
-| `docs/rom-library/` | Stock DOS and C64 KERNAL, tested SpeedDOS+ pages/KERNAL, DolphinDOS 2 source/license/reference/pages/KERNAL, plus JiffyDOS/S-JiffyDOS documentation and project-authored patch/build source without licensed JiffyDOS payloads. See `ASSETS.md` for provenance limits. |
+| `docs/rom-library/` | Stock DOS and C64 KERNAL, tested SpeedDOS+ factory inputs/pages/KERNAL, DolphinDOS 2 source/license/reference/pages/KERNAL, plus JiffyDOS/S-JiffyDOS documentation and project-authored patch/build source without licensed JiffyDOS payloads. See `ASSETS.md` for provenance limits. |
 | `source/one-rom-v0.8.1` | Supported source derived from official `v0.8.1`, with checked-in host fixes, source provenance and unsupported GUI trees excluded. |
 | `overlays/host-dependencies-v0.8.1.*` and host dependency helpers/tests | Historical checksummed host patch and helpers. Current exports verify the incorporated fixes; the original snapshot is preserved in history/private backups. |
 | Active `1541HUD-USB-v0.8.1` and `1541HUD-Host-Control-v0.8.1` source | UB3 integration source. The wrapper builds these custom plugins against the official pinned core in an ignored work tree. |

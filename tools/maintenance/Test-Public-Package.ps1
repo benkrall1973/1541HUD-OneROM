@@ -55,6 +55,10 @@ $required = @(
     'docs/rom-library/stock-dos-2.6/README.md',
     'docs/rom-library/speeddos-plus/README.md',
     'docs/rom-library/dolphindos-2/README.md',
+    'docs/rom-library/speeddos-plus/source-images/1541lower',
+    'docs/rom-library/speeddos-plus/source-images/1541upper_sd',
+    'docs/rom-library/speeddos-plus/source-images/1541both_sd',
+    'docs/rom-library/speeddos-plus/source-images/kernal_en_sd',
     'docs/rom-library/jiffydos/README.md',
     'docs/rom-library/s-jiffydos/README.md',
     'docs/rom-library/dolphindos-2/source/1541.asm',
@@ -144,8 +148,17 @@ foreach ($line in Get-Content -LiteralPath $romAssetManifestPath) {
     if ($romAssetEntries.ContainsKey($relative)) { throw "Duplicate ROM library asset: $relative" }
     $romAssetEntries[$relative] = $Matches[1].ToUpperInvariant()
 }
+$speedSourceDir = Join-Path $PackageRoot 'docs/rom-library/speeddos-plus/source-images'
+$expectedSpeedSourceNames = @('1541both_sd', '1541lower', '1541upper_sd', 'kernal_en_sd')
+$actualSpeedSourceNames = @(Get-ChildItem -LiteralPath $speedSourceDir -File | ForEach-Object { $_.Name } | Sort-Object)
+if (($actualSpeedSourceNames -join "`n") -ne (@($expectedSpeedSourceNames | Sort-Object) -join "`n")) {
+    throw 'SpeedDOS factory-named source images are missing or unexpected.'
+}
 $actualRomFiles = Get-ChildItem -LiteralPath (Join-Path $PackageRoot 'docs/rom-library') -Recurse -Force -File |
-    Where-Object { $_.Extension -in '.bin', '.rom', '.d64', '.prg' } |
+    Where-Object {
+        $_.Extension -in @('.bin', '.rom', '.d64', '.prg') -or
+        $_.DirectoryName -eq (Join-Path $PackageRoot 'docs/rom-library/speeddos-plus/source-images')
+    } |
     ForEach-Object { $_.FullName.Substring($PackageRoot.Length + 1).Replace('\', '/') }
 if ((@($actualRomFiles | Sort-Object) -join "`n") -ne (@($romAssetEntries.Keys | Sort-Object) -join "`n")) {
     throw 'ROM library binary files and checksum manifest do not match exactly.'
@@ -158,13 +171,11 @@ foreach ($relative in $romAssetEntries.Keys) {
     if (-not (Test-Path -LiteralPath $asset) -or (Get-Sha256Hex -Path $asset) -ne $romAssetEntries[$relative]) {
         throw "ROM library asset hash mismatch: $relative"
     }
-    if ($relative -notmatch '(?i)dolphindos-2/reference/.*\.rom$' -and
-        (Get-Item -LiteralPath $asset).Length -ne 8192) {
-        throw "ROM library page/KERNAL is not 8192 bytes: $relative"
-    }
-    if ($relative -match '(?i)dolphindos-2/reference/.*\.rom$' -and
-        (Get-Item -LiteralPath $asset).Length -ne 32768) {
-        throw "DolphinDOS reference image is not 32768 bytes: $relative"
+    $expectedBytes = if ($relative -match '(?i)dolphindos-2/reference/.*\.rom$') { 32768 }
+        elseif ($relative -match '(?i)speeddos-plus/source-images/1541both_sd$') { 16384 }
+        else { 8192 }
+    if ((Get-Item -LiteralPath $asset).Length -ne $expectedBytes) {
+        throw "ROM library asset has an unexpected byte count (expected $expectedBytes): $relative"
     }
 }
 $badPaths = Get-ChildItem -LiteralPath $PackageRoot -Recurse -Force -File |

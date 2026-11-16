@@ -6,23 +6,48 @@ single documented build set.
 
 The high-speed transfer path requires the matching SpeedDOS+ C64 KERNAL and
 parallel cable. With IEC only, the drive may still operate, but that does not
-exercise the parallel fast path. The private project has a C64-side
-`kernal_en_sd.bin`; it is not a public ROM asset.
+exercise the parallel fast path. The original host KERNAL is included as
+`source-images/kernal_en_sd`.
 
-Before publishing a build recipe, record the exact source release, 35/40-track
-choice, C64 KERNAL source, parallel-cable pinout, and whether the drive build
-uses the RAMBoard. Do not mix a 35-track host ROM with a 40-track drive image.
+## Build the OneROM page set
+
+The four original, prebuilt files from the supplied SpeedDOS+ archive are
+preserved with their factory names in `source-images/`:
+
+- `1541both_sd` — 16 KiB drive image, C page followed by E page.
+- `1541lower` — 8 KiB C page, byte-identical to the first half of
+  `1541both_sd`.
+- `1541upper_sd` — 8 KiB upper/E page, byte-identical to the second half.
+- `kernal_en_sd` — matching 8 KiB English C64 KERNAL.
+
+The current tested OneROM set needs three 8 KiB pages in C/A/E order. For this
+SpeedDOS image, A mirrors E. From the repository root, run:
+
+```powershell
+.\utilities\rom-pages\Split-1541-RomPages.ps1 `
+  -InputPath .\docs\rom-library\speeddos-plus\source-images\1541both_sd `
+  -OutputDirectory .\output\speeddos-plus `
+  -PageOrder CE -MirrorEToA -Prefix SpeedDOS
+```
+
+This writes the C and E pages from `1541both_sd` and makes an exact copy of E
+for A. It is page preparation only; use the matching C/A/E composition
+template to build a OneROM image. Alternatively, use the already included
+`drive-pages/` files, whose hashes match these source files. The `source-images`
+are prebuilt ROMs, not assembler source; this repository does not rebuild the
+SpeedDOS program itself.
 
 ## Included profile
 
-The `drive-pages/` files are the tested SpeedDOS+ 35-track profile used by
-this project. The A page mirrors E in this profile. The matching English
-SpeedDOS+ C64 KERNAL is in `host-kernel/`. Each file is 8192 bytes; hashes are
-in [the library asset manifest](../ASSETS.sha256).
+The `drive-pages/` files are the tested SpeedDOS+ profile used by this
+project. The A page mirrors E. The matching English SpeedDOS+ C64 KERNAL is in
+`host-kernel/`. Each page and KERNAL is 8192 bytes; hashes are in [the library
+asset manifest](../ASSETS.sha256).
 
-These are profile inputs, not a composed OneROM image. The exact source/build
-recipe for these files was not present in the project archive, so do not claim
-that this profile can be rebuilt from source here. The
+These are profile inputs, not a composed OneROM image. The exact assembler
+source for the SpeedDOS program is not present, so users can prepare and
+compose the supplied image but cannot rebuild SpeedDOS from its original
+source here. The
 [RAMBoardII repository](https://github.com/ytmytm/1541-RAMBOardII) is a
 reference for related SpeedDOS builds, but its RAMBoard-II patches are not the
 source of this original-longboard profile. This is the tested profile; it does

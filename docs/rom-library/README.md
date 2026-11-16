@@ -29,7 +29,7 @@ or completed JiffyDOS images.
 | JiffyDOS | Commercial serial fast-DOS pair. | Licensed JiffyDOS C64 KERNAL for JiffyDOS fast serial transfers; stock KERNAL remains ordinary IEC. | Official drive ROM is an owner-supplied input. See `jiffydos/`. |
 | S-JiffyDOS 1541 | A drive-side patch derived from JiffyDOS 1541; independent of S-JiffyDOS 64. | No special S-JiffyDOS C64 KERNAL is required. A JiffyDOS C64 KERNAL can use its serial fast path. | The private project has a generated and hardware-tested build; public recipe is limited by input/tool redistribution rights. See `s-jiffydos/`. |
 | DolphinDOS 2.0 | Separate drive DOS and C64 KERNAL project; it is not built from JiffyDOS. | Matching DolphinDOS C64 KERNAL, parallel cable, and required drive-side RAM support for its fast parallel path. | Source, license, reference image, extracted pages, and host KERNAL are included. See `dolphindos-2/`. |
-| SpeedDOS+ | Separate drive DOS and C64 KERNAL pair. | Matching SpeedDOS+ C64 KERNAL and parallel cable for the high-speed path; ordinary IEC alone is not the parallel path. | The tested 35-track profile's drive pages and host KERNAL are included. The build source for these exact binaries is not available in this repository. See `speeddos-plus/`. |
+| SpeedDOS+ | Separate drive DOS and C64 KERNAL pair. | Matching SpeedDOS+ C64 KERNAL and parallel cable for the high-speed path; ordinary IEC alone is not the parallel path. | The tested profile's original images and C/A/E-ready pages are included. Use the page-splitting instructions in `speeddos-plus/`; assembler source is not available. |
 
 ## Drive ROM versus C64 KERNAL
 
