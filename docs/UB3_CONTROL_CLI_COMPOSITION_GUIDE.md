@@ -36,11 +36,11 @@ Split and inspect ROM pages with
 
 ## Private custom configuration
 
-Create a local folder named `private-roms/` at the repository root. Copy the
-matching template there, then update its labels and file paths. Example:
+Copy the matching example from `roms/configs/` into the ignored
+`roms/private/` folder, then update its labels and file paths. Example:
 
 ```text
-private-roms/
+roms/private/
   my-drive.json
   control/
     slot0-c000-dfff.bin
@@ -60,7 +60,7 @@ and a compatible `onerom` CLI, compose an image from the repository root:
 
 ```powershell
 onerom firmware build `
-  --config private-roms/my-drive.json `
+  --config roms/private/my-drive.json `
   --board fire-24-g `
   --base-firmware firmware-control/.work/control-core-v0.8.1/one-rom-v0.8.1/firmware/build/onerom-rp235x.bin `
   --output output/onerom-ub3-control-fire24g.bin `

@@ -1,7 +1,7 @@
 CA65 ?= ca65
 LD65 ?= ld65
 PYTHON ?= python3
-OUT ?= ../../private-roms/s-jiffydos-autostart
+OUT ?= ../../../../roms/private/s-jiffydos-autostart
 RUNTIME_FLASH_SLOT ?= 10
 
 .PHONY: all test clean

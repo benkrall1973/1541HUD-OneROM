@@ -79,7 +79,7 @@ are intentionally not committed; install the pinned tool prerequisites below.
 | Component | Build command | Expected output |
 | --- | --- | --- |
 | UB3 public stock two-ROM image | `bash consolidation/scripts/build-control-v0.8.1.sh releases/stock-2rom-compose.json output/onerom-ub3-control-fire24g.bin` | `output/onerom-ub3-control-fire24g.bin` |
-| UB3 custom lawful ROM set | `bash consolidation/scripts/build-control-v0.8.1.sh private-roms/<your-config>.json output/onerom-ub3-control-fire24g.bin` | `output/onerom-ub3-control-fire24g.bin` |
+| UB3 custom lawful ROM set | `bash consolidation/scripts/build-control-v0.8.1.sh roms/private/<your-config>.json output/onerom-ub3-control-fire24g.bin` | `output/onerom-ub3-control-fire24g.bin` |
 | UB4 Monitor, WSL2/Linux source build | `TOOLCHAIN=/path/to/bin ONEROM_CLI=onerom bash firmware-monitor/Build-Monitor-Fire24G-V0.8.1.sh` | `firmware-monitor/releases/v8.1/candidates/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.32.bin` |
 
 Both wrappers use the root-level pinned source tree at `source/one-rom-v0.8.1`.
@@ -104,7 +104,7 @@ used to produce the supplied Monitor release image.
 The Monitor and public stock UB3 composition use the tracked C000 and Universal
 E000 baseline pages shown above. The stock DOS 2.6 E000 page is fetched from
 the public URL in `releases/stock-2rom-compose.json`. Keep other owner-supplied
-DOS pages private under `private-roms/`.
+DOS pages private under `roms/private/`.
 
 ### Supported source-build host: WSL2 or Linux
 
@@ -139,7 +139,7 @@ The Monitor PowerShell entry point also accepts `-Toolchain` and
 the repository portable without embedding operator-specific paths.
 `Build-Control-V8.1-Clean.cmd` remains an optional native Windows composition
 helper for an already-built core and plugins. Invoke it as
-`Build-Control-V8.1-Clean.cmd private-roms/<your-config>.json output/<name>.bin`.
+`Build-Control-V8.1-Clean.cmd roms/private/<your-config>.json output/<name>.bin`.
 It is not the supported fresh public source-build path.
 
 ## Flash and acceptance procedure

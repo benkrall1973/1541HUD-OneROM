@@ -21,7 +21,7 @@ sets and modifications require their own qualification.
 | Three-page C/A/E layout | Supported build path | Requires documented 74LS138 decode wiring and builder-supplied pages. |
 | SpeedDOS, JiffyDOS, DolphinDOS 2.0 layouts | Builder-supplied/private | No ROM payloads are distributed; hardware and legal input responsibility remain with the builder. |
 | C64 configurator | Deferred | Not part of this public release. |
-| S-JiffyDOS | Out of scope | Experimental material is deliberately excluded. |
+| S-JiffyDOS 1541 | Documentation and project-authored bootstrap source included; generated ROM excluded | The private build was user-tested in the drive. Public users need their own licensed JiffyDOS inputs and must follow the RAMBoard shadow-memory warning. No public generated S-JiffyDOS image or complete recipe is included. |
 | Other 1541 board revisions | Not qualified | Require independent electrical review and acceptance testing. |
 
 ## Build evidence

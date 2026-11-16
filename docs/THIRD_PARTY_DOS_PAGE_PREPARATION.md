@@ -11,22 +11,22 @@ prints SHA-256 hashes. It never downloads ROMs.
 For a conventional 16 KiB C/E source image:
 
 ```powershell
-.\utilities\rom-pages\Split-1541-RomPages.ps1 -InputPath .\private-roms\source.bin -OutputDirectory .\private-roms\control -PageOrder CE
+.\utilities\rom-pages\Split-1541-RomPages.ps1 -InputPath .\roms\private\source.bin -OutputDirectory .\roms\private\control -PageOrder CE
 ```
 
 For a verified 24 KiB image already ordered C/A/E:
 
 ```powershell
-.\utilities\rom-pages\Split-1541-RomPages.ps1 -InputPath .\private-roms\source.bin -OutputDirectory .\private-roms\control -PageOrder CAE
+.\utilities\rom-pages\Split-1541-RomPages.ps1 -InputPath .\roms\private\source.bin -OutputDirectory .\roms\private\control -PageOrder CAE
 ```
 
 For the supplied SpeedDOS+ 16 KiB C/E image, follow the exact command and
-page mapping in [`speeddos-plus/README.md`](rom-library/speeddos-plus/README.md).
+page mapping in [`speeddos-plus/README.md`](../roms/speeddos-plus/README.md).
 That profile's upper page is also used for A, so `-MirrorEToA` is appropriate
 for that specific input. Do not assume the flag is valid for another DOS.
 
 For DolphinDOS 2.0, use the already prepared and hardware-tested C/A/E pages
-in [`dolphindos-2/drive-pages/`](rom-library/dolphindos-2/README.md). The
+in [`dolphindos-2/drive-pages/`](../roms/dolphindos-2/README.md). The
 separate 32 KiB `dd2_1541.rom` reference image is not byte-identical to those
 pages; this general splitter is not a substitute for identifying the exact
 source image and memory map first.

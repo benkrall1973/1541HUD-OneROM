@@ -55,7 +55,7 @@ the UB4 Monitor image. The ROM library includes stock DOS 2.6, the tested
 SpeedDOS+ profile, and DolphinDOS 2.0 source/pages/KERNAL. JiffyDOS and
 S-JiffyDOS directories contain patch/build documentation and project source,
 but no licensed JiffyDOS inputs or generated S-JiffyDOS pages. See the
-[ROM and KERNAL catalog](docs/rom-library/README.md) for exact contents.
+[ROM and KERNAL catalog](roms/README.md) for exact contents.
 The [latest verified release](https://github.com/benkrall1973/1541HUD-OneROM/releases/tag/v8.1-fire24g-stock-2rom-2026-11-10)
 contains the UB3 V51 baseline, the V53-compatible .17 Apply Only image, and the
 UB4 Monitor image. The .16 release attachment is the original drive-tested
@@ -110,8 +110,8 @@ drive-only power cycle.
 | `1541hud/` | 1541HUD Python source, launcher, build script, and tests. |
 | `firmware-control/` | UB3 Control source and 1541HUD Control plugins. |
 | `firmware-monitor/` | UB4 passive Monitor source and plugins. |
-| `templates/` | Templates for Lower, Upper, C/A/E, and Monitor inputs. |
-| `docs/rom-library/` | Curated stock, SpeedDOS+, and DolphinDOS assets; JiffyDOS/S-JiffyDOS documentation and source only. |
+| `roms/` | Curated drive ROMs, C64 KERNALs, source references, and RAMBoard documents. |
+| `roms/configs/` | ROM-free composition examples for Lower, Upper, C/A/E, and Monitor inputs. |
 | `docs/` | Wiring, engineering, build, release, and ROM-preparation references. |
 
 ## Quick start: flash the supplied images
@@ -196,17 +196,17 @@ CLI, not a standalone 1541HUD application.
 The supplied firmware is intentionally a stock test baseline. To build a
 custom DOS image, use ROM files that you are legally entitled to use:
 
-1. Start with the [DOS and KERNAL catalog](docs/rom-library/README.md) to
+1. Start with the [DOS and KERNAL catalog](roms/README.md) to
    choose a profile and its C64-side KERNAL pairing.
 2. Read the [ROM page preparation guide](docs/THIRD_PARTY_DOS_PAGE_PREPARATION.md).
-3. Select the matching template in `templates/`:
+3. Select the matching example in `roms/configs/`:
    - Lower socket: C/E pages
    - Upper socket: E/C pages
    - C/A/E: three-page layout for the documented 74LS138 wiring
-4. Copy the template and your ROM pages into ignored `private-roms/` paths.
+4. Copy the example and your ROM pages into ignored `roms/private/` paths.
 5. Follow [Build the UB3 Control firmware](docs/BUILD_UB3_CONTROL.md).
 
-The repository's [ROM library](docs/rom-library/README.md) contains the
+The repository's [ROM library](roms/README.md) contains the
 documented stock, SpeedDOS+, and DolphinDOS profile inputs. JiffyDOS and
 S-JiffyDOS folders contain patch/build notes and project source only; never
 commit licensed JiffyDOS files or generated JiffyDOS/S-JiffyDOS pages. Keep
@@ -237,7 +237,6 @@ Run the package check before publishing a derivative:
 ## Documentation map
 
 - [Supported-source security cleanup and alert handling](docs/SOURCE_SECURITY_CLEANUP_2026-11-10.md)
-- [Current maintenance review and retained limitations](docs/MAINTENANCE_REVIEW_2026-11-10.md)
 - [Release images and hashes](docs/PUBLIC_FIRE24G_RELEASES.md)
 - [Verified wiring and reset behavior](docs/FIRE24G-VERIFIED-WIRING.md)
 - [Engineering dossier: GPIO, LEDs, reset, architecture](docs/FIRE24G_V81_ENGINEERING_DOSSIER.md)

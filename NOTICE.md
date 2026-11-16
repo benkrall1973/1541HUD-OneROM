@@ -39,10 +39,10 @@ license files must remain with any redistribution of the relevant source.
 
 ## ROM library
 
-The curated `docs/rom-library/` contains stock Commodore DOS 2.6 drive pages
+The curated `roms/` folder contains stock Commodore DOS 2.6 drive pages
 and C64 KERNAL, SpeedDOS+ profile pages and host KERNAL, and DolphinDOS 2
 source, license, reference image, pages, and host KERNAL. Exact sizes and
-SHA-256 values are recorded in `docs/rom-library/ASSETS.sha256`; the public
+SHA-256 values are recorded in `roms/ASSETS.sha256`; the public
 package validator enforces the binary allowlist and hashes. DolphinDOS source
 retains the upstream Unlicense. The SpeedDOS+ files are included as the
 specific profile assets accepted for this project; their exact build is not

@@ -17,9 +17,9 @@ or completed JiffyDOS images.
    an arbitrary 24/32 KiB input is arranged correctly.
 3. Keep each DOS's drive pages, build recipe, host KERNAL notes, and test record
    together. Never treat a profile label as proof of provenance.
-4. Build with the matching composition template in `templates/`. Keep licensed
-   JiffyDOS inputs and all private manifests/output images in ignored local
-   `private-roms/` / `output/` paths.
+4. Copy the matching composition example from `configs/` to ignored
+   `private/`. Keep licensed JiffyDOS inputs and private manifests/output
+   images in `private/` / `output/` paths.
 
 ## Known profiles and host-side pairing
 

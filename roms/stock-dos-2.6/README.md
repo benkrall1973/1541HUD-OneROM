@@ -39,5 +39,5 @@ remains the tested artifact; the external build input's provenance still
 needs reconciliation before claiming a fully self-contained, bit-reproducible
 stock build.
 
-See [ROM page preparation](../../THIRD_PARTY_DOS_PAGE_PREPARATION.md) and the
-[CLI composition guide](../../UB3_CONTROL_CLI_COMPOSITION_GUIDE.md).
+See [ROM page preparation](../../docs/THIRD_PARTY_DOS_PAGE_PREPARATION.md) and
+the [CLI composition guide](../../docs/UB3_CONTROL_CLI_COMPOSITION_GUIDE.md).

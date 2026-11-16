@@ -8,8 +8,8 @@ future repository and not a substitute for the build or wiring guides.
 
 | Area | Reason |
 | --- | --- |
-| `templates/`, `private-roms/` templates, `utilities/rom-pages/`, and `tools/maintenance/` | Templates, utilities, validator, and public-boundary records. |
-| `docs/rom-library/` | Stock DOS and C64 KERNAL, tested SpeedDOS+ factory inputs/pages/KERNAL, DolphinDOS 2 source/license/reference/pages/KERNAL, JiffyDOS/S-JiffyDOS documentation and project-authored patch/build source without licensed JiffyDOS payloads, and original CLD RAMBoard documentation/layouts plus its utility D64. See `ASSETS.md` for provenance limits. |
+| `roms/` and `roms/configs/` | Curated drive ROM/KERNAL assets, source references, RAMBoard docs, and ROM-free composition examples. JiffyDOS/S-JiffyDOS folders contain documentation and project-authored source only, without licensed payloads. See `roms/ASSETS.md` for provenance limits. |
+| `utilities/rom-pages/` and `tools/maintenance/` | ROM page utility, validator, and public-boundary records. |
 | `source/one-rom-v0.8.1` | Supported source derived from official `v0.8.1`, with checked-in host fixes, source provenance and unsupported GUI trees excluded. |
 | `overlays/host-dependencies-v0.8.1.*` and host dependency helpers/tests | Historical checksummed host patch and helpers. Current exports verify the incorporated fixes; the original snapshot is preserved in history/private backups. |
 | Active `1541HUD-USB-v0.8.1` and `1541HUD-Host-Control-v0.8.1` source | UB3 integration source. The wrapper builds these custom plugins against the official pinned core in an ignored work tree. |
@@ -24,7 +24,7 @@ future repository and not a substitute for the build or wiring guides.
 
 | Area | Why it is excluded |
 | --- | --- |
-| `roms/` and arbitrary ROM payloads | Only exact files under `docs/rom-library/stock-dos-2.6/`, `speeddos-plus/`, and `dolphindos-2/` are included; the validator hash-checks this allowlist. |
+| `roms/private/` and arbitrary ROM payloads | `roms/private/` is ignored by Git and excluded from public packages. Only exact asset files listed in `roms/ASSETS.sha256` are permitted. |
 | Any composed firmware `.bin` except the three named Fire-24G images | Custom OneROM firmware images must not be added. ROM-library inputs are not composed firmware images. |
 | `firmware-*/releases/`, historical EXEs, `outputs/`, `work/`, and build kits | Generated artifacts, old candidates, or third-party material not yet cleared for public redistribution. |
 | `c64-onerom-configurator/` | Deferred until its Control-board discovery issue is separately repaired and qualified. |
@@ -46,7 +46,7 @@ A public build can compile the firmware bases and project plugins once the
 documented toolchain prerequisites are supplied. The UB4 Monitor composition
 is fully reproducible from its tracked baseline inputs. UB3 Control image
 composition still requires ROM inputs and a private composition manifest. The
-public package defines a `private-roms/` directory ignored by Git; JiffyDOS
+public package defines a `roms/private/` directory ignored by Git; JiffyDOS
 inputs remain owner-supplied and are not fetched by the build tools.
 
 At minimum the templates need:
@@ -60,7 +60,7 @@ Do not add JiffyDOS binaries or generated S-JiffyDOS outputs. The curated
 stock, SpeedDOS+, DolphinDOS, and original CLD RAMBoard utility-disk files are
 explicitly enumerated and hash-checked. The RAMBoard D64 is a utility disk, not
 a drive ROM. See [notices](../NOTICE.md) and the
-[asset list](rom-library/ASSETS.sha256).
+[asset list](../roms/ASSETS.sha256).
 
 ## Deferred scope
 

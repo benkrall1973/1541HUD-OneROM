@@ -56,29 +56,29 @@ For the public stock two-ROM image, use the checked-in configuration:
 releases/stock-2rom-compose.json
 ```
 
-For your own ROM set, copy the template matching your wiring into the ignored
-`private-roms/` folder and update its file paths. The quick rule is:
+For your own ROM set, copy the example matching your wiring into the ignored
+`roms/private/` folder and update its file paths. The quick rule is:
 
 - **Two ROM pages, no 74LS138:** choose Lower Socket or Upper Socket.
 - **Three C/A/E pages and the documented 74LS138 wiring:** choose the C/A/E
   template. Each page must be exactly 8 KiB; keep the C, A, E order.
 
 See the [ROM layout and manifest reference](UB3_CONTROL_CLI_COMPOSITION_GUIDE.md)
-for the templates, file names, and full C/A/E details. The
-[ROM catalog](rom-library/README.md) lists included public files and required
+for the examples, file names, and full C/A/E details. The
+[ROM catalog](../roms/README.md) lists included public files and required
 C64 KERNAL pairings.
 
 For example, to start a custom three-page setup:
 
 ```bash
-mkdir -p private-roms
-cp templates/control-compose.template.json private-roms/my-drive.json
+mkdir -p roms/private
+cp roms/configs/control-compose.template.json roms/private/my-drive.json
 ```
 
-Edit `private-roms/my-drive.json` to point to your local 8 KiB C, A, and E
+Edit `roms/private/my-drive.json` to point to your local 8 KiB C, A, and E
 pages. For the two-page templates, copy the matching
-`UB3-Control-Lower-Socket.template.json` or
-`UB3-Control-Upper-Socket.template.json` instead.
+`roms/configs/UB3-Control-Lower-Socket.template.json` or
+`roms/configs/UB3-Control-Upper-Socket.template.json` instead.
 
 ## 3. Build
 
@@ -91,7 +91,7 @@ bash consolidation/scripts/build-control-v0.8.1.sh \
 ```
 
 For a private configuration, replace the first path with your JSON file, for
-example `private-roms/my-drive.json`. The script builds the Control core,
+example `roms/private/my-drive.json`. The script builds the Control core,
 plugins, and local OneROM command-line tool, then composes and inspects the
 image. The finished file and its SHA-256 are reported at the end.
 

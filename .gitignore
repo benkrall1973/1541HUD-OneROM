@@ -1,9 +1,4 @@
-private-roms/*
-!private-roms/README.md
-!private-roms/UB3-Control-DolphinDOS-CAE.json
-!private-roms/UB3-Control-Lower-Socket.json
-!private-roms/UB3-Control-Upper-Socket.json
-!private-roms/monitor-compose.json
+/roms/private/
 **/build/
 **/build-*/
 **/.git-local-metadata/

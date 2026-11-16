@@ -13,10 +13,10 @@ from py65.devices.mpu6502 import MPU
 
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parents[1]
+REPO = HERE.parents[3]
 IMAGE = Path(os.environ.get(
     "AUTOSTART_IMAGE",
-    str(REPO / "private-roms/s-jiffydos-autostart/s-jiffydos-autostart-e000-ffff.bin"),
+    str(REPO / "roms/private/s-jiffydos-autostart/s-jiffydos-autostart-e000-ffff.bin"),
 ))
 RUNTIME_FLASH_SLOT = int(os.environ.get("AUTOSTART_RUNTIME_FLASH_SLOT", "10"), 0)
 BOOT_PC = 0xE000

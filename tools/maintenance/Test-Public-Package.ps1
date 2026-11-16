@@ -50,27 +50,33 @@ $required = @(
     'docs/PUBLIC_FIRE24G_RELEASES.md',
     'docs/STOCK_CONTROL_APPLY_ONLY_CANDIDATE_2026-11-10.md',
     'docs/PUBLIC_PACKAGE_MANIFEST.md',
-    'docs/rom-library/README.md',
-    'docs/rom-library/ASSETS.md',
-    'docs/rom-library/ASSETS.sha256',
-    'docs/rom-library/stock-dos-2.6/README.md',
-    'docs/rom-library/speeddos-plus/README.md',
-    'docs/rom-library/dolphindos-2/README.md',
-    'docs/rom-library/speeddos-plus/source-images/1541lower',
-    'docs/rom-library/speeddos-plus/source-images/1541upper_sd',
-    'docs/rom-library/speeddos-plus/source-images/1541both_sd',
-    'docs/rom-library/speeddos-plus/source-images/kernal_en_sd',
-    'docs/rom-library/jiffydos/README.md',
-    'docs/rom-library/s-jiffydos/README.md',
-    'docs/rom-library/dolphindos-2/source/1541.asm',
-    'docs/rom-library/dolphindos-2/source/kernal.asm',
-    'docs/rom-library/dolphindos-2/source/LICENSE',
-    'docs/rom-library/dolphindos-2/source/Makefile',
-    'docs/rom-library/dolphindos-2/source/README-upstream.md',
-    'docs/rom-library/s-jiffydos/source/one-rom-autostart/autostart.s',
-    'docs/rom-library/s-jiffydos/source/one-rom-autostart/autostart.cfg',
-    'docs/rom-library/s-jiffydos/source/one-rom-autostart/Makefile',
-    'docs/rom-library/s-jiffydos/source/one-rom-autostart/test_autostart.py',
+    'roms/README.md',
+    'roms/ASSETS.md',
+    'roms/ASSETS.sha256',
+    'roms/configs/README.md',
+    'roms/configs/control-compose.template.json',
+    'roms/configs/UB3-Control-Lower-Socket.template.json',
+    'roms/configs/UB3-Control-Upper-Socket.template.json',
+    'roms/configs/monitor-compose.template.json',
+    'roms/stock-dos-2.6/README.md',
+    'roms/ramboard/README.md',
+    'roms/speeddos-plus/README.md',
+    'roms/dolphindos-2/README.md',
+    'roms/speeddos-plus/source-images/1541lower',
+    'roms/speeddos-plus/source-images/1541upper_sd',
+    'roms/speeddos-plus/source-images/1541both_sd',
+    'roms/speeddos-plus/source-images/kernal_en_sd',
+    'roms/jiffydos/README.md',
+    'roms/s-jiffydos/README.md',
+    'roms/dolphindos-2/source/1541.asm',
+    'roms/dolphindos-2/source/kernal.asm',
+    'roms/dolphindos-2/source/LICENSE',
+    'roms/dolphindos-2/source/Makefile',
+    'roms/dolphindos-2/source/README-upstream.md',
+    'roms/s-jiffydos/source/one-rom-autostart/autostart.s',
+    'roms/s-jiffydos/source/one-rom-autostart/autostart.cfg',
+    'roms/s-jiffydos/source/one-rom-autostart/Makefile',
+    'roms/s-jiffydos/source/one-rom-autostart/test_autostart.py',
     'docs/RELEASE_CHECKLIST.md',
     'docs/VALIDATION_MATRIX.md',
     'docs/DEPENDENCY_ALERT_TRIAGE.md',
@@ -82,10 +88,6 @@ $required = @(
     'tools/maintenance/tests/host_dependency_zip.rs',
     'overlays/host-dependencies-v0.8.1.patch',
     'overlays/host-dependencies-v0.8.1.json',
-    'templates/control-compose.template.json',
-    'templates/UB3-Control-Lower-Socket.template.json',
-    'templates/UB3-Control-Upper-Socket.template.json',
-    'templates/monitor-compose.template.json',
     'consolidation/scripts/Build-Control-V8.1-Clean.ps1',
     'consolidation/scripts/build-control-v0.8.1.sh',
     'firmware-monitor/Build-Monitor-Fire24G-V0.8.1.ps1',
@@ -123,18 +125,13 @@ $required = @(
     'docs/WINDOWS_CLI.md',
     'releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0.8.1.bin',
     'releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0.8.1.17.bin',
-    'releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.32.bin',
-    'private-roms/README.md',
-    'private-roms/UB3-Control-DolphinDOS-CAE.json',
-    'private-roms/UB3-Control-Lower-Socket.json',
-    'private-roms/UB3-Control-Upper-Socket.json',
-    'private-roms/monitor-compose.json'
+    'releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.32.bin'
 )
 
 $missing = $required | Where-Object { -not (Test-Path -LiteralPath (Join-Path $PackageRoot $_)) }
 if ($missing) { throw "Public package is incomplete:`n$($missing -join "`n")" }
 
-$forbiddenDirectories = @('roms', 'archives', 'c64-onerom-configurator', 'outputs', 'work', 'build-kits')
+$forbiddenDirectories = @('roms/private', 'archives', 'c64-onerom-configurator', 'outputs', 'work', 'build-kits')
 foreach ($name in $forbiddenDirectories) {
     if (Test-Path -LiteralPath (Join-Path $PackageRoot $name)) {
         throw "Forbidden private/generated directory in public package: $name"
@@ -142,26 +139,26 @@ foreach ($name in $forbiddenDirectories) {
 }
 
 $forbiddenPath = '(?i)(\.bin$|\.rom$|\.uf2$|\.exe$|\.d64$|\.prg$)'
-$romAssetManifestPath = Join-Path $PackageRoot 'docs/rom-library/ASSETS.sha256'
+$romAssetManifestPath = Join-Path $PackageRoot 'roms/ASSETS.sha256'
 $romAssetEntries = @{}
 foreach ($line in Get-Content -LiteralPath $romAssetManifestPath) {
     if ($line -notmatch '^([0-9a-fA-F]{64})\s+(.+)$') {
         throw "Malformed ROM library checksum line: $line"
     }
-    $relative = 'docs/rom-library/' + $Matches[2].Replace('\', '/')
+    $relative = 'roms/' + $Matches[2].Replace('\', '/')
     if ($romAssetEntries.ContainsKey($relative)) { throw "Duplicate ROM library asset: $relative" }
     $romAssetEntries[$relative] = $Matches[1].ToUpperInvariant()
 }
-$speedSourceDir = Join-Path $PackageRoot 'docs/rom-library/speeddos-plus/source-images'
+$speedSourceDir = Join-Path $PackageRoot 'roms/speeddos-plus/source-images'
 $expectedSpeedSourceNames = @('1541both_sd', '1541lower', '1541upper_sd', 'kernal_en_sd')
 $actualSpeedSourceNames = @(Get-ChildItem -LiteralPath $speedSourceDir -File | ForEach-Object { $_.Name } | Sort-Object)
 if (($actualSpeedSourceNames -join "`n") -ne (@($expectedSpeedSourceNames | Sort-Object) -join "`n")) {
     throw 'SpeedDOS factory-named source images are missing or unexpected.'
 }
-$actualRomFiles = Get-ChildItem -LiteralPath (Join-Path $PackageRoot 'docs/rom-library') -Recurse -Force -File |
+$actualRomFiles = Get-ChildItem -LiteralPath (Join-Path $PackageRoot 'roms') -Recurse -Force -File |
     Where-Object {
         $_.Extension -in @('.bin', '.rom', '.d64', '.prg') -or
-        $_.DirectoryName -eq (Join-Path $PackageRoot 'docs/rom-library/speeddos-plus/source-images')
+        $_.DirectoryName -eq (Join-Path $PackageRoot 'roms/speeddos-plus/source-images')
     } |
     ForEach-Object { $_.FullName.Substring($PackageRoot.Length + 1).Replace('\', '/') }
 if ((@($actualRomFiles | Sort-Object) -join "`n") -ne (@($romAssetEntries.Keys | Sort-Object) -join "`n")) {
@@ -188,8 +185,8 @@ $badPaths = Get-ChildItem -LiteralPath $PackageRoot -Recurse -Force -File |
         $relative = $_.FullName.Substring($PackageRoot.Length + 1).Replace('\', '/')
         # These are synthetic fixtures shipped in the pinned upstream source,
         # not commercial 1541/C64 ROM images. Keep the allowlist exact.
-        $relative -notmatch '^(source/one-rom-v0\.8\.1/images/test/(stub-(system|user)-plugin\.bin|0_63_(2048|4096|8192)\.rom|ff8192\.rom|rand_(0\.5KB|1KB|2KB|4KB|8KB|16KB|32KB|48KB|64KB|128KB|256KB|512KB|512KB_alt)\.rom|zero(3|8192)\.rom)|private-roms/(UB3-Control-DolphinDOS-CAE|UB3-Control-Lower-Socket|UB3-Control-Upper-Socket|monitor-compose)\.json|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0\.8\.1\.bin|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0\.8\.1\.17\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.32\.bin|tools/onerom-v0\.6\.0-hud1\.exe|firmware-monitor/inputs/(1541-OneROM-Bootloader-Universal-v1\.1\.0|1541-c000\.325302-01)\.bin|docs/rom-library/ramboard/original-cld/ramboard\.d64)$' -and
-        $relative -notmatch '^docs/rom-library/(stock-dos-2\.6|speeddos-plus|dolphindos-2)/.*\.(bin|rom)$' -and
+        $relative -notmatch '^(source/one-rom-v0\.8\.1/images/test/(stub-(system|user)-plugin\.bin|0_63_(2048|4096|8192)\.rom|ff8192\.rom|rand_(0\.5KB|1KB|2KB|4KB|8KB|16KB|32KB|48KB|64KB|128KB|256KB|512KB|512KB_alt)\.rom|zero(3|8192)\.rom)|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0\.8\.1\.bin|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0\.8\.1\.17\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.32\.bin|tools/onerom-v0\.6\.0-hud1\.exe|firmware-monitor/inputs/(1541-OneROM-Bootloader-Universal-v1\.1\.0|1541-c000\.325302-01)\.bin|roms/ramboard/original-cld/ramboard\.d64)$' -and
+        $relative -notmatch '^roms/(stock-dos-2\.6|speeddos-plus|dolphindos-2)/.*\.(bin|rom)$' -and
         $relative -match $forbiddenPath
     }
 if ($badPaths) {

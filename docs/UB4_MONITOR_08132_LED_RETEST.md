@@ -1,8 +1,9 @@
-# Monitor 0.8.1.32 / USB 0.8.1.5 LED persistence candidate
+# Monitor 0.8.1.32 / USB 0.8.1.5 LED persistence record
 
-Status: build/host checks passed; user-confirmed drive tests accepted. Control
-firmware and the V51 application are unchanged. The image includes the .31
-checksum gate already exercised in the drive retest.
+Status: build/host checks passed and the user confirmed LED control during disk
+reads plus persistence after a full power cycle. No .32 serial log was supplied.
+Control firmware and the V51 application are unchanged. The image includes the
+.31 checksum gate previously exercised in the drive.
 
 ## Repair
 
@@ -48,8 +49,9 @@ This does not test actual flash failure or cross-core hardware timing.
    requested policy without an earlier save confirming the wrong mode.
 
 Do not interrupt a flash write or damage hardware to induce failure. The
-failure-response path is covered by the host test. The candidate is not
-flashed without explicit authorization. The user subsequently confirmed LED
-control during disk reads and persistence after a full power cycle. These are
-user-reported hardware results; no .32 serial log was supplied. Host tests cover
-the precise pending/failure/supersession reply cases.
+failure-response path is covered by the host test. The reported .32 drive
+results are user-confirmed; host tests cover the precise pending/failure and
+supersession reply cases. The preceding .31 retest recorded 187 STATUS samples
+with R=0/Q=0 and 122 RPM readings between 300.53 and 300.68; no stale-zone RPM
+spike was observed. This historical retest is summarized here because .32
+retains that checksum gate.
