@@ -1,266 +1,100 @@
 # 1541HUD / OneROM Fire-24G
 
-## Project introduction
+1541HUD adds USB control and optional drive monitoring to a OneROM Fire-24G
+installation in a Commodore 1541. Use the **UB3 Control** board to serve drive
+ROMs and control the IEC address, reset, and optional write protect. The
+optional **UB4 Monitor** board passively observes drive activity.
 
-1541HUD is a OneROM community project for Commodore 1541 owners who want
-easier ROM switching, USB control, and optional live drive-status monitoring.
-It begins with one compatible **UB3 Control** OneROM board and a practical
-Windows interface, using the drive ROMs that you are entitled to use. From
-there, the installation can grow at your own pace, including an optional small
-Raspberry Pi touchscreen display mounted with the drive.
+## Drive ROMs you can use
 
-The current Fire-24G baseline provides several paths:
+The public [r21 Basic image](https://github.com/benkrall1973/1541HUD-OneROM/releases/tag/v8.1-fire24g-ub3-images-2026-11-16)
+contains four selectable drive ROM profiles. Choose the matching C64 KERNAL
+for fast DOS features; a drive ROM and a C64 KERNAL are separate things.
 
-- Flash the supplied stock UB3 image for a safe Control/USB starting point.
-- Use 1541HUD on Windows for ROM selection, IEC device 8/9 selection, reset,
-  UB3 write-protect sense/override, and LED policy.
-- Add a second, passive **UB4 Monitor** board for live telemetry on motor
-  activity, full- and half-track position, stepping activity, observed
-  write-gate/write-pulse activity,
-  disk density, headers, RPM, and SYNC activity. Unlike a simple activity
-  light, the passive monitor can decode checksum-validated physical GCR
-  headers, show sector coverage and recent header order, estimate disk identity,
-  correlate density with SYNC-per-revolution, and expose capture-health/drop
-  counters alongside the drive's observed mechanical state.
-- Compose custom Lower, Upper, or C/A/E ROM layouts from lawful ROM pages with
-  the included templates and build documentation. A RAMBoard-capable C/A/E
-  installation can support owner-supplied SpeedDOS, JiffyDOS, and DolphinDOS
-  2.0 ROM sets where the required hardware and lawful ROM pages are present.
+| Drive profile | Matching C64 KERNAL | Extra hardware / notes |
+| --- | --- | --- |
+| **DOS 2.6 Original** | Stock Commodore KERNAL | Standard IEC. Default startup profile. |
+| **DOS 2.6 1541-II** | Stock Commodore KERNAL | Standard IEC; this profile was tested in a longboard 1541. |
+| **SpeedDOS** | English SpeedDOS+ KERNAL | Parallel cable for fast transfer. IEC works with the parallel fast path disabled. |
+| **DolphinDOS 2.0** | DolphinDOS 2.0 KERNAL | Parallel cable and compatible drive-side RAM for its fast path. |
 
-The goal is a useful baseline that the community can build on: additional
-qualified ROM layouts, monitor cards, diagnostics, display options, and
-hardware profiles can be proposed, tested, documented, and contributed over
-time.
+The r21 image starts with **DOS 2.6 Original** and IEC address **8**. It omits
+JiffyDOS and S-JiffyDOS. It passed software composition checks but has **not
+yet been flashed or tested in a drive**; treat it as a test candidate.
 
-> **Project note:** This is a community builder/tester project. I use AI as a
-> practical development partner for research, coding, documentation, test
-> ideas, and troubleshooting, while learning and validating the hardware as I
-> go.
+The separate [stock two-ROM image](https://github.com/benkrall1973/1541HUD-OneROM/releases/tag/v8.1-fire24g-ub3-images-2026-11-16)
+is the hardware-tested starting point. It contains stock 1541 DOS 2.6 and the
+OneROM bootloader.
 
-This repository is the public Fire-24G baseline built from the official
-OneROM v0.8.1 release, based on commit
-`1b189260d85a5feced19e969399986f5f1d1cabe`, with the custom 1541HUD plugins
-and role-specific firmware overlays. The checked-in host source already has
-the tested security updates; unused upstream Studio/prototype build trees
-are excluded. The pinned upstream OneROM core source remains unchanged; the
-project Control USB plugin has a separate source-only diagnostic-text fix,
-described below. See the
-[supported-source provenance](source/one-rom-v0.8.1/1541HUD-SOURCE.json).
-The integration is community-tested.
-See the [baseline runbook](docs/V81_BASELINE_RUNBOOK.md) for versions and test scope.
-It includes qualified source, wiring records, the 1541HUD Python
-application, ROM-composition templates, a curated DOS/KERNAL library, and three Fire-24G images: the tested
-UB3 USB 0.8.1.16 baseline, a V53-compatible UB3 USB 0.8.1.17 candidate, and
-the UB4 Monitor image. The ROM library includes stock DOS 2.6, the tested
-SpeedDOS+ profile, and DolphinDOS 2.0 source/pages/KERNAL. JiffyDOS and
-S-JiffyDOS directories contain patch/build documentation and project source,
-but no licensed JiffyDOS inputs or generated S-JiffyDOS pages. See the
-[ROM and KERNAL catalog](roms/README.md) for exact contents.
-The [latest verified release](https://github.com/benkrall1973/1541HUD-OneROM/releases/tag/v8.1-fire24g-stock-2rom-2026-11-10)
-contains the UB3 V51 baseline, the V53-compatible .17 Apply Only image, and the
-UB4 Monitor image. The .16 release attachment is the original drive-tested
-build; the checked-in .16 package image is a path-normalized copy with a
-different hash. The .17 asset matches the checked-in package image.
+### JiffyDOS and S-JiffyDOS
 
-The Control USB source now reports the accepted IEC range as 8–9 when rejecting
-an invalid address. The release images do not include that later text-only
-source correction, so an invalid-address reply may still print `MAX=11`. The
-firmware accepts only IEC 8/9; the message does not change address behavior. A ROM set is one
-selectable profile and may contain up to three ROM chips, such as a C/A/E
-triplet. OneROM Fire supports up to 16 sets in a firmware image. The HUD can
-scroll through and select the sets exposed by the installed image; direct
-jumper selection is limited by the board's physical selector inputs.
+You can make private images from ROMs and tools you are licensed to use. The
+public repository includes preparation notes and project-authored material,
+but **does not include licensed JiffyDOS ROMs or a ready-made JiffyDOS image**.
+JiffyDOS fast serial transfers need the matching licensed JiffyDOS C64 KERNAL.
+S-JiffyDOS uses RAMBoard shadow RAM at `$8000–$9FFF`; software that writes to
+that range while S-JiffyDOS is active can corrupt its running code. See the
+[JiffyDOS](roms/jiffydos/README.md), [S-JiffyDOS](roms/s-jiffydos/README.md),
+and [RAMBoard](roms/ramboard/README.md) notes.
 
-## AI-assisted builds
+Browse the [ROM and KERNAL library](roms/README.md) for included pages, source,
+build notes, and checksums. C64 KERNALs are installed on the C64; the UB3
+images above contain drive-side ROM profiles, not a C64 KERNAL replacement.
 
-An AI coding assistant can be a practical build partner for this project: it
-can inspect the repository, help install and verify the documented toolchain,
-prepare a lawful ROM manifest, run the qualified build wrapper, compare hashes,
-and troubleshoot a failed build. The repository is deliberately organized so a
-fresh clone contains the pinned official source, runbook, and validation
-material needed for that work.
+## Get started
 
-AI assistance does not replace builder judgment. Supply only ROM pages you are
-entitled to use, review any changes before building, and verify the target
-OneROM serial before flashing. Never let an assistant guess which of two
-connected boards should be programmed.
-
-## Start here
-
-1. Decide whether you want to **use the supplied firmware** or **build your
-   own**. For a source build, follow [Build the UB3 Control firmware](docs/BUILD_UB3_CONTROL.md).
-2. Before wiring, pick the layout that matches your drive: **two ROM pages with
-   direct X1 wiring**, or **three C/A/E pages using the 74LS138**. The
-   [wiring guide](docs/FIRE24G-VERIFIED-WIRING.md) shows both.
-3. UB3 is the Control board: it serves ROMs and handles IEC address, reset,
-   and optional write protect. UB4 is the Monitor board: it only observes the
-   drive. Use the firmware image that matches each board's role.
-
-The wiring guide also explains the reset resistor, optional write-protect
-circuit, and the USB cable needed when Apply Only must revert after a
-drive-only power cycle.
-
-## What is included
-
-| Item | Purpose |
-| --- | --- |
-| `releases/` | Fire-24G UB3 stock Control baseline, V53 Apply Only candidate, and UB4 Monitor images. |
-| `source/one-rom-v0.8.1/` | Supported source derived from official v0.8.1, with checked-in host security fixes and an explicit provenance manifest. |
-| `tools/onerom-v0.6.0-hud1.exe` | Patched OneROM CLI 0.6.0 for Windows composition, scan, inspection, and flashing. |
-| `1541hud/` | 1541HUD Python source, launcher, build script, and tests. |
-| `firmware-control/` | UB3 Control source and 1541HUD Control plugins. |
-| `firmware-monitor/` | UB4 passive Monitor source and plugins. |
-| `roms/` | Curated drive ROMs, C64 KERNALs, source references, and RAMBoard documents. |
-| `roms/configs/` | ROM-free composition examples for Lower, Upper, C/A/E, and Monitor inputs. |
-| `docs/` | Wiring, engineering, build, release, and ROM-preparation references. |
-
-## Quick start: flash the supplied images
-
-The included OneROM CLI avoids a separate download for the stock-image
-workflow. Close 1541HUD first so it releases the board USB ports.
-
-1. Connect **only the intended OneROM** and put it into BOOTSEL.
-2. Open PowerShell in the repository root and discover the board:
+1. Read the [baseline runbook](docs/V81_BASELINE_RUNBOOK.md) and
+   [verified wiring guide](docs/FIRE24G-VERIFIED-WIRING.md). These images are
+   for Fire-24G boards; UB3 Control and UB4 Monitor images are not interchangeable.
+2. Close 1541HUD, connect only the board you intend to program, enter BOOTSEL,
+   and scan for its serial:
 
    ```powershell
    ./tools/onerom-v0.6.0-hud1.exe --unrecognised scan --board fire-24-g
    ```
 
-3. Confirm the displayed serial is the board you intend to flash.
-4. Flash exactly one image, replacing `<SERIAL>` with that board's serial.
-
-   **UB3 Control - stock two-ROM DOS 2.6 image for HUD V53 Apply Only**
-
-   ```powershell
-   ./tools/onerom-v0.6.0-hud1.exe --serial <SERIAL> program `
-     --firmware ./releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0.8.1.17.bin `
-     --verify
-   ```
-
-   For the established HUD V51 baseline, use
-   `onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0.8.1.bin` instead.
-
-   **UB4 Monitor - passive telemetry image**
+3. Confirm the serial, download the selected `.bin` from the
+   [release page](https://github.com/benkrall1973/1541HUD-OneROM/releases/tag/v8.1-fire24g-ub3-images-2026-11-16),
+   then flash it with `program --verify`:
 
    ```powershell
    ./tools/onerom-v0.6.0-hud1.exe --serial <SERIAL> program `
-     --firmware ./releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.32.bin `
-     --verify
+     --firmware <PATH-TO-IMAGE.bin> --verify
    ```
 
-5. Reboot normally and confirm USB enumeration. Test UB3 first: IEC 8/9,
-   reset, then an immediate directory read. Install and test UB4 only after
-   the Control board is known good.
+   Compare the image's SHA-256 with the value shown on the release page.
+4. Install and run the Windows HUD by following
+   [1541HUD setup](1541hud/README.md). HUD V0.8.0.58 supports the newer ROM
+   list and Apply Only flow; Apply Only needs the matching UB3 USB 0.8.1.17
+   image. For a USB-connected power cycle to reload the saved address, UB3
+   must lose power too: use a data cable that passes D+/D− and ground while
+   blocking host +5 V, or power-cycle UB3 separately.
 
-See [public release images](docs/PUBLIC_FIRE24G_RELEASES.md) for SHA-256
-values, image contents, and the full acceptance sequence.
+## Build or customize
 
-## Run 1541HUD
+- To build the Control firmware, follow [Build UB3 Control](docs/BUILD_UB3_CONTROL.md).
+- To compose a custom drive image, start with the [ROM library](roms/README.md),
+  [page preparation guide](docs/THIRD_PARTY_DOS_PAGE_PREPARATION.md), and
+  [composition guide](docs/UB3_CONTROL_CLI_COMPOSITION_GUIDE.md). Examples
+  are in `roms/configs/`.
+- Keep private ROM inputs and custom images out of public Git. JiffyDOS is
+  commercial software; use only ROMs and tools you are licensed to use.
 
-Install Python 3.12 or newer for Windows with **pip, Tcl/Tk, and the Python launcher**.
-From the repository root, install the USB serial dependency into the same
-Python installation used by the launcher:
+## Repository map
 
-```powershell
-py -3 -m pip install -r ./1541hud/requirements.txt
-py -3 -c "import tkinter, serial; print('1541HUD dependencies ready')"
-```
+| Folder | Contents |
+| --- | --- |
+| `releases/` | UB3 and UB4 firmware images and composition manifests |
+| `1541hud/` | Windows HUD source and launch/build files |
+| `firmware-control/` | UB3 Control firmware and plugins |
+| `firmware-monitor/` | UB4 passive Monitor firmware and plugins |
+| `roms/` | DOS ROM pages, KERNALs, references, and ROM-free config examples |
+| `docs/` | Wiring, build, flashing, and verification guides |
+| `source/` | Supported OneROM source snapshot and provenance |
 
-Then run:
+The supported base is the official OneROM v0.8.1 release. See the
+[source provenance](source/one-rom-v0.8.1/1541HUD-SOURCE.json),
+[contribution guide](CONTRIBUTING.md), and [safety notes](SECURITY.md).
 
-```text
-1541hud/source/Run-1541HUD-V0.8.0.58.cmd
-```
-
-V0.8.0.58 is the current HUD source candidate; V0.8.0.51 remains the last
-hardware-qualified HUD baseline. V58 includes the V53 Apply Only behavior and
-the newer ROM/help/menu UI. Apply Only requires the matching UB3 image with
-Control USB plugin 0.8.1.17. It changes the temporary IEC address without
-saving NV2. To have a 1541-only power cycle also restart UB3 and reload NV2
-while USB data remains connected, use a data-capable cable with host VBUS +5 V
-blocked.
-
-The application discovers OneROM boards by USB serial, not by an unstable COM
-number. Assign the Control and Monitor roles in **Settings**, then use the
-dashboard cards to inspect telemetry or issue Control commands. A connected
-UB4 is optional; UB3 remains usable for ROM, IEC, reset, and write-protect
-functions without it.
-
-See [1541HUD setup and troubleshooting](1541hud/README.md) if Python is not
-found, no USB boards appear, or you want to build a standalone application.
-The Python source is distributed here; the bundled Windows EXE is the OneROM
-CLI, not a standalone 1541HUD application.
-
-## Custom ROM images
-
-The supplied firmware is intentionally a stock test baseline. To build a
-custom DOS image, use ROM files that you are legally entitled to use:
-
-1. Start with the [DOS and KERNAL catalog](roms/README.md) to
-   choose a profile and its C64-side KERNAL pairing.
-2. Read the [ROM page preparation guide](docs/THIRD_PARTY_DOS_PAGE_PREPARATION.md).
-3. Select the matching example in `roms/configs/`:
-   - Lower socket: C/E pages
-   - Upper socket: E/C pages
-   - C/A/E: three-page layout for the documented 74LS138 wiring
-4. Copy the example and your ROM pages into ignored `roms/private/` paths.
-5. Follow [Build the UB3 Control firmware](docs/BUILD_UB3_CONTROL.md).
-
-The repository's [ROM library](roms/README.md) contains the
-documented stock, SpeedDOS+, and DolphinDOS profile inputs. JiffyDOS and
-S-JiffyDOS folders contain patch/build notes and project source only; never
-commit licensed JiffyDOS files or generated JiffyDOS/S-JiffyDOS pages. Keep
-private manifests, disk images, and custom composed firmware binaries out of
-the public repository.
-
-## Building from source
-
-The qualified source-build host is WSL2 or Linux with ARM GNU Toolchain 15.3.Rel1,
-GNU Make, and a POSIX shell; Rust/Cargo is also required for Control builds.
-Native Windows remains supported for 1541HUD and the bundled OneROM CLI, which
-is sufficient for inspecting and flashing release images, but it is not a
-replacement for the compiler toolchain.
-
-The detailed procedures and build-script arguments are in
-[Fire-24G V8.1 Build and Installation](docs/FIRE24G_V81_BUILD_AND_INSTALL.md).
-Supported wrappers verify the [checked-in host dependency security fixes](docs/HOST_DEPENDENCY_OVERLAY.md)
-before building. The historical overlay remains for provenance and older
-source exports. Published firmware images are unchanged.
-For a repeatable build of both roles without private ROM inputs, use the
-[clean source-build check](docs/CLEAN_SOURCE_BUILD.md).
-Run the package check before publishing a derivative:
-
-```powershell
-./tools/maintenance/Test-Public-Package.ps1 -PackageRoot .
-```
-
-## Documentation map
-
-- [Supported-source security cleanup and alert handling](docs/SOURCE_SECURITY_CLEANUP_2026-11-10.md)
-- [Release images and hashes](docs/PUBLIC_FIRE24G_RELEASES.md)
-- [Verified wiring and reset behavior](docs/FIRE24G-VERIFIED-WIRING.md)
-- [Engineering dossier: GPIO, LEDs, reset, architecture](docs/FIRE24G_V81_ENGINEERING_DOSSIER.md)
-- [Build and installation runbook](docs/FIRE24G_V81_BUILD_AND_INSTALL.md)
-- [UB3 custom composition guide](docs/UB3_CONTROL_CLI_COMPOSITION_GUIDE.md)
-- [Build the UB3 Control firmware](docs/BUILD_UB3_CONTROL.md)
-- [ROM page preparation](docs/THIRD_PARTY_DOS_PAGE_PREPARATION.md)
-- [Package boundary and redistribution policy](docs/PUBLIC_PACKAGE_MANIFEST.md)
-- [Release checklist](docs/RELEASE_CHECKLIST.md)
-- [Validation matrix and support boundary](docs/VALIDATION_MATRIX.md)
-- [Dependency-alert triage](docs/DEPENDENCY_ALERT_TRIAGE.md)
-- [Notices and upstream provenance](NOTICE.md)
-- [Contributing guide](CONTRIBUTING.md)
-- [Security and hardware-safety reporting](SECURITY.md)
-
-## Safety and support boundaries
-
-Disconnect power before altering wiring. Never connect a 5 V drive signal
-directly to a 3.3 V-only OneROM GPIO. Do not flash a board until its serial
-and role are known. This project documents a specific, tested installation;
-other 1541 revisions and wiring choices require their own electrical review.
-
-Contributions are welcome under the repository [MIT License](LICENSE). Preserve
-the separate licenses and notices for OneROM and all vendored dependencies;
-the project does not grant redistribution rights for third-party DOS ROMs.
-
-
+Disconnect power before changing wiring. Do not connect 5 V drive signals
+directly to 3.3 V OneROM GPIO. Verify the board role and serial before flashing.
