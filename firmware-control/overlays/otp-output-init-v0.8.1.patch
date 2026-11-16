@@ -1,0 +1,9 @@
+--- a/firmware/src/otp.c
++++ b/firmware/src/otp.c
+@@ -177,2 +177,2 @@
+-    uint16_t row;
+-    uint16_t len;
++    uint16_t row = 0;
++    uint16_t len = 0;
+         return 0;
+     }

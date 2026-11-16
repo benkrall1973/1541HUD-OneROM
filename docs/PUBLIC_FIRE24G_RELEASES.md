@@ -17,8 +17,18 @@ tested in a 1541: DOS boot, directory read and game load, saving IEC address
 and ROM selection, write-protect operation, reset, and Control/Monitor
 communication. Use the stock C64 KERNAL.
 
-The r21 image starts with **DOS 2.6 Original** and IEC address **8**. Its four
-visible drive profiles and C64 KERNAL pairings are:
+The r21 image starts with **DOS 2.6 Original** (NV0 = 1) and IEC address **8**
+(NV2 = 8). I downloaded the release asset and inspected it locally with the
+repository's OneROM CLI. The image reports Fire-24G, USB plugin 0.8.1.18,
+Host-Control 0.8.1.5, 11 total slots including the bootloader, and the four
+visible profiles below. Slots 5–10 are marked `@hidden:Unused ROM slot`; no
+JiffyDOS or S-JiffyDOS pages are present. The image contains 33 8-KiB drive
+pages. Its embedded NV data starts at offset `0x2F000`, with NV0 set to slot 1
+and NV2 to address 8; the NV-sector hash is
+`431ACA2B89BF1051557C02F7F9A94DCD4CA6DA16AE4F68BD458E51104FBD3045`. The
+image is 917,504 bytes and its SHA-256 matches the release entry above.
+
+Its four visible drive profiles and C64 KERNAL pairings are:
 
 All four profiles use the three-page **C/A/E layout**. The r21 image therefore
 requires the documented **74LS138 decoder wiring**: X1 to `/Y5` (pin 10) and
@@ -33,9 +43,10 @@ use the stock two-ROM image for that wiring.
 | DolphinDOS 2.0 | DolphinDOS 2.0 C64 KERNAL, parallel cable, and compatible drive-side RAM for its fast path |
 
 JiffyDOS and S-JiffyDOS drive ROMs, C64 KERNALs, and runtime helper are not
-included in r21. Its visible slot layout, labels, defaults, image size, and
-absence of JiffyDOS pages passed software inspection. **The image still needs
-the listed hardware test before it can be called drive-qualified.**
+included in r21. The same four-profile manifest is available at
+[`r21-basic-no-jiffydos-compose.json`](../releases/r21-basic-no-jiffydos-compose.json)
+and uses public ROM assets. **The image still needs the listed hardware test
+before it can be called drive-qualified.**
 
 ## Other repository images
 
@@ -44,8 +55,8 @@ the listed hardware test before it can be called drive-qualified.**
 | UB4 passive Monitor | `releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.32.bin` | 229,376 bytes | `475EB25252ADB9435BD7569297C6C16E72DD7830980B88DA9268EAEFC9BF43BD` | Flash only to the passive UB4 Monitor board; do not use on UB3. |
 | UB3 V53 Apply Only candidate | `releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0.8.1.17.bin` | 262,144 bytes | `4798C3DD88B9018581E5285E529F6C69A678308AFD25202CF761E1ACF6AA55B8` | Historical candidate in the repository; it is not attached to the current GitHub release. |
 
-The V53 candidate combines the same two stock 1541 profiles with Control USB
-0.8.1.17 and Host-Control 0.8.1.5. USB 0.8.1.17 adds `ROMIEC_NOW` for HUD
+The recorded V53 candidate combines the same two stock 1541 profiles with
+Control USB 0.8.1.17 and Host-Control 0.8.1.5. USB 0.8.1.17 adds `ROMIEC_NOW` for HUD
 V0.8.0.53/V0.8.0.58 Apply Only. The live address change was verified on the
 drive without changing the selected DOS profile or requiring a 1541 power
 cycle. The checked-in binary was normalized after testing to remove local
@@ -60,12 +71,10 @@ equal-length diagnostic-path strings normalized and a different hash
 normalized copy was not reflashed. The normalizer is
 [`Sanitize-Control-Diagnostics.ps1`](../tools/maintenance/Sanitize-Control-Diagnostics.ps1).
 
-The public stock composition example fetches the 1541 E000 page from the
-Zimmers URL in [`stock-2rom-compose.json`](../releases/stock-2rom-compose.json).
-That fetched page's recorded hash differs from the tracked 1541-II E page;
-the two are not interchangeable based on their names. The released stock
-image is the tested artifact, but its public compose input provenance still
-needs reconciliation before claiming a bit-for-bit reproducible rebuild. See
+The public stock composition uses the separately named 1541 E000 901229-06AA
+page tracked in the ROM library and checksum manifest. It is not byte-identical
+to the other 1541 and 1541-II E pages; do not substitute either based only on a
+similar filename. See
 [`roms/stock-dos-2.6/README.md`](../roms/stock-dos-2.6/README.md).
 
 ## Flashing

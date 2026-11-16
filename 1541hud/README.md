@@ -2,8 +2,8 @@
 
 V0.8.0.58 is the current public HUD source candidate. V0.8.0.51 remains the
 last hardware-qualified application baseline. V58 includes the V53 runtime-only
-IEC address behavior and UI updates; Apply Only requires the matching UB3
-Control USB plugin 0.8.1.17. The HUD version is independent of OneROM firmware
+IEC address behavior and UI updates; Apply Only requires UB3 Control USB
+plugin 0.8.1.17 or newer. The current public source is 0.8.1.18. The HUD version is independent of OneROM firmware
 v0.8.1.
 
 The startup ROM picker shows profile names without slot numbers while
@@ -23,7 +23,7 @@ writing NV2. The temporary address remains while UB3 stays powered. If a
 1541-only power cycle must also restart UB3 and reload the saved address while
 USB data stays connected, use a data-capable cable with host VBUS +5 V blocked,
 or power-cycle UB3 explicitly. The older v0.8.1.16 stock image is the V51
-baseline; Apply Only needs v0.8.1.17.
+baseline; Apply Only needs USB 0.8.1.17 or newer.
 
 The public package includes Python source, launchers, and the optional build
 script, not a prebuilt standalone HUD EXE. `tools/onerom-v0.6.0-hud1.exe` is

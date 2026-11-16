@@ -12,6 +12,7 @@
 /firmware-monitor/.work/
 /work/
 !firmware-monitor/inputs/*.bin
+!roms/stock-dos-2.6/drive-1541/E000-FFFF-901229-06AA.bin
 !tools/onerom-v0.6.0-hud1.exe
 # Recreated Control core and local consolidation probes.
 /firmware-control/.work/

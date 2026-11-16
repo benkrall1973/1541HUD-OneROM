@@ -1,11 +1,11 @@
 # Changelog
 
-## [Unreleased]
+## [1541HUD 0.8.1.18] - ten-profile selector support
 
-Correct the invalid IEC-address diagnostic's reported maximum from 11 to 9.
-The validator already accepted only addresses 8 and 9; this changes reply text
-only. The checked-in .16 and .17 firmware images were not rebuilt for this
-source correction and may still report `MAX=11`.
+Raise the selectable profile ceiling from eight to ten so ROMLIST/ROMSLOT and
+ROMSET can expose the two additional S-JiffyDOS RAMBoard shadow-test profiles.
+Keep the range derived from the configured slot count, retain NV0/NV2 behavior,
+and assign distinct LED colors to the two new profile numbers.
 
 ## [1541HUD 0.8.1.12] - full Control qualification candidate
 

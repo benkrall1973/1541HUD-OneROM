@@ -21,11 +21,14 @@ for fast DOS features; a drive ROM and a C64 KERNAL are separate things.
 | **DolphinDOS 2.0** | DolphinDOS 2.0 KERNAL | Parallel cable and compatible drive-side RAM for its fast path. |
 
 The r21 image starts with **DOS 2.6 Original** and IEC address **8**. It omits
-JiffyDOS and S-JiffyDOS. It passed software composition checks but has **not
-yet been flashed or tested in a drive**; treat it as a test candidate.
+JiffyDOS and S-JiffyDOS. The release binary passed offline inspection of its
+board, plugin versions, slot layout, ROM labels, and NV0/NV2 defaults, but has
+**not yet been flashed or tested in a drive**; treat it as a test candidate.
 All four r21 drive profiles use the three-page **C/A/E layout** and require
 the documented **74LS138 decoder wiring** (X1 to `/Y5`, pin 10; X2 to `/Y7`,
-pin 7). Use the stock two-ROM image for a direct X1 socket-wiring setup.
+pin 7). The complete ROM composition is in
+[`releases/r21-basic-no-jiffydos-compose.json`](releases/r21-basic-no-jiffydos-compose.json).
+Use the stock two-ROM image for a direct X1 socket-wiring setup.
 
 The separate [stock two-ROM image](https://github.com/benkrall1973/1541HUD-OneROM/releases/tag/v8.1-fire24g-ub3-images-2026-11-16)
 is the hardware-tested starting point. It contains stock 1541 DOS 2.6 and the
@@ -71,8 +74,8 @@ images above contain drive-side ROM profiles, not a C64 KERNAL replacement.
    Compare the image's SHA-256 with the value shown on the release page.
 4. Install and run the Windows HUD by following
    [1541HUD setup](1541hud/README.md). HUD V0.8.0.58 supports the newer ROM
-   list and Apply Only flow; Apply Only needs the matching UB3 USB 0.8.1.17
-   image. For a USB-connected power cycle to reload the saved address, UB3
+   list and Apply Only flow; Apply Only needs UB3 Control USB 0.8.1.17 or newer
+   (the repository source is 0.8.1.18). For a USB-connected power cycle to reload the saved address, UB3
    must lose power too: use a data cable that passes D+/D− and ground while
    blocking host +5 V, or power-cycle UB3 separately.
 

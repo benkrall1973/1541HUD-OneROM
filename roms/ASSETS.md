@@ -9,9 +9,11 @@ the RAMBoard D64 is a 174,848-byte, 35-track utility disk, not ROM data.
 
 The `stock-dos-2.6/` folder contains the extracted 1541 longboard and 1541-II
 drive pages plus stock C64 KERNAL 901227-03. The A page mirrors E for each
-drive revision. These are ROM dumps/pages; Commodore assembly source was not
-available in the project archive. The root MIT license does not apply to
-these contents.
+drive revision. The folder also contains E000 page 901229-06AA, fetched from
+[Zimmers](http://www.zimmers.net/anonftp/pub/cbm/firmware/drives/new/1541/1541-e000.901229-06AA.bin)
+and used by the stock two-ROM build. These are ROM dumps/pages; Commodore assembly source
+was not available in the project archive. The root MIT license does not apply
+to these contents.
 
 ## SpeedDOS+
 

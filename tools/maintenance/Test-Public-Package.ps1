@@ -30,6 +30,20 @@ function Get-Sha256Hex {
     }
 }
 
+function Get-LfTextSha256Hex {
+    param([Parameter(Mandatory)][string]$Path)
+    $text = [System.IO.File]::ReadAllText($Path, [System.Text.Encoding]::UTF8)
+    $text = $text.Replace("`r`n", "`n").Replace("`r", "`n")
+    $bytes = [System.Text.UTF8Encoding]::new($false).GetBytes($text)
+    $sha256 = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        return ([System.BitConverter]::ToString($sha256.ComputeHash($bytes))).Replace('-', '')
+    }
+    finally {
+        $sha256.Dispose()
+    }
+}
+
 $required = @(
     'README.md',
     '1541hud/README.md',
@@ -96,6 +110,7 @@ $required = @(
     'firmware-monitor/inputs/1541-OneROM-Bootloader-Universal-v1.1.0.bin',
     'firmware-monitor/inputs/1541-c000.325302-01.bin',
     'firmware-control/active-plugins/system/1541HUD-USB-v0.8.1',
+    'firmware-control/overlays/otp-output-init-v0.8.1.patch',
     'firmware-control/active-plugins/user/1541HUD-Host-Control-v0.8.1',
     'firmware-monitor/active-plugins/system/1541HUD-Monitor-USB',
     'firmware-monitor/active-plugins/user/1541HUD-Monitor',
@@ -113,6 +128,7 @@ $required = @(
     '1541hud/source/Run-1541HUD-V0.8.0.58.cmd',
     '1541hud/Build-1541HUD-V0.8.0.58.ps1',
     'releases/stock-2rom-apply-only-compose.json',
+    'releases/r21-basic-no-jiffydos-compose.json',
     '1541hud/tests/test_onerom_usb.py',
     'utilities/rom-pages/Split-1541-RomPages.ps1',
     'tools/onerom-v0.6.0-hud1.exe',
@@ -201,7 +217,7 @@ $sourcePins = Get-Content -Raw -LiteralPath $sourceManifestPath | ConvertFrom-Js
 if ($LASTEXITCODE -ne 0) { throw 'Checked-in supported source verification failed.' }
 $expectedCliLock = $hostPins.lock_sha256
 if ($cliRecord.PSObject.Properties.Name -contains 'source_hardening_sha256') {
-    if ($cliRecord.source_hardening_sha256 -ne (Get-Sha256Hex -Path $sourceManifestPath)) {
+    if ($cliRecord.source_hardening_sha256 -ne (Get-LfTextSha256Hex -Path $sourceManifestPath)) {
         throw 'Rebuilt CLI source provenance differs from the checked-in source manifest.'
     }
     $expectedCliLock = $sourcePins.files_sha256_lf.'rust/Cargo.lock'

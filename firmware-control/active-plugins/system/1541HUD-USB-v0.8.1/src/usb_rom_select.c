@@ -28,7 +28,7 @@
 #include "tusb.h"
 #include "system.h"
 
-#define ROMSEL_VERSION             "V0.8.1.04"
+#define ROMSEL_VERSION             "V0.8.1.05"
 #define ROMSEL_NV_SECTOR_SIZE      4096u
 #define ROMSEL_USER_PLUGIN_SIZE    (64u * 1024u)
 #define ROMSEL_NV_ADDR             (ORA_USER_PLUGIN_BASE + ROMSEL_USER_PLUGIN_SIZE - ROMSEL_NV_SECTOR_SIZE)
@@ -38,7 +38,7 @@
 #define ROMSEL_BOOT_IEC_OFFSET      2u
 #define ROMSEL_LED_POLICY_AUTO     0xA5u
 #define ROMSEL_LED_POLICY_OFF      0x5Au
-#define ROMSEL_MAX_SELECTABLE      8u
+#define ROMSEL_MAX_SELECTABLE      10u
 #define ROMSEL_IEC_SEL_A_INDEX     0u
 #ifndef ROMSEL_DIAGNOSTIC_NO_AUTO_NV
 #define ROMSEL_DIAGNOSTIC_NO_AUTO_NV 0
@@ -140,7 +140,7 @@ static void rgb_set(uint8_t mode, uint8_t red, uint8_t green, uint8_t blue,
 }
 
 static void rgb_slot(uint8_t slot) {
-    static const uint8_t colours[9][3] = {
+    static const uint8_t colours[11][3] = {
         {  0u,  64u, 180u }, // bootloader: blue
         {  0u, 160u, 220u }, // DOS 2.6: cyan
         {120u,  70u, 190u }, // 1541-II: purple
@@ -150,8 +150,10 @@ static void rgb_slot(uint8_t slot) {
         {  0u, 150u, 120u }, // DolphinDOS: teal
         {220u, 220u, 220u }, // SpeedDOS: white
         {255u, 110u,  20u }, // SpeedDOS RAMBoard: orange
+        {100u,  40u, 220u }, // S-Jiffy shadow loader: violet
+        {240u,  30u, 100u }, // S-Jiffy RAMBoard runtime: rose
     };
-    uint8_t index = (slot < 9u) ? slot : 0u;
+    uint8_t index = (slot < 11u) ? slot : 0u;
     rgb_set(ORA_LED_MODE_ON, colours[index][0], colours[index][1],
             colours[index][2], 15u, 0u, 0u);
 }
@@ -1055,7 +1057,7 @@ static void cmd_list(void) {
     if (!s_ready) {
         cdc_write("$ROMTEST,ERROR,API_NOT_READY"); reply_end(); return;
     }
-    // Return only the list header. Sending all eight slot records synchronously
+    // Return only the list header. Sending every slot record synchronously
     // from the CDC RX callback can overflow TinyUSB's transmit FIFO and
     // splice/drop response bytes.
     // The host now requests one slot at a time with ROMSLOT=<index>.
@@ -1139,7 +1141,7 @@ static void process_line(char *line) {
         }
         if (!boot_iec_valid(address)) {
             cdc_write("$ROMTEST,IEC,FAIL,INVALID_ADDRESS,ADDRESS="); cdc_write_u32(address);
-            cdc_write(",MIN=8,MAX=9"); reply_end(); return;
+            cdc_write(",MIN=8,MAX=11"); reply_end(); return;
         }
         bool ok = write_boot_iec_address(address);
         if (ok) rgb_save_iec(address);

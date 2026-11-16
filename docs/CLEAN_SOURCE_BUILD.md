@@ -13,6 +13,14 @@ export TOOLCHAIN=/path/to/arm-toolchain/bin
 bash tools/maintenance/Test-Source-Build.sh
 ```
 
+When using the bundled installer from a Windows checkout mounted in WSL, pass
+the pinned version explicitly so a CRLF checkout cannot add a carriage return
+to the version string:
+
+```sh
+export TOOLCHAIN="$(bash source/one-rom-v0.8.1/ci/install-arm-toolchain.sh "$HOME/arm-gnu-toolchain" 15.3.rel1)"
+```
+
 This builds the official core, custom Control plugins, host CLI, passive
 Monitor core and custom Monitor plugins, then composes and inspects the
 synthetic Control and Monitor verification images. It uses the CLI built from

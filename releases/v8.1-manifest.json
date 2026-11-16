@@ -66,5 +66,39 @@
       "prototypes/studiov2"
     ],
     "firmware_c_source_changed": false
+  },
+  "github_release": {
+    "tag": "v8.1-fire24g-ub3-images-2026-11-16",
+    "prerelease": true,
+    "assets": [
+      {
+        "role": "UB3 stock two-ROM DOS 2.6",
+        "file": "onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0.8.1.bin",
+        "bytes": 262144,
+        "sha256": "A066F70C1B9636714C0D0A0694D4B981641DF3E1DDD024D0E210097697BCBAFD",
+        "status": "flashed and drive-tested; see docs/STOCK_CONTROL_DRIVE_TEST_2026-11-10.md"
+      },
+      {
+        "role": "UB3 r21 Basic, no JiffyDOS",
+        "file": "onerom-1541HUD-Control-UB3-fire-24-g-basic-no-jiffydos-r21.bin",
+        "bytes": 917504,
+        "sha256": "4A8D2477B1C250111D846FBBF51CFFA5664A95E86627C28DEC8C0CF754827588",
+        "usb_plugin": "0.8.1.18",
+        "host_control_plugin": "0.8.1.5",
+        "default_rom_slot": 1,
+        "default_iec_address": 8,
+        "nv_sector_offset": "0x2F000",
+        "nv_sector_bytes": 4096,
+        "nv_sector_sha256": "431ACA2B89BF1051557C02F7F9A94DCD4CA6DA16AE4F68BD458E51104FBD3045",
+        "visible_profiles": [
+          "DOS 2.6 Original",
+          "DOS 2.6 1541-II",
+          "SpeedDOS",
+          "DolphinDOS 2.0"
+        ],
+        "hidden_unused_slots": [5, 6, 7, 8, 9, 10],
+        "status": "downloaded and independently inspected offline; hardware test pending"
+      }
+    ]
   }
 }

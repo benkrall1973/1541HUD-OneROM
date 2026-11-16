@@ -16,6 +16,7 @@ upstream="$root/source/one-rom-v0.8.1"
 work="$root/firmware-control/.work/control-core-v0.8.1"
 core="$work/one-rom-v0.8.1"
 overlay="$root/firmware-control/overlays/ub3-early-reset-v0.8.1.patch"
+otp_overlay="$root/firmware-control/overlays/otp-output-init-v0.8.1.patch"
 usb="$root/firmware-control/active-plugins/system/1541HUD-USB-v0.8.1"
 host="$root/firmware-control/active-plugins/user/1541HUD-Host-Control-v0.8.1"
 
@@ -43,10 +44,18 @@ bash "$root/tools/maintenance/Apply-Host-Dependencies.sh" "$core"
 # The tracked Windows checkout carries CRLF in this source file; normalise the
 # disposable build copy before applying the POSIX patch.
 sed -i 's/\r$//' "$core/firmware/src/rp235x.c"
+sed -i 's/\r$//' "$core/firmware/src/otp.c"
 # Fail immediately if the reset overlay cannot be applied.
 patch --fuzz=0 -d "$core" -p1 < "$overlay"
 grep -Fq "UB3 Control reset interlock" "$core/firmware/src/rp235x.c" || {
   echo "Failed to apply UB3 reset interlock overlay." >&2
+  exit 1
+}
+# Initialize OTP outputs before the helper call.  Its false path returns
+# immediately, but GCC 15 still flags the later use as maybe-uninitialized.
+patch --fuzz=0 -d "$core" -p1 < "$otp_overlay"
+grep -Fq 'uint16_t len = 0;' "$core/firmware/src/otp.c" || {
+  echo "Failed to apply OTP output initialization overlay." >&2
   exit 1
 }
 make -C "$core" TOOLCHAIN="${TOOLCHAIN:-/usr/bin}" all

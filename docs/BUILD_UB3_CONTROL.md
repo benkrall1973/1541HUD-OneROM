@@ -7,8 +7,8 @@ only want to use the supplied image, skip this and follow
 ## What you need
 
 - A Windows PC with **WSL2 and Ubuntu**, or a Linux computer.
-- Internet access. The build downloads pinned source dependencies and the
-  public stock DOS page referenced by the stock configuration.
+- Internet access. The build downloads pinned source dependencies; the stock
+  DOS page is included in the checksummed ROM library.
 - The build tools below. The supported, CI-matched versions are Rust/Cargo
   **1.99.0** and Arm GNU Toolchain **15.3.rel1**.
 - A ROM configuration and the ROM pages it names. The public stock
@@ -41,7 +41,7 @@ From the repository root, install the pinned Arm compiler and add it to this
 terminal's search path:
 
 ```bash
-export TOOLCHAIN="$(bash source/one-rom-v0.8.1/ci/install-arm-toolchain.sh "$HOME/arm-gnu-toolchain")"
+export TOOLCHAIN="$(bash source/one-rom-v0.8.1/ci/install-arm-toolchain.sh "$HOME/arm-gnu-toolchain" 15.3.rel1)"
 export PATH="$TOOLCHAIN:$PATH"
 ```
 
@@ -50,11 +50,23 @@ shell startup file.
 
 ## 2. Choose a configuration
 
-For the public stock two-ROM image, use the checked-in configuration:
+For a source-built stock two-ROM image, use the checked-in configuration:
 
 ```text
 releases/stock-2rom-compose.json
 ```
+
+The repository currently builds USB plugin **0.8.1.18**. The attached stock
+release image uses USB **0.8.1.16** and remains the hardware-tested artifact;
+a fresh source build is a separate candidate until it is flashed and checked.
+The 901229-06AA ROM page is included in the checksummed library, so the stock
+composition has no external ROM download.
+
+The build wrapper applies two small patches to the disposable upstream copy:
+the UB3 reset interlock and an initialization for OTP output variables that
+GCC 15 otherwise reports as possibly uninitialized. The OTP helper returns
+before those values are read when no commissioning data exists, so this change
+does not alter normal behavior.
 
 For your own ROM set, copy the example matching your wiring into the ignored
 `roms/private/` folder and update its file paths. The quick rule is:
@@ -94,6 +106,21 @@ For a private configuration, replace the first path with your JSON file, for
 example `roms/private/my-drive.json`. The script builds the Control core,
 plugins, and local OneROM command-line tool, then composes and inspects the
 image. The finished file and its SHA-256 are reported at the end.
+
+To compose the four-profile no-JiffyDOS layout from the public, checksummed
+ROM pages, use:
+
+```bash
+bash consolidation/scripts/build-control-v0.8.1.sh \
+  releases/r21-basic-no-jiffydos-compose.json \
+  output/onerom-ub3-basic-no-jiffydos.bin
+```
+
+This produces an **untested build candidate**. It uses the C/A/E page layout
+and requires the documented 74LS138 wiring. Its fresh Host-Control NV starts
+erased; USB plugin 0.8.1.18 seeds the saved ROM slot to 1 and IEC address to 8
+when it initializes. The published r21 binary is a separate, offline-inspected
+release artifact and still needs the same drive test.
 
 The pinned upstream OneROM core is exported from the current Git commit.
 Commit changes to that core before building; uncommitted core edits are not

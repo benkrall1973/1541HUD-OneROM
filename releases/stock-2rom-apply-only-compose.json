@@ -7,9 +7,9 @@
       "type": "single",
       "chips": [
         {
-          "file": "firmware-control/active-plugins/system/1541HUD-USB-v0.8.1/build/1541-OneROM-1541HUD-USB-v0.8.1.17.bin",
+          "file": "firmware-control/active-plugins/system/1541HUD-USB-v0.8.1/build/1541-OneROM-1541HUD-USB-v0.8.1.18.bin",
           "type": "system_plugin",
-          "label": "1541HUD-USB-v0.8.1.17"
+          "label": "1541HUD-USB-v0.8.1.18"
         }
       ]
     },
@@ -54,7 +54,7 @@
           "label": "1541 STOCK DOS 2.6 (901229-06AA)"
         },
         {
-          "file": "http://www.zimmers.net/anonftp/pub/cbm/firmware/drives/new/1541/1541-e000.901229-06AA.bin",
+          "file": "roms/stock-dos-2.6/drive-1541/E000-FFFF-901229-06AA.bin",
           "type": "2364",
           "cs1": "active_low",
           "description": "1541 E000 stock DOS 2.6 page 901229-06AA",

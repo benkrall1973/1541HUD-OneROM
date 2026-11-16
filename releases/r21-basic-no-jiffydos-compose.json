@@ -1,0 +1,285 @@
+{
+  "version": 1,
+  "description": "Public C/A/E composition using the included stock DOS 2.6, SpeedDOS+, and DolphinDOS 2.0 drive pages. It omits JiffyDOS and S-JiffyDOS. Fresh Host-Control NV initializes to DOS 2.6 Original in slot 1 and IEC address 8.",
+  "chip_sets": [
+    {
+      "type": "single",
+      "chips": [
+        {
+          "file": "firmware-control/active-plugins/system/1541HUD-USB-v0.8.1/build/1541-OneROM-1541HUD-USB-v0.8.1.18.bin",
+          "type": "system_plugin",
+          "label": "1541HUD USB 0.8.1.18"
+        }
+      ]
+    },
+    {
+      "type": "single",
+      "chips": [
+        {
+          "file": "firmware-control/active-plugins/user/1541HUD-Host-Control-v0.8.1/build/1541-OneROM-1541HUD-Host-Control-v0.8.1.5.bin",
+          "type": "user_plugin",
+          "label": "1541HUD Host-Control 0.8.1.5"
+        }
+      ]
+    },
+    {
+      "type": "multi",
+      "chips": [
+        {
+          "file": "firmware-monitor/inputs/1541-c000.325302-01.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "1541 ONEROM BOOTLOADER"
+        },
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/A000-BFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "Commodore 1541 DOS 2.6 A-page"
+        },
+        {
+          "file": "firmware-monitor/inputs/1541-OneROM-Bootloader-Universal-v1.1.0.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "OneROM Universal Bootloader v1.1.0 E-page"
+        }
+      ]
+    },
+    {
+      "type": "multi",
+      "chips": [
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/C000-DFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "DOS 2.6 Original"
+        },
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/A000-BFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "Commodore 1541 DOS 2.6 A-page"
+        },
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/E000-FFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "Commodore 1541 DOS 2.6 E-page"
+        }
+      ]
+    },
+    {
+      "type": "multi",
+      "chips": [
+        {
+          "file": "roms/stock-dos-2.6/drive-1541-ii/C000-DFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "DOS 2.6 1541-II"
+        },
+        {
+          "file": "roms/stock-dos-2.6/drive-1541-ii/A000-BFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "Commodore 1541-II DOS 2.6 A-page"
+        },
+        {
+          "file": "roms/stock-dos-2.6/drive-1541-ii/E000-FFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "Commodore 1541-II DOS 2.6 E-page"
+        }
+      ]
+    },
+    {
+      "type": "multi",
+      "chips": [
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/C000-DFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "SpeedDOS"
+        },
+        {
+          "file": "roms/speeddos-plus/drive-pages/A000-BFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "SpeedDOS+ 2.7 35-track A-page"
+        },
+        {
+          "file": "roms/speeddos-plus/drive-pages/E000-FFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "SpeedDOS+ 2.7 35-track E-page"
+        }
+      ]
+    },
+    {
+      "type": "multi",
+      "chips": [
+        {
+          "file": "roms/dolphindos-2/drive-pages/C000-DFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "DolphinDOS 2.0"
+        },
+        {
+          "file": "roms/dolphindos-2/drive-pages/A000-BFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "DolphinDOS 2.0 A-page"
+        },
+        {
+          "file": "roms/dolphindos-2/drive-pages/E000-FFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "DolphinDOS 2.0 E-page"
+        }
+      ]
+    },
+    {
+      "type": "multi",
+      "chips": [
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/C000-DFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "@hidden:Unused ROM slot"
+        },
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/E000-FFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "@hidden:Unused ROM slot"
+        },
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/E000-FFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "@hidden:Unused ROM slot"
+        }
+      ]
+    },
+    {
+      "type": "multi",
+      "chips": [
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/C000-DFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "@hidden:Unused ROM slot"
+        },
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/E000-FFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "@hidden:Unused ROM slot"
+        },
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/E000-FFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "@hidden:Unused ROM slot"
+        }
+      ]
+    },
+    {
+      "type": "multi",
+      "chips": [
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/C000-DFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "@hidden:Unused ROM slot"
+        },
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/E000-FFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "@hidden:Unused ROM slot"
+        },
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/E000-FFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "@hidden:Unused ROM slot"
+        }
+      ]
+    },
+    {
+      "type": "multi",
+      "chips": [
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/C000-DFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "@hidden:Unused ROM slot"
+        },
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/E000-FFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "@hidden:Unused ROM slot"
+        },
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/E000-FFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "@hidden:Unused ROM slot"
+        }
+      ]
+    },
+    {
+      "type": "multi",
+      "chips": [
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/C000-DFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "@hidden:Unused ROM slot"
+        },
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/E000-FFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "@hidden:Unused ROM slot"
+        },
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/E000-FFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "@hidden:Unused ROM slot"
+        }
+      ]
+    },
+    {
+      "type": "multi",
+      "chips": [
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/C000-DFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "@hidden:Unused ROM slot"
+        },
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/E000-FFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "@hidden:Unused ROM slot"
+        },
+        {
+          "file": "roms/stock-dos-2.6/drive-1541/E000-FFFF.bin",
+          "type": "2364",
+          "cs1": "active_low",
+          "label": "@hidden:Unused ROM slot"
+        }
+      ]
+    }
+  ],
+  "name": "1541HUD Fire-24G Control - Basic without JiffyDOS",
+  "reserved_pins": [
+    "sel_b",
+    "sel_c",
+    "sel_d"
+  ]
+}

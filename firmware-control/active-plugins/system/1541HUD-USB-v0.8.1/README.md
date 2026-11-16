@@ -19,7 +19,7 @@ The wrapper copies the root-level official v0.8.1 source into that work tree.
 The output is:
 
 ```text
-build/1541-OneROM-1541HUD-USB-v0.8.1.17.bin
+build/1541-OneROM-1541HUD-USB-v0.8.1.18.bin
 ```
 
 Pair it with the official v0.8.1 core, the UB3 early-reset build overlay, and
@@ -28,7 +28,7 @@ cooperative idle wait; no idle-yield core patch is required.
 
 ## V8.1 HUD transport
 
-Build `v0.8.1.17` includes the V8.1 USB-DPRAM reservation required by the
+Build `v0.8.1.18` includes the V8.1 USB-DPRAM reservation required by the
 firmware before it can place its DPRAM log and allocator pool. It also enables
 the exclusive-serial property so the Control
 protocol owns the CDC stream; core logs are retrieved through picoboot/DPRAM
@@ -61,13 +61,15 @@ channels share the physical LED GPIO, so controlling just one channel can
 create false blended colours. A firmware-level fault indication remains under
 core control and is not claimed by this plugin.
 
-## Eight-profile selector limit
+## Selectable profile range
 
-The current UB3/74LS138 collection has eight selectable ROM profiles plus the
-bootloader. The selector therefore accepts `ROMSET=1` through `ROMSET=8` and
-rejects any other saved-slot value. NV0 selection saves are expected to work
-while the C64 and 1541 are running; the active ROM is RAM-backed. A C64 cursor
-lock during a completed `ROMSET` write is a regression, not expected behavior.
+The selector reports and accepts up to ten user-selectable ROM profiles. Its
+actual maximum is the configured non-plugin slot count minus the bootloader,
+capped at ten. Thus the ordinary r6 image reports eight; the experimental r7
+S-Jiffy shadow image reports ten. `ROMLIST`, `ROMSLOT`, and `ROMSET` use that
+same dynamic range. NV0 selection saves are expected to work while the C64 and
+1541 are running; the active ROM is RAM-backed. A C64 cursor lock during a
+completed `ROMSET` write is a regression, not expected behavior.
 
 ## OneROM contribution identity
 
