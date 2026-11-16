@@ -102,9 +102,10 @@ used to produce the supplied Monitor release image.
 | `firmware-monitor/inputs/1541-c000.325302-01.bin` | `6FA7B07AFF92DA66B0A28A52BB3C82FFE310AB0FAD2CC473B40137A8D299C7E5` |
 
 The Monitor and public stock UB3 composition use the tracked C000 and Universal
-E000 baseline pages shown above. The stock DOS 2.6 E000 page is fetched from
-the public URL in `releases/stock-2rom-compose.json`. Keep other owner-supplied
-DOS pages private under `roms/private/`.
+E000 baseline pages shown above. The stock DOS 2.6 E000 page is included in the
+checksummed `roms/stock-dos-2.6/drive-1541/` library, so the stock composition
+does not fetch a ROM page at build time. Keep other owner-supplied DOS pages
+private under `roms/private/`.
 
 ### Supported source-build host: WSL2 or Linux
 

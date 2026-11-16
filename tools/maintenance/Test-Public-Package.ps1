@@ -114,6 +114,7 @@ $required = @(
     'firmware-control/active-plugins/user/1541HUD-Host-Control-v0.8.1',
     'firmware-monitor/active-plugins/system/1541HUD-Monitor-USB',
     'firmware-monitor/active-plugins/user/1541HUD-Monitor',
+    'firmware-monitor/README.md',
     'firmware-monitor/shared/1541hud_mailbox.h',
     'firmware-monitor/overlays/ub4-passive-v0.8.1.patch',
     'releases/v8.1-manifest.json',

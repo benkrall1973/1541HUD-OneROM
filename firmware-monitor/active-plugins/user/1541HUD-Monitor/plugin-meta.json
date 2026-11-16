@@ -3,7 +3,7 @@
   "display_name": "1541HUD Monitor v0.8.1.32",
   "description": "Passive PIO/DMA capture plugin for the Fire-24G V8.1 UB4 Monitor image; reads core-owned SEL_A/GPIO26 /CS2 without attempting to claim it.",
   "author": "Ben Krall and contributors",
-  "source": "https://github.com/benkrall1973/1541-OneROM-Private",
+  "source": "https://github.com/benkrall1973/1541HUD-OneROM/tree/v8.1/firmware-monitor/active-plugins/user/1541HUD-Monitor",
   "license": "MIT",
   "build_output": "build/1541-OneROM-1541HUD-Monitor-v0.8.1.32.bin"
 }
