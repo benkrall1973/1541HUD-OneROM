@@ -197,14 +197,16 @@ py -3 -c "import tkinter, serial; print('1541HUD dependencies ready')"
 Then run:
 
 ```text
-1541hud/source/Run-1541HUD-V0.8.0.53.cmd
+1541hud/source/Run-1541HUD-V0.8.0.58.cmd
 ```
 
-V0.8.0.53 is the Apply Only candidate and requires the matching UB3 image with
-Control USB plugin 0.8.1.17. Apply Only changes SEL_A without saving NV2; to
-have a 1541-only power cycle also restart UB3 and reload NV2 while USB data
-remains connected, use a data-capable cable with host VBUS +5 V blocked. The
-existing V0.8.0.51/USB 0.8.1.16 release remains the last qualified baseline.
+V0.8.0.58 is the current HUD source candidate; V0.8.0.51 remains the last
+hardware-qualified HUD baseline. V58 includes the V53 Apply Only behavior and
+the newer ROM/help/menu UI. Apply Only requires the matching UB3 image with
+Control USB plugin 0.8.1.17. It changes the temporary IEC address without
+saving NV2. To have a 1541-only power cycle also restart UB3 and reload NV2
+while USB data remains connected, use a data-capable cable with host VBUS +5 V
+blocked.
 
 The application discovers OneROM boards by USB serial, not by an unstable COM
 number. Assign the Control and Monitor roles in **Settings**, then use the
