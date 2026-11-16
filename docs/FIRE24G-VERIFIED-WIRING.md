@@ -1,111 +1,83 @@
-# Fire-24G verified wiring and reset behavior
+# Fire-24G wiring for a 1541 long board
 
-This document records the hardware configuration verified on the 1541 long
-board using the Fire-24G OneROM integration on the public `v8.1` branch.
+Use this guide with the matching UB3 Control image. These connections were
+verified on the documented 1541 long-board setup; other drive revisions need
+their own wiring review. Disconnect power before wiring.
 
-## Selector mapping
+## First choose the ROM wiring
 
-| Function | Fire-24G header signal | RP2350 GPIO | Wiring |
-| --- | --- | ---: | --- |
-| IEC device 8/9 | `SEL_A` | 26 | Existing J1 address-control connection; LOW selects device 8, released selects device 9. |
-| 1541 reset | `SEL_B` | 27 | Through the 1 kOhm resistor described below. |
-| Write-protect override | `SEL_C` | 25 | Through 5.1 kOhm to the override NPN base. |
-| Write-protect sense | `SEL_D` | 24 | 22 kOhm / 22 kOhm divider from 1541 P6 pin 12. |
-| A-page select | `X1` | 9 | 74LS138 `/Y5`. |
-| E-page select | `X2` | 8 | 74LS138 `/Y7`. |
+OneROM can serve two ROM pages directly, or three pages through a 74LS138.
+Choose the row that matches the hardware already in your drive.
 
-`SEL_A` and `SEL_B` are ADC-class GPIOs according to the OneROM CLI. The
-existing installation uses SEL_B only as an active-low, open-drain-style reset
-control: firmware never drives it HIGH.
+| Drive setup | OneROM placement | X1 | X2 |
+| --- | --- | --- | --- |
+| Two ROMs; no 74LS138 | Fit OneROM in the lower `$C000` socket (mainboard UB3) | Connect to pin 20 (`/CS`) of the empty upper `$E000` socket (mainboard UB4). | Leave unused. |
+| Two ROMs; OneROM in upper socket | Fit OneROM in the upper `$E000` socket (mainboard UB4) | Connect to pin 20 (`/CS`) of the empty lower `$C000` socket (mainboard UB3). | Leave unused. |
+| Three pages; 74LS138 installed | Use the documented C/A/E decoder wiring | 74LS138 pin 10, `/Y5` (A page) | 74LS138 pin 7, `/Y7` (E page) |
 
-## Two-page ROM routing without a 74LS138
+The labels UB3 and UB4 in the two-ROM rows are **1541 mainboard socket names**.
+They are unrelated to the project names UB3 Control and UB4 Monitor. For the
+three-page setup, use the C/A/E composition template and keep the pages in
+C, A, E order. Do not connect X1 and X2 to the decoder outputs for a direct
+two-page setup.
 
-The 74LS138 `X1`/`X2` entries in the table above apply only to the three-page
-C/A/E arrangement. A conventional 1541 using two 8 KiB ROM sockets needs no
-74LS138: `X1` supplies the second ROM page directly to the `/CS` **pin 20** of
-the otherwise empty socket. `X2` is unused.
+## UB3 Control connections
 
-| OneROM installation | OneROM socket | `X1` connection |
-| --- | --- | --- |
-| Standard lower-socket | `$C000` main-PCB socket **UB3** | Pin 20 of the `$E000` main-PCB socket **UB4** |
-| Standard upper-socket | `$E000` main-PCB socket **UB4** | Pin 20 of the `$C000` main-PCB socket **UB3** |
+| Signal | GPIO | Connect to | Notes |
+| --- | ---: | --- | --- |
+| `SEL_A` | 26 | Existing J1 IEC address-control wire | LOW selects device 8; released selects device 9. |
+| `SEL_B` | 27 | C46 positive / CR7 anode through **1 kOhm** | Active-low reset. Never connect directly to UC4 pin 40. |
+| `SEL_C` | 25 | KSC2383YTA transistor base through **5.1 kOhm** | Optional write-protect override. |
+| `SEL_D` | 24 | P6 pin 12 through **22 kOhm** | Optional write-protect sense; add another 22 kOhm from SEL_D to ground. |
+| `X1`, `X2` | 9, 8 | Select one ROM wiring option above | These signals are not interchangeable between layouts. |
 
-Here **UB3** and **UB4** are 1541 *main-PCB ROM socket designators*. They do
-not refer to the project names “UB3 Control OneROM” and “UB4 Monitor OneROM.”
-Use the matching Lower or Upper two-page composition template; do not apply
-the 74LS138 C/A/E image to this direct two-page wiring.
+### Reset
 
-## USB data and VBUS power
+The 1 kOhm series resistor is required. The earlier 2.2 kOhm value did not
+pull C46 low enough and could leave IEC access stalled after reset. The
+firmware holds reset low for 350 ms, then releases the pin. It never drives
+`SEL_B` high. The red LED and motor may run during that short reset pulse.
 
-For an Apply Only test that must return to the saved IEC address after cycling
-1541 power while keeping USB data connected, use a data-capable USB cable or
-adapter that blocks host VBUS +5 V but passes D+/D− and ground. This lets UB3
-lose power with the drive and reload NV2 at its next startup. A normal USB
-cable that supplies +5 V can keep UB3 alive while the 1541 is off; SEL_A then
-retains the temporary address. Fully power-cycling UB3 also reloads NV2.
+### Optional write-protect circuit
 
-Apply+Save writes the selected address to NV2 and is intended to use the
-controlled OneROM reboot path without disconnecting USB. Apply Only changes
-SEL_A at runtime and does not write NV2. Automatic drive power-off sensing is
-not implemented, so a drive-only power cycle cannot reset a still-powered UB3.
-The historical stock-image Apply+Save test used a USB-powered OneROM; it does
-not validate Apply Only power-cycle restoration on a VBUS-powered UB3.
+For override, connect a **KSC2383YTA NPN** emitter to drive ground, collector
+to P6 pin 12, and base through 5.1 kOhm to `SEL_C`. Do not connect a OneROM
+GPIO directly to P6 pin 12. The specified transistor uses pin 1 emitter,
+pin 2 collector, pin 3 base; confirm the datasheet's view before assembly.
 
-## C46 reset path
+For sensing, connect P6 pin 12 through 22 kOhm to `SEL_D`, then add 22 kOhm
+from `SEL_D` to ground. `SEL_D` is input-only. When override is on, the
+transistor pulls the shared WP node low, so physical disk WP status is masked.
 
-Connect Fire-24G `SEL_B` to 1541 **C46 positive** (or the equivalent CR7
-anode reset node) through a **1 kOhm series resistor**. Do not connect it to
-UC4 pin 40, which is driven by the 1541 reset logic.
+## UB4 Monitor connections
 
-The prior 2.2 kOhm resistor left C46 at about 1.2 V during a ten-second reset
-test. Replacing it with 1 kOhm lowered C46 to about 0.8 V. This corrected the
-failure where the C64 remained alive but `LOAD"$",8` waited indefinitely after
-a HUD reset. Immediate directory access after reset was hardware-verified.
+UB4 is passive telemetry only. It does not serve ROMs, reset the drive, or
+control write protect.
 
-The final firmware behavior is:
+| Signal | GPIO | Connect to |
+| --- | ---: | --- |
+| `SEL_A` | 26 | UC2 pin 23 (`/CS2`) |
+| `SEL_B` | 27 | UC2 pin 17 (PB7 / active-low SYNC) |
+| `X1` | 9 | UC4 pin 34 (`R/W`) |
+| `X2` | 8 | UC4 pin 39 (`phi2`) |
 
-- Manual `ROMRESET`: drive SEL_B LOW for 350 ms, then return it to input.
-- OneROM boot/reboot: assert SEL_B from early core GPIO setup through a 350 ms
-  plugin hold, then return it to input only after ROM serving is available.
-- SEL_B is never driven HIGH.
+## USB power and Apply Only
 
-During a manual reset the 1541 red LED and motor can be active for the
-350 ms reset hold. That is expected.
+Apply Only changes the live IEC address but does not save it to NV2. A normal
+USB cable can keep UB3 powered while the drive is off, so a drive-only power
+cycle may leave the temporary address selected. To reload the saved address
+while leaving USB data connected, use a data-capable cable/adapter that blocks
+host VBUS +5 V and still passes D+/D− and ground. Or power-cycle UB3 too.
 
-## Optional write-protect override
+Apply+Save stores the address in NV2 and uses the controlled OneROM reboot.
+Automatic drive power-off sensing is not implemented.
 
-The UB3 write-protect override is not a direct GPIO connection. Connect
-Fire-24G `SEL_C` (GPIO25) through a **5.1 kOhm** resistor to the base of a
-**KSC2383YTA NPN** transistor. Connect the transistor emitter to 1541 ground
-and collector to **P6 pin 12**. The transistor pulls that write-protect node
-low only when `ROMWP=ON`; firmware otherwise drives `SEL_C` LOW, leaving the
-override off after startup. Never connect a OneROM GPIO directly to P6 pin 12.
+## Quick check after wiring
 
-For the specified KSC2383YTA, pin 1 is emitter, pin 2 collector, and pin 3
-base. Verify the manufacturer's pin diagram and viewing direction before
-assembly; other NPN parts can have different pin orders.
+1. Confirm that the ROM template matches the physical wiring.
+2. Boot the drive and check its normal device address.
+3. Use 1541HUD to test reset, then immediately read the directory.
+4. If fitted, check write-protect sensing and override separately.
 
-Optional write-protect sensing is separate: feed P6 pin 12 through a 22 kOhm
-resistor to `SEL_D` (GPIO24), with another 22 kOhm resistor from `SEL_D` to
-ground. UB4 has no write-protect wiring or authority.
-
-The divider senses the shared WP node. When override is active, Q1 forces
-that node low and physical disk WP status is masked; the HUD indicates this.
-Turn override off to observe the physical sensor state.
-
-## Reset electrical estimate
-
-C46 is 100 uF. With the verified 1 kOhm resistor, the initial capacitor
-discharge current is approximately 3.9–5 mA and decays with an approximately
-100 ms time constant. After the capacitor is discharged, the 1541 pull-up path
-supplies roughly 0.5–0.7 mA. This reset is used infrequently and is not a
-meaningful thermal load on the OneROM.
-
-## Acceptance test
-
-1. Boot the C64 and 1541 normally at device 8.
-2. In 1541HUD, press **Reset 1541**.
-3. Wait for the reset card to report that the pulse was released.
-4. Immediately issue `LOAD"$",8` (or the JiffyDOS directory command).
-5. Successful immediate directory access confirms a complete reset and IEC
-   recovery.
+For the electrical measurements and full verification record, see the
+[engineering dossier](FIRE24G_V81_ENGINEERING_DOSSIER.md).

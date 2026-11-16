@@ -1,117 +1,71 @@
-# UB3 Control: CLI Composition Guide
+# UB3 ROM layouts and configuration reference
 
-## Scope
-
-This is the supported public procedure for building a Fire-24G **UB3 Control**
-image. It uses the OneROM command-line interface (CLI). The legacy GUI
-configurator is not part of this procedure.
+For the beginner step-by-step build procedure, start with
+[Build the UB3 Control firmware](BUILD_UB3_CONTROL.md). This page is the
+reference for choosing a template and preparing custom ROM sets.
 
 The public repository includes selected stock DOS 2.6, SpeedDOS+, and
-DolphinDOS 2.0 profile inputs; see the [ROM library](rom-library/README.md).
-It does not include licensed JiffyDOS images or generated S-JiffyDOS pages.
-For other custom sets, provide only ROM images you are entitled to use. Keep
-licensed inputs and completed private manifests out of public repositories.
+DolphinDOS 2.0 inputs. The JiffyDOS folders contain build notes and patches,
+not licensed JiffyDOS files or generated images. Supply only ROMs you are
+entitled to use, and keep licensed images and completed private configurations
+out of public Git repositories.
 
-## Choose the hardware layout
+## Choose the template that matches your wiring
 
-The public package provides three CLI templates. Choose the one that matches
-the installed hardware; these are not interchangeable.
+| Template | Physical setup | Pages in each ROM set |
+| --- | --- | --- |
+| `UB3-Control-Lower-Socket.template.json` | OneROM in lower `$C000` socket; direct X1 connection to the other socket | C and E |
+| `UB3-Control-Upper-Socket.template.json` | OneROM in upper `$E000` socket; direct X1 connection to the other socket | E and C |
+| `control-compose.template.json` | Three-page C/A/E setup with the documented 74LS138 decode wiring | C, A and E |
 
-| Template | Hardware | Required owner-supplied ROM pages | RAMBoard required |
-| --- | --- | --- | --- |
-| `UB3-Control-Lower-Socket.template.json` | Standard lower-socket Control installation | C and E | No |
-| `UB3-Control-Upper-Socket.template.json` | Standard upper-socket Control installation | E and C | No |
-| `control-compose.template.json` | Three-page Fire-24G C/A/E installation, including DolphinDOS-style sets | C, A and E | No; it requires the documented A-page decode wiring |
+Use a two-page template when the drive has no 74LS138. Use the C/A/E template
+only when the decoder wiring is installed. See the
+[wiring guide](FIRE24G-VERIFIED-WIRING.md) before choosing.
 
-The standard Lower and Upper templates are the normal two-page options for a
-user who has no RAMBoard or A-page wiring. The DolphinDOS/C/A/E template is
-only for hardware that has the documented X1/Y5 A-page and X2/Y7 E-page decode
-wiring.
+## C/A/E page order and size
 
-For the three-page C/A/E installation, every selectable DOS profile is a
-three-page set in this order:
+Each C/A/E ROM set has three 8 KiB pages, in this exact order:
 
-1. `$C000-$DFFF` (C page)
-2. `$A000-$BFFF` (A page, selected through X1 / 74LS138 `/Y5`)
-3. `$E000-$FFFF` (E page, selected through X2 / 74LS138 `/Y7`)
+1. C page: `$C000-$DFFF`
+2. A page: `$A000-$BFFF`, selected by X1 / 74LS138 `/Y5`
+3. E page: `$E000-$FFFF`, selected by X2 / 74LS138 `/Y7`
 
-Each file must be exactly 8192 bytes. The C/A/E order must not be rearranged.
+Do not reorder the files or substitute a full 16 KiB image for one 8 KiB page.
+Split and inspect ROM pages with
+[`Split-1541-RomPages.ps1`](../utilities/rom-pages/Split-1541-RomPages.ps1).
 
-## Prerequisites
+## Private custom configuration
 
-- A clean clone of this project.
-- OneROM CLI `onerom` on `PATH`, or an absolute path to it.
-- ARM GNU Toolchain and GNU Make, as described in
-  `FIRE24G_V81_BUILD_AND_INSTALL.md`.
-- Built UB3 base firmware and the two Control plugins:
-  - `1541HUD-USB` system plugin
-  - `1541HUD-Host-Control` user plugin
-- Your lawful C, A and E ROM page files.
-
-## Prepare private inputs
-
-Create a local, ignored folder:
+Create a local folder named `private-roms/` at the repository root. Copy the
+matching template there, then update its labels and file paths. Example:
 
 ```text
 private-roms/
+  my-drive.json
   control/
     slot0-c000-dfff.bin
     slot0-a000-bfff.bin
     slot0-e000-ffff.bin
-  UB3-Control-DolphinDOS-CAE.json
 ```
 
-For the C/A/E layout, copy
-`templates/control-compose.template.json` to
-`private-roms/UB3-Control-DolphinDOS-CAE.json`, then edit only its local labels
-and ROM file paths. Add additional complete C/A/E groups locally for more DOS
-profiles. Never publish that finished JSON file or the referenced ROM files.
+For a two-page setup, provide only the two pages named by its template. For
+multiple ROM profiles, add a complete group of pages for each profile. Keep
+the JSON and ROM files local; `.gitignore` excludes the private inputs.
 
-For a standard two-page installation, copy the corresponding Lower or Upper
-template instead and provide only its two 8192-byte files. Do not add a dummy
-A page merely because another person's build uses one.
+## Advanced: compose with an existing core and CLI
 
-## Build and compose the image
-
-For a fresh public checkout, the supported route is WSL2/Linux. The wrapper
-builds the patched Control core and both Control plugins from this repository,
-then invokes the locally built OneROM CLI to compose your private manifest:
-
-```bash
-bash consolidation/scripts/build-control-v0.8.1.sh \
-  private-roms/UB3-Control-DolphinDOS-CAE.json \
-  output/onerom-ub3-control-fire24g.bin
-```
-
-The bundled Windows `tools/onerom-v0.6.0-hud1.exe` is for inspecting and flashing
-the public release images; it does not replace ARM GCC, Make, Cargo, and a
-POSIX shell required for a fresh source build.
-
-## Compose an already-built core
-
-From the repository root, substitute your actual base firmware path and chosen
-private manifest path:
+Most users should use the full build script in the
+[build guide](BUILD_UB3_CONTROL.md). If you already have the built Control core
+and a compatible `onerom` CLI, compose an image from the repository root:
 
 ```powershell
 onerom firmware build `
-  --config private-roms/UB3-Control-DolphinDOS-CAE.json `
+  --config private-roms/my-drive.json `
   --board fire-24-g `
   --base-firmware firmware-control/.work/control-core-v0.8.1/one-rom-v0.8.1/firmware/build/onerom-rp235x.bin `
   --output output/onerom-ub3-control-fire24g.bin `
   --force
 ```
 
-The output file is a private, composed firmware image; keep it out of Git.
-
-## Verify before flashing
-
-- Confirm the CLI reports the Fire-24G board and the expected plugins.
-- Confirm every selected ROM page is 8192 bytes.
-- Confirm the C/A/E page order matches the qualified 74LS138 wiring.
-- Compare the generated slot labels with the intended DOS profiles.
-- Flash only one board at a time and verify USB enumeration before connecting
-  it to the drive.
-
-For wiring, GPIO roles, LED behavior, reset timing and qualified hardware
-assumptions, use `FIRE24G_V81_ENGINEERING_DOSSIER.md` and
-`FIRE24G-VERIFIED-WIRING.md`.
+The output is a composed firmware image. Keep private builds and licensed ROM
+inputs out of Git.

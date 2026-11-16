@@ -68,8 +68,9 @@ private. Public image hashes and sizes are in releases/v8.1-manifest.json.
 
 ## Build, flash and recovery
 
-Use WSL/Linux, Arm GNU 15.3.Rel1, Make, current Rust/Cargo (Control wrapper
-requires 1.93 or newer), and OneROM CLI. Build Control with
+Use WSL/Linux, Arm GNU 15.3.rel1, Make, Rust/Cargo 1.99.0 (the CI-selected
+version; the Control wrapper's 1.93 minimum is only a lower-bound check), and
+the OneROM CLI. Build Control with
 consolidation/scripts/build-control-v0.8.1.sh and owner-supplied lawful ROMs.
 Build Monitor with firmware-monitor/Build-Monitor-Fire24G-V0.8.1.sh, setting
 TOOLCHAIN and ONEROM_CLI. Its PowerShell wrapper accepts Linux paths via WSL.

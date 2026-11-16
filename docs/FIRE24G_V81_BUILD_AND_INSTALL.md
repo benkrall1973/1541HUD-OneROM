@@ -6,6 +6,9 @@ in the drive. The exact public stock two-ROM Control image passed the
 user-confirmed drive checks on 2026-11-10; full USB disconnect/reconnect
 persistence was not reported. See the [baseline runbook](V81_BASELINE_RUNBOOK.md)
 and [drive test record](STOCK_CONTROL_DRIVE_TEST_2026-11-10.md) for scope.
+New builders should start with the shorter
+[UB3 Control build guide](BUILD_UB3_CONTROL.md); this page is the detailed
+build and installation record.
 
 UB3 is the state-changing **Control** board; UB4 is the electrically passive
 **Monitor** board. Do not exchange their firmware, USB roles, or wiring.
@@ -129,7 +132,7 @@ for the OneROM CLI, USB inspection/flashing, and the 1541HUD application.
   wrapper. WSL/Linux builds need a Linux CLI; the combined source-build checker
   builds and selects it automatically. The bundled Windows CLI is built with the same checked host overlay;
   see tools/windows-cli-manifest.json for its exact provenance.
-- Rust/Cargo **1.99.0** (the CI-validated toolchain) for the pinned V8.1 Rust host tooling. The original 1.85 floor was only a wrapper check; it is not sufficient for the currently vendored source snapshot. The dependency-refresh branch validated `onerom-fw` and `onerom-cli` with Rust/Cargo 1.93.0 on Linux.
+- Rust/Cargo **1.99.0**, the toolchain selected by the current CI build and the recommended version for this source snapshot. The Control wrapper accepts Cargo 1.93 or newer, but that lower-bound check is not the qualified build version.
 
 The Monitor PowerShell entry point also accepts `-Toolchain` and
 `-OneRomCli` arguments for an installed-but-not-on-PATH toolchain. This keeps

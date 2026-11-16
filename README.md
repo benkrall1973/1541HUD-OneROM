@@ -85,48 +85,20 @@ entitled to use, review any changes before building, and verify the target
 OneROM serial before flashing. Never let an assistant guess which of two
 connected boards should be programmed.
 
-## Before you start
+## Start here
 
-This is a documented modification for a 1541 long board, not a universal
-drop-in firmware update. Read the [verified wiring guide](docs/FIRE24G-VERIFIED-WIRING.md)
-before connecting a board to the drive. In particular:
+1. Decide whether you want to **use the supplied firmware** or **build your
+   own**. For a source build, follow [Build the UB3 Control firmware](docs/BUILD_UB3_CONTROL.md).
+2. Before wiring, pick the layout that matches your drive: **two ROM pages with
+   direct X1 wiring**, or **three C/A/E pages using the 74LS138**. The
+   [wiring guide](docs/FIRE24G-VERIFIED-WIRING.md) shows both.
+3. UB3 is the Control board: it serves ROMs and handles IEC address, reset,
+   and optional write protect. UB4 is the Monitor board: it only observes the
+   drive. Use the firmware image that matches each board's role.
 
-- **Control and Monitor are roles, not different Fire-24G hardware.** The same
-  Fire-24G board can be flashed with either image, but a **UB3 Control**
-  installation serves the drive ROM and controls ROM selection, IEC address,
-  reset, and optional write protect; a **UB4 Monitor** installation is wired
-  only for passive telemetry. Flash the image that matches the intended role
-  and its wiring. Do not use a Monitor image where the Control image is
-  required, or vice versa.
-- For a standard two-ROM 1541 with **no 74LS138**, `X1` **must** drive pin 20
-  (`/CS`) of the empty ROM socket. For the usual lower-socket installation,
-  fit OneROM in the `$C000` **UB3 socket** and wire `X1` to pin 20 of the
-  `$E000` **UB4 socket**. Those are main-PCB socket references, not the
-  optional UB4 Monitor board.
-- The supplied UB3 stock image supports IEC **8/9**, 350 ms active-low drive
-  reset, and optional write-protect control.
-- The verified reset circuit uses UB3 `SEL_B` through a **1 kOhm** resistor to
-  the C46-positive/CR7-anode reset node. Do not connect it directly to UC4
-  pin 40.
-- Optional write-protect override uses `SEL_C` through a **5.1 kOhm** resistor
-  to the base of a **KSC2383YTA NPN** transistor; connect its emitter to 1541
-  ground and its collector to **P6 pin 12**. This transistor is required:
-  never wire a OneROM GPIO directly to P6 pin 12.
-- Optional physical write-protect sensing is separate: route **P6 pin 12**
-  through **22 kOhm** to `SEL_D`, and fit a second **22 kOhm** resistor from
-  `SEL_D` to ground. `SEL_D` is input-only for this purpose; never connect P6
-  pin 12 directly to a OneROM GPIO.
-- UB4 is a passive monitor only. It must not be used to control write protect
-  or serve the drive ROM.
-- For Apply Only tests where a 1541 power cycle must restore the saved IEC
-  address while USB data remains connected, use a data-capable USB cable with
-  host VBUS +5 V blocked. It must still pass D+/D− and ground. A normal powered
-  USB cable can keep UB3 alive when the drive is off, so its temporary SEL_A
-  address remains active. Alternatively, fully power-cycle UB3.
-- Apply+Save stores the boot address in NV2 and uses the controlled OneROM
-  reboot path. Do not confuse that with Apply Only, which changes SEL_A at
-  runtime and does not save NV2. Automatic 1541 power-off sensing is not
-  implemented.
+The wiring guide also explains the reset resistor, optional write-protect
+circuit, and the USB cable needed when Apply Only must revert after a
+drive-only power cycle.
 
 ## What is included
 
@@ -232,7 +204,7 @@ custom DOS image, use ROM files that you are legally entitled to use:
    - Upper socket: E/C pages
    - C/A/E: three-page layout for the documented 74LS138 wiring
 4. Copy the template and your ROM pages into ignored `private-roms/` paths.
-5. Follow the [UB3 Control composition guide](docs/UB3_CONTROL_CLI_COMPOSITION_GUIDE.md).
+5. Follow [Build the UB3 Control firmware](docs/BUILD_UB3_CONTROL.md).
 
 The repository's [ROM library](docs/rom-library/README.md) contains the
 documented stock, SpeedDOS+, and DolphinDOS profile inputs. JiffyDOS and
@@ -271,6 +243,7 @@ Run the package check before publishing a derivative:
 - [Engineering dossier: GPIO, LEDs, reset, architecture](docs/FIRE24G_V81_ENGINEERING_DOSSIER.md)
 - [Build and installation runbook](docs/FIRE24G_V81_BUILD_AND_INSTALL.md)
 - [UB3 custom composition guide](docs/UB3_CONTROL_CLI_COMPOSITION_GUIDE.md)
+- [Build the UB3 Control firmware](docs/BUILD_UB3_CONTROL.md)
 - [ROM page preparation](docs/THIRD_PARTY_DOS_PAGE_PREPARATION.md)
 - [Package boundary and redistribution policy](docs/PUBLIC_PACKAGE_MANIFEST.md)
 - [Release checklist](docs/RELEASE_CHECKLIST.md)

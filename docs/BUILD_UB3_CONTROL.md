@@ -1,0 +1,113 @@
+# Build the UB3 Control firmware
+
+This guide builds a flashable UB3 Control image from a fresh checkout. If you
+only want to use the supplied image, skip this and follow
+[Flash a release image](PUBLIC_FIRE24G_RELEASES.md).
+
+## What you need
+
+- A Windows PC with **WSL2 and Ubuntu**, or a Linux computer.
+- Internet access. The build downloads pinned source dependencies and the
+  public stock DOS page referenced by the stock configuration.
+- The build tools below. The supported, CI-matched versions are Rust/Cargo
+  **1.99.0** and Arm GNU Toolchain **15.3.rel1**.
+- A ROM configuration and the ROM pages it names. The public stock
+  configuration is ready to use. For copyrighted ROMs, provide your own
+  licensed files and keep them and your finished configuration out of Git.
+
+The build runs in WSL/Linux because the OneROM source uses Linux shell commands.
+The Windows OneROM CLI is for inspecting and flashing images; it is not a
+replacement for the source-build tools.
+
+## 1. Install the build tools
+
+In Ubuntu/WSL, install the basic packages:
+
+```bash
+sudo apt update
+sudo apt install -y build-essential git make patch tar python3 curl xz-utils
+```
+
+Install `rustup` if needed, then install and select Rust 1.99.0:
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"
+rustup toolchain install 1.99.0 --profile minimal
+rustup default 1.99.0
+```
+
+From the repository root, install the pinned Arm compiler and add it to this
+terminal's search path:
+
+```bash
+export TOOLCHAIN="$(bash source/one-rom-v0.8.1/ci/install-arm-toolchain.sh "$HOME/arm-gnu-toolchain")"
+export PATH="$TOOLCHAIN:$PATH"
+```
+
+Run these commands again in a new terminal before building, or add them to your
+shell startup file.
+
+## 2. Choose a configuration
+
+For the public stock two-ROM image, use the checked-in configuration:
+
+```text
+releases/stock-2rom-compose.json
+```
+
+For your own ROM set, copy the template matching your wiring into the ignored
+`private-roms/` folder and update its file paths. The quick rule is:
+
+- **Two ROM pages, no 74LS138:** choose Lower Socket or Upper Socket.
+- **Three C/A/E pages and the documented 74LS138 wiring:** choose the C/A/E
+  template. Each page must be exactly 8 KiB; keep the C, A, E order.
+
+See the [ROM layout and manifest reference](UB3_CONTROL_CLI_COMPOSITION_GUIDE.md)
+for the templates, file names, and full C/A/E details. The
+[ROM catalog](rom-library/README.md) lists included public files and required
+C64 KERNAL pairings.
+
+For example, to start a custom three-page setup:
+
+```bash
+mkdir -p private-roms
+cp templates/control-compose.template.json private-roms/my-drive.json
+```
+
+Edit `private-roms/my-drive.json` to point to your local 8 KiB C, A, and E
+pages. For the two-page templates, copy the matching
+`UB3-Control-Lower-Socket.template.json` or
+`UB3-Control-Upper-Socket.template.json` instead.
+
+## 3. Build
+
+From the repository root in WSL/Linux, run:
+
+```bash
+bash consolidation/scripts/build-control-v0.8.1.sh \
+  releases/stock-2rom-compose.json \
+  output/onerom-ub3-control-fire24g.bin
+```
+
+For a private configuration, replace the first path with your JSON file, for
+example `private-roms/my-drive.json`. The script builds the Control core,
+plugins, and local OneROM command-line tool, then composes and inspects the
+image. The finished file and its SHA-256 are reported at the end.
+
+The pinned upstream OneROM core is exported from the current Git commit.
+Commit changes to that core before building; uncommitted core edits are not
+included. The project Control plugin source is built from the checkout.
+ROM configurations and ROM pages can remain local and uncommitted.
+
+## 4. Before flashing
+
+Check that the output path names the image you intended. Flash only after
+reading the [wiring guide](FIRE24G-VERIFIED-WIRING.md) and the
+[release and recovery instructions](PUBLIC_FIRE24G_RELEASES.md). Close
+1541HUD, scan for the board, confirm its serial number, then program with
+verification enabled. Do not guess which connected board is UB3.
+
+For build internals and CI evidence, see
+[clean source-build notes](CLEAN_SOURCE_BUILD.md) and the
+[v8.1 build/install record](FIRE24G_V81_BUILD_AND_INSTALL.md).
