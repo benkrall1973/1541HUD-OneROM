@@ -1,9 +1,11 @@
 # 1541HUD / OneROM Fire-24G
 
 1541HUD adds USB control and optional drive monitoring to a OneROM Fire-24G
-installation in a Commodore 1541. Use the **UB3 Control** board to serve drive
-ROMs and control the IEC address, reset, and optional write protect. The
-optional **UB4 Monitor** board passively observes drive activity.
+installation in a Commodore 1541. The **UB3 Control** board serves drive ROMs,
+sets the IEC address, resets the drive, manages optional write-protect control,
+and sets LED behavior. The optional **UB4 Monitor** board passively reports
+motor and track activity, RPM, disk density, SYNC, and validated disk-header
+activity; it does not control the drive.
 
 ## Drive ROMs you can use
 
@@ -21,6 +23,9 @@ for fast DOS features; a drive ROM and a C64 KERNAL are separate things.
 The r21 image starts with **DOS 2.6 Original** and IEC address **8**. It omits
 JiffyDOS and S-JiffyDOS. It passed software composition checks but has **not
 yet been flashed or tested in a drive**; treat it as a test candidate.
+All four r21 drive profiles use the three-page **C/A/E layout** and require
+the documented **74LS138 decoder wiring** (X1 to `/Y5`, pin 10; X2 to `/Y7`,
+pin 7). Use the stock two-ROM image for a direct X1 socket-wiring setup.
 
 The separate [stock two-ROM image](https://github.com/benkrall1973/1541HUD-OneROM/releases/tag/v8.1-fire24g-ub3-images-2026-11-16)
 is the hardware-tested starting point. It contains stock 1541 DOS 2.6 and the
@@ -46,6 +51,7 @@ images above contain drive-side ROM profiles, not a C64 KERNAL replacement.
 1. Read the [baseline runbook](docs/V81_BASELINE_RUNBOOK.md) and
    [verified wiring guide](docs/FIRE24G-VERIFIED-WIRING.md). These images are
    for Fire-24G boards; UB3 Control and UB4 Monitor images are not interchangeable.
+   Match the r21 C/A/E decoder requirement above to your physical wiring before flashing.
 2. Close 1541HUD, connect only the board you intend to program, enter BOOTSEL,
    and scan for its serial:
 

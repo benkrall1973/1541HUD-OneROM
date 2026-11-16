@@ -18,7 +18,7 @@ future repository and not a substitute for the build or wiring guides.
 | ROM-free private-input instructions and the UB3 CLI composition guide | Explain the two standard C/E socket layouts and the optional C/A/E DolphinDOS-style layout without distributing ROM bytes; users create a private composition manifest locally. |
 | V0.8.0.51 hardware-qualified HUD baseline, V0.8.0.53 Apply Only behavior, and V0.8.0.58 UI candidate with source, launcher, build script, tests, and documentation | V58 includes the V53 runtime-only IEC address behavior and UI updates; Apply Only requires UB3 USB plugin 0.8.1.17. Apply Only restoration after a 1541-only power cycle requires UB3 to lose power; use a data-capable cable with host VBUS +5 V blocked, or power-cycle UB3 explicitly. V51 remains the last hardware-qualified HUD baseline. |
 | `docs/FIRE24G_V81_BUILD_AND_INSTALL.md`, `docs/FIRE24G_V81_ENGINEERING_DOSSIER.md`, and sanitized wiring/build documentation | Hardware integration, prerequisites, flash/recovery, GPIO, LED and acceptance contract. |
-| Three named Fire-24G images under `releases/` | UB3 Control stock two-ROM V51 baseline, separate stock two-ROM V53 Apply Only candidate, and UB4 passive Monitor image; the validator permits only these exact binaries. The V53 candidate is also attached to the current GitHub Release. |
+| Three named Fire-24G images under `releases/` | UB3 Control stock two-ROM V51 baseline, separate stock two-ROM V53 Apply Only candidate, and UB4 passive Monitor image; the validator permits only these exact binaries. The current GitHub prerelease attaches the original drive-tested stock image and the r21 four-profile no-JiffyDOS candidate. The r21 binary is a release asset only and is not checked into `releases/`. |
 
 ## Explicit exclusions
 
@@ -67,5 +67,5 @@ a drive ROM. See [notices](../NOTICE.md) and the
 - Exact source/build provenance for the checked-in SpeedDOS+ profile.
 - DOSNAME D64/PRG diagnostic utility is not included; its provenance and license must be cleared before adding it.
 - C64 configurator repair and release.
-- Additional public prebuilt firmware beyond the named stock baseline, V53 candidate, and Monitor images.
+- Additional prebuilt firmware in the public repository beyond the named stock baseline, V53 candidate, and Monitor images. The separately attached r21 test candidate is a GitHub release asset and is not part of the tracked package.
 

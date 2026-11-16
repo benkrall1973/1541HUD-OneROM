@@ -25,7 +25,7 @@ SpeedDOS image, A mirrors E. From the repository root, run:
 
 ```powershell
 .\utilities\rom-pages\Split-1541-RomPages.ps1 `
-  -InputPath .\docs\rom-library\speeddos-plus\source-images\1541both_sd `
+  -InputPath .\roms\speeddos-plus\source-images\1541both_sd `
   -OutputDirectory .\output\speeddos-plus `
   -PageOrder CE -MirrorEToA -Prefix SpeedDOS
 ```
