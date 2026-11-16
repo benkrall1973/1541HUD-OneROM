@@ -1,9 +1,9 @@
-# Private build-input templates
+# ROM composition templates
 
-These templates are exported into the new ROM-free repository. Copy the JSON
-files into its ignored `private-roms/` directory, provide only ROM images you
-are licensed to use, and adjust labels/slots locally. Do not commit either the
-filled templates or their referenced files.
+These JSON files describe OneROM layouts. Copy a suitable template into
+`private-roms/`, update its labels and file paths, then build an image with the
+documented tool. Keep licensed ROM files and completed private configurations
+out of Git.
 
 For the public CLI workflow and the qualified three-page Fire-24G Control
 layout, read
@@ -18,5 +18,7 @@ layout, read
 - `monitor-compose.template.json` creates the UB4 passive Monitor image after
   the owner supplies the two legally held 8 KiB monitor/boot ROM inputs.
 
-The project deliberately does not name, hash, fetch, package, or distribute
-third-party DOS ROMs in the public repository.
+The public repository includes a small, hash-listed ROM library. For ROMs not
+included there, provide only files you are entitled to use. See the
+[ROM catalog](../docs/rom-library/README.md) for what is included and the
+[package boundary](../docs/PUBLIC_PACKAGE_MANIFEST.md) for what may be added.

@@ -80,4 +80,6 @@ Automatic drive power-off sensing is not implemented.
 4. If fitted, check write-protect sensing and override separately.
 
 For the electrical measurements and full verification record, see the
-[engineering dossier](FIRE24G_V81_ENGINEERING_DOSSIER.md).
+[engineering dossier](FIRE24G_V81_ENGINEERING_DOSSIER.md). Its
+[three-page decoder section](FIRE24G_V81_ENGINEERING_DOSSIER.md#three-page-drive-rom-decode)
+lists every 74LS138 pin connection.

@@ -44,6 +44,7 @@ $required = @(
     '.github/ISSUE_TEMPLATE/bug_report.md',
     'docs/FIRE24G_V81_ENGINEERING_DOSSIER.md',
     'docs/FIRE24G_V81_BUILD_AND_INSTALL.md',
+    'docs/BUILD_UB3_CONTROL.md',
     'docs/UB3_CONTROL_CLI_COMPOSITION_GUIDE.md',
     'docs/THIRD_PARTY_DOS_PAGE_PREPARATION.md',
     'docs/PUBLIC_FIRE24G_RELEASES.md',
@@ -176,6 +177,7 @@ foreach ($relative in $romAssetEntries.Keys) {
     }
     $expectedBytes = if ($relative -match '(?i)dolphindos-2/reference/.*\.rom$') { 32768 }
         elseif ($relative -match '(?i)speeddos-plus/source-images/1541both_sd$') { 16384 }
+        elseif ($relative -match '(?i)ramboard/original-cld/ramboard\.d64$') { 174848 }
         else { 8192 }
     if ((Get-Item -LiteralPath $asset).Length -ne $expectedBytes) {
         throw "ROM library asset has an unexpected byte count (expected $expectedBytes): $relative"
@@ -184,7 +186,9 @@ foreach ($relative in $romAssetEntries.Keys) {
 $badPaths = Get-ChildItem -LiteralPath $PackageRoot -Recurse -Force -File |
     Where-Object {
         $relative = $_.FullName.Substring($PackageRoot.Length + 1).Replace('\', '/')
-        $relative -notmatch '^(source/one-rom-v0\.8\.1/images/test/stub-(system|user)-plugin\.bin|private-roms/(UB3-Control-DolphinDOS-CAE|UB3-Control-Lower-Socket|UB3-Control-Upper-Socket|monitor-compose)\.json|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0\.8\.1\.bin|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0\.8\.1\.17\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.32\.bin|tools/onerom-v0\.6\.0-hud1\.exe|firmware-monitor/inputs/(1541-OneROM-Bootloader-Universal-v1\.1\.0|1541-c000\.325302-01)\.bin)$' -and
+        # These are synthetic fixtures shipped in the pinned upstream source,
+        # not commercial 1541/C64 ROM images. Keep the allowlist exact.
+        $relative -notmatch '^(source/one-rom-v0\.8\.1/images/test/(stub-(system|user)-plugin\.bin|0_63_(2048|4096|8192)\.rom|ff8192\.rom|rand_(0\.5KB|1KB|2KB|4KB|8KB|16KB|32KB|48KB|64KB|128KB|256KB|512KB|512KB_alt)\.rom|zero(3|8192)\.rom)|private-roms/(UB3-Control-DolphinDOS-CAE|UB3-Control-Lower-Socket|UB3-Control-Upper-Socket|monitor-compose)\.json|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0\.8\.1\.bin|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0\.8\.1\.17\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.32\.bin|tools/onerom-v0\.6\.0-hud1\.exe|firmware-monitor/inputs/(1541-OneROM-Bootloader-Universal-v1\.1\.0|1541-c000\.325302-01)\.bin|docs/rom-library/ramboard/original-cld/ramboard\.d64)$' -and
         $relative -notmatch '^docs/rom-library/(stock-dos-2\.6|speeddos-plus|dolphindos-2)/.*\.(bin|rom)$' -and
         $relative -match $forbiddenPath
     }

@@ -1,8 +1,9 @@
 # ROM library asset provenance
 
-`ASSETS.sha256` lists every ROM library binary with its SHA-256 digest. The
-package validator checks the recorded hashes and expected byte counts. Drive
-and host pages are 8192 bytes unless noted.
+`ASSETS.sha256` lists every binary ROM-library asset and utility-disk image
+with its SHA-256 digest. The package validator checks the recorded hashes and
+expected byte counts. Drive and host ROM pages are 8192 bytes unless noted;
+the RAMBoard D64 is a 174,848-byte, 35-track utility disk, not ROM data.
 
 ## Stock DOS 2.6
 
@@ -50,3 +51,12 @@ licensed JiffyDOS inputs, JiffyDOS C64 KERNALs, the S-JiffyDOS generator disk,
 or generated JiffyDOS/S-JiffyDOS pages or images. Builders must obtain their
 own licensed JiffyDOS copy and generator where required. Never add those
 payloads to this public repository.
+
+## Original CLD RAMBoard
+
+`ramboard/original-cld/` contains the original schematic, installation manual,
+three board-layout images, and the RAMBoard utility D64 supplied for this
+project. The manual identifies CLD copyright and describes a revision-specific
+installation; the files are preserved as references and are not relicensed by
+the repository. See [the RAMBoard guide](ramboard/README.md) for the board
+scope, utility-disk command, and S-JiffyDOS memory warning.

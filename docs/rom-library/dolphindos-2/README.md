@@ -26,6 +26,8 @@ KERNAL used in this project. The source files and license are from the
 [DolphinDOS 2 upstream repository](https://github.com/donnchawp/DolphinDOS2).
 The extracted pages and KERNAL are 8192 bytes each; sizes and SHA-256 values
 are recorded in [the library asset manifest](../ASSETS.sha256).
+The included Makefile builds the C64 KERNAL and creates its `rom/` output
+folder automatically. It does not build the drive ROM.
 
 Use the included `drive-pages/` files as the known-good C/A/E inputs for this
 project. They are the same pages from the user's working DolphinDOS setup;

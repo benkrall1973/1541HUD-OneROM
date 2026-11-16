@@ -1,9 +1,14 @@
-# Private ROM inputs
+# Private build inputs
 
-This directory is intentionally empty and ignored by Git. Supply only ROM
-images you are licensed to use. The public source repository does not contain
-ROM bytes, bootloader binaries, composed OneROM firmware, disk images, or
-third-party DOS payloads.
+This folder contains tracked, ROM-free example configurations. The matching
+general templates are in `templates/`; copy one here and edit the local file
+paths for your build. The four example JSON files in this folder are tracked
+intentionally.
 
-Use the Fire-24G V8.1 engineering dossier and the local/private composition
-record to create a private manifest appropriate to your legally held ROMs.
+Put your completed private configuration and any owner-supplied ROM files in
+this folder. Those local inputs are ignored by Git. Do not overwrite the
+tracked examples with licensed ROM data.
+
+The public repository includes a limited, documented ROM library and release
+firmware images. See `docs/rom-library/README.md` for the public assets and
+legal boundaries.
