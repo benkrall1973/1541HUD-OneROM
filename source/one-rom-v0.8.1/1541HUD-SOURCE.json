@@ -14,7 +14,7 @@
     "zip": "9.5.0",
     "rustls": "0.23.46",
     "ctutils": "0.4.4",
-    "libz-sys": "1.1.31",
+    "libz-sys": "1.1.33",
     "webpki-roots": "1.0.10",
     "quinn-proto": "0.11.19",
     "git2": "0.21.0",
@@ -29,7 +29,7 @@
     "rust/Cargo.toml": "f425428952100c81bce25b215425e1c50c09d15e8f95ee6d8e5335ddfed3c261",
     "rust/fw/Cargo.toml": "c9400e869e18ec35385da53c9a645213bfbae6834da9f1a0a2198e990ddaa109",
     "rust/cli/Cargo.toml": "28eb694813036b6be867dbc5b068c3dc8f8e56f4af35b88548ebeb810f6e7232",
-    "rust/Cargo.lock": "30671a51263263e3c2d35b3ab5a0bd3631a42d3d4d64c4aabe00355e40b8a0b7",
+    "rust/Cargo.lock": "745b99cb850984b9d0c4bdcb74e6948997d3d453f5aa6a7ab4c47d158d5315fc",
     "README.md": "b3dd6bf3175c8aa434a54208eaf85bd2c4ed7c51384a9ced6c7b0712a6a08296",
     "rust/cli/build.rs": "51faeabd7774c0e33477550edece7c527dc1342871ac3c4356f7838dc7d2d4a4"
   },
