@@ -22665,7 +22665,7 @@ DEALINGS IN THE SOFTWARE.
 
 
 ========================================================================
-libz-sys 1.1.31
+libz-sys 1.1.33
 License: MIT OR Apache-2.0
 LICENSE-APACHE
                               Apache License
@@ -32900,7 +32900,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 
 ========================================================================
-quinn-proto 0.11.18
+quinn-proto 0.11.19
 License: MIT OR Apache-2.0
 LICENSE-APACHE
                                  Apache License
@@ -33117,7 +33117,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 
 ========================================================================
-quinn-udp 0.5.15
+quinn-udp 0.5.16
 License: MIT OR Apache-2.0
 LICENSE-APACHE
                                  Apache License
