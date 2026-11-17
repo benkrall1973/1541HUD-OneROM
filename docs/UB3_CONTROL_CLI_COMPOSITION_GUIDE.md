@@ -37,7 +37,8 @@ Split and inspect ROM pages with
 ## Private custom configuration
 
 Copy the matching example from `roms/configs/` into the ignored
-`roms/private/` folder, then update its labels and file paths. Example:
+`roms/private/` folder, then update its labels and file paths. Templates use
+the OneROM v0.8.1 `chip_sets`/`chips` configuration schema. Example:
 
 ```text
 roms/private/
@@ -55,8 +56,12 @@ the JSON and ROM files local; `.gitignore` excludes the private inputs.
 ## Advanced: compose with an existing core and CLI
 
 Most users should use the full build script in the
-[build guide](BUILD_UB3_CONTROL.md). If you already have the built Control core
-and a compatible `onerom` CLI, compose an image from the repository root:
+[build guide](BUILD_UB3_CONTROL.md). **The OneROM CLI can build the exact UB3
+image** when given the patched Control base firmware, the project plugin
+binaries, and a valid configuration. The configuration names those plugin
+binaries as `system_plugin` and `user_plugin` chip sets. If you already have
+the built Control core and a compatible `onerom` CLI, compose an image from
+the repository root:
 
 ```powershell
 onerom firmware build `
@@ -67,5 +72,7 @@ onerom firmware build `
   --force
 ```
 
-The output is a composed firmware image. Keep private builds and licensed ROM
-inputs out of Git.
+The output is a composed firmware image. The CLI composes and inspects the
+image; it does not compile the patched core or project plugin sources. The
+full build script performs those steps first. Keep private builds and licensed
+ROM inputs out of Git.

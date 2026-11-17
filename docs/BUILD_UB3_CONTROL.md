@@ -16,8 +16,8 @@ only want to use the supplied image, skip this and follow
   licensed files and keep them and your finished configuration out of Git.
 
 The build runs in WSL/Linux because the OneROM source uses Linux shell commands.
-The Windows OneROM CLI is for inspecting and flashing images; it is not a
-replacement for the source-build tools.
+The OneROM CLI is the final image composer in this workflow. By itself it does
+not compile the project plugins or the patched OneROM core.
 
 ## 1. Install the build tools
 
@@ -67,6 +67,29 @@ the UB3 reset interlock and an initialization for OTP output variables that
 GCC 15 otherwise reports as possibly uninitialized. The OTP helper returns
 before those values are read when no commissioning data exists, so this change
 does not alter normal behavior.
+
+The reset interlock is the important UB3-specific part: it asserts reserved
+SEL_B early in core startup so the 1541 remains held in reset while ROM serving
+restarts. Plugins start after ROM serving has been set up, so moving this
+assertion into the current USB plugin would be too late to provide the same
+startup guarantee. Keep the core overlay in this build unless the reset
+sequence is redesigned and verified or an upstream firmware hook replaces it.
+
+## Can I use OneROM Studio?
+
+Studio can load a OneROM JSON configuration and build a ROM collection using
+prebuilt ROM and plugin files. It uses an official published OneROM base
+firmware selected in Studio. It does not compile this repository's C plugins
+or apply the UB3 early-reset core overlay, so a Studio-only build is not the
+same as the tested UB3 Control image.
+
+For the complete UB3 image, use this guide's build script. It builds the core
+and plugins, then invokes the OneROM CLI with the resulting patched base
+firmware and the selected configuration. If you have already built those
+inputs, the CLI can compose the exact image directly; see the advanced command
+in [the composition guide](UB3_CONTROL_CLI_COMPOSITION_GUIDE.md). The current
+templates use the v0.8.1 `chip_sets` schema and are suitable inputs to that CLI
+workflow.
 
 For your own ROM set, copy the example matching your wiring into the ignored
 `roms/private/` folder and update its file paths. The quick rule is:

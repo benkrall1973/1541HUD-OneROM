@@ -1,8 +1,10 @@
 # ROM composition examples
 
-These four JSON files are the single tracked examples for composing ROMs with
-the OneROM CLI. Each is ROM-free; they do not include private or licensed
-payloads.
+These four JSON files use the OneROM v0.8.1 `chip_sets` configuration format.
+They are ROM-free templates; they do not include private or licensed payloads.
+The CLI and Studio can load schema-compatible JSON configurations. Studio
+builds against an official published OneROM base firmware; it does not apply
+the UB3-specific early-reset core patch described in the build guide.
 
 | File | Wiring/layout |
 |---|---|
@@ -15,7 +17,15 @@ The CLI resolves file paths from the repository working directory. The
 examples therefore use repository-relative plugin paths and point DOS/Monitor
 inputs into `roms/private/`. Copy the chosen example there, then edit labels
 and page paths as needed. That directory is ignored by Git and is the only
-place for private configuration files and owner-supplied ROM data.
+place for private configuration files and owner-supplied ROM data. The custom
+plugin `.bin` files referenced by Control and Monitor examples are generated
+by their project build scripts; they are not committed to this repository.
+
+Studio can build a configuration from prebuilt ROM and plugin files, but the
+result uses the Studio-selected official base firmware. That is useful for a
+generic OneROM image, but it is not the complete UB3 Control build while the
+early-reset core patch is required. Use the project build script below for the
+tested UB3 firmware.
 
 For a custom Control build, invoke the build script from the repository root:
 
