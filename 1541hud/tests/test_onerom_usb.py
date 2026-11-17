@@ -281,21 +281,22 @@ class ControllerRomDiscoveryTests(unittest.TestCase):
 
     def discovery_target(self):
         target = HUDApp.__new__(HUDApp)
-        target.rom_choices = (
+        target._legacy_rom_choices = (
             "Slot 1 — ORIGINAL", "Slot 2 — JIFFYDOS", "Slot 3 — ORIGINAL",
         )
-        target._legacy_rom_choices = target.rom_choices
-        target._rom_choices_by_slot = {
-            index: label for index, label in enumerate(target.rom_choices, start=1)
-        }
+        target._rom_choices_by_slot = {}
+        target._rom_slot_by_choice = {}
         target._rom_discovery_pending = []
         target._rom_discovery_slots = {}
         class Var:
             def __init__(self, value): self.value = value
             def get(self): return self.value
             def set(self, value): self.value = value
-        target.rom_choice = Var(target.rom_choices[0])
-        target.rom_var = Var(target.rom_choices[0])
+        target.rom_choice = Var("")
+        target.rom_var = Var("")
+        target.set_controller_rom_choices({
+            index: label for index, label in enumerate(target._legacy_rom_choices, start=1)
+        })
         target._controller_transactions = {}
         target.controller_card_feedback = {}
         target._hud_dirty = False
@@ -324,8 +325,8 @@ class ControllerRomDiscoveryTests(unittest.TestCase):
         self.assertTrue(target.handle_controller_rom_slot_reply("$ROMTEST,SLOT,INDEX=1,SELECTABLE=1,NAME=ORIGINAL"))
         self.assertEqual(sent[-1], "ROMSLOT=2")
         self.assertTrue(target.handle_controller_rom_slot_reply("$ROMTEST,SLOT,INDEX=2,SELECTABLE=1,NAME=TEST ROM"))
-        self.assertEqual(target.rom_choices, ("Slot 1 — ORIGINAL", "Slot 2 — TEST ROM"))
-        self.assertEqual(target.controller_rom_choice_for_slot(2), "Slot 2 — TEST ROM")
+        self.assertEqual(target.rom_choices, ("ORIGINAL", "TEST ROM"))
+        self.assertEqual(target.controller_rom_choice_for_slot(2), "TEST ROM")
         self.assertIsNone(target.controller_rom_choice_for_slot(3))
         scheduled[-1]()
         self.assertEqual(sent[-1], "ROMGET")
@@ -334,7 +335,7 @@ class ControllerRomDiscoveryTests(unittest.TestCase):
         target, sent, _scheduled = self.discovery_target()
         target.begin_controller_session()
         self.assertTrue(target.handle_controller_rom_discovery_error("$ROMTEST,ERROR,UNKNOWN_COMMAND"))
-        self.assertEqual(target.rom_choices, target._legacy_rom_choices)
+        self.assertEqual(target.rom_choices, ("ORIGINAL (copy 1)", "JIFFYDOS", "ORIGINAL (copy 2)"))
         self.assertIn("USING LEGACY SLOT LABELS", target.controller_card_feedback["startup_rom"])
 
 
