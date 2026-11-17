@@ -205,7 +205,7 @@ class PopupChoiceViewportTests(unittest.TestCase):
     def test_long_choice_list_scrolls_in_bounded_seven_row_viewport(self) -> None:
         target = HUDApp.__new__(HUDApp)
         choices = tuple(f"Slot {index} — ROM {index}" for index in range(1, 13))
-        target.popup_menu = {"choices": choices, "scroll": 0}
+        target.popup_menu = {"kind": "choice", "choices": choices, "scroll": 0}
         self.assertEqual(target.popup_visible_choices(), choices[:7])
         target.scroll_popup_choices(99)
         self.assertEqual(target.popup_visible_choices(), choices[-7:])
@@ -290,6 +290,12 @@ class ControllerRomDiscoveryTests(unittest.TestCase):
         }
         target._rom_discovery_pending = []
         target._rom_discovery_slots = {}
+        class Var:
+            def __init__(self, value): self.value = value
+            def get(self): return self.value
+            def set(self, value): self.value = value
+        target.rom_choice = Var(target.rom_choices[0])
+        target.rom_var = Var(target.rom_choices[0])
         target._controller_transactions = {}
         target.controller_card_feedback = {}
         target._hud_dirty = False
@@ -710,6 +716,8 @@ class MonitorLedPersistenceRepliesTests(unittest.TestCase):
     def target(self):
         target = HUDApp.__new__(HUDApp)
         target.monitor_led_off = False
+        target._monitor_led_query_generation = 0
+        target._monitor_led_read_pending = False
         target._monitor_led_save_pending = True
         target._monitor_health_hold = True
         target._monitor_health_rebaseline_pending = False
