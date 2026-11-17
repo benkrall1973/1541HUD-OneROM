@@ -46,8 +46,10 @@ JiffyDOS and S-JiffyDOS drive ROMs, C64 KERNALs, and runtime helper are not
 included in r21. The same four-profile manifest is available at
 [`r21-basic-no-jiffydos-compose.json`](../releases/r21-basic-no-jiffydos-compose.json)
 and uses public ROM assets. The owner reports successful drive tests for
-Commodore DOS, SpeedDOS, DolphinDOS 2.0, IEC address control, and write-protect
-status/override. See the [r21 hardware test record](R21_BASIC_HARDWARE_TEST_2026-11-16.md)
+Commodore DOS, SpeedDOS, DolphinDOS 2.0, parallel cable operation, IEC address
+control, and write-protect status/override. The owner reports the parallel
+cable had previously been tested and working; the DOS tests confirmed it was
+working in this setup. See the [r21 hardware test record](R21_BASIC_HARDWARE_TEST_2026-11-16.md)
 for the reported test scope.
 
 ## Other repository images
@@ -100,8 +102,7 @@ For the r21 GitHub release asset, download the `.bin` first and use its local
 path for `<IMAGE.bin>`; r21 is not checked into the repository. Reboot and
 check USB enumeration. On UB3, test IEC 8/9, reset, write protect, ROM selection,
 directory reads, and a game load. For r21, consult its test record for confirmed
-profiles and controls. SpeedDOS parallel transfer was not qualified in r21;
-begin with its parallel fast path disabled over IEC if necessary. Test UB4
+profiles and controls, including the working parallel cable. Test UB4
 only after UB3 is confirmed healthy, using the Monitor-specific wiring in the
 [verified wiring guide](FIRE24G-VERIFIED-WIRING.md).
 

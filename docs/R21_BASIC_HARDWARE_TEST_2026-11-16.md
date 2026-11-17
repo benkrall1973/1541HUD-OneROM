@@ -8,6 +8,7 @@ UB3 Control board and tested in the drive by the project owner.
 - Commodore DOS
 - SpeedDOS
 - DolphinDOS 2.0
+- Parallel cable operation
 - IEC address control
 - Write-protect status and override
 
@@ -16,9 +17,10 @@ The image uses the C/A/E three-page layout and requires the documented
 74LS138 decoder wiring. The test used the existing 74LS138 setup; no wiring
 change was reported.
 
-This record reflects the checks reported by the owner. It does not claim that
-every profile-specific C64 KERNAL, parallel transfer mode, or other hardware
-combination was separately qualified.
+The owner reports that the parallel cable had been tested previously and was
+working. During the r21 testing, SpeedDOS and DolphinDOS 2.0 worked, which the
+owner confirms as evidence that the parallel setup was working. This does not
+claim that every profile-specific C64 KERNAL or transfer benchmark was tested.
 
 ## Image identity
 
