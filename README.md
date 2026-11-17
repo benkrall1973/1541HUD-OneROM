@@ -21,9 +21,10 @@ for fast DOS features; a drive ROM and a C64 KERNAL are separate things.
 | **DolphinDOS 2.0** | DolphinDOS 2.0 KERNAL | Parallel cable and compatible drive-side RAM for its fast path. |
 
 The r21 image starts with **DOS 2.6 Original** and IEC address **8**. It omits
-JiffyDOS and S-JiffyDOS. The release binary passed offline inspection of its
-board, plugin versions, slot layout, ROM labels, and NV0/NV2 defaults, but has
-**not yet been flashed or tested in a drive**; treat it as a test candidate.
+JiffyDOS and S-JiffyDOS. It has been flashed and tested in a drive: the owner
+confirmed Commodore DOS, SpeedDOS, DolphinDOS 2.0, IEC address control, and
+write-protect status and override. See the
+[r21 hardware test record](docs/R21_BASIC_HARDWARE_TEST_2026-11-16.md).
 All four r21 drive profiles use the three-page **C/A/E layout** and require
 the documented **74LS138 decoder wiring** (X1 to `/Y5`, pin 10; X2 to `/Y7`,
 pin 7). The complete ROM composition is in

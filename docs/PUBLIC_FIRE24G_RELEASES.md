@@ -10,7 +10,7 @@ All images target OneROM **Fire-24G** hardware only.
 | Image | Download name | Size | SHA-256 | Status |
 | --- | --- | ---: | --- | --- |
 | Stock DOS 2.6 two-ROM UB3 | `onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0.8.1.bin` | 262,144 bytes | `A066F70C1B9636714C0D0A0694D4B981641DF3E1DDD024D0E210097697BCBAFD` | Flashed and drive-tested |
-| r21 Basic multi-ROM UB3, no JiffyDOS | `onerom-1541HUD-Control-UB3-fire-24-g-basic-no-jiffydos-r21.bin` | 917,504 bytes | `4A8D2477B1C250111D846FBBF51CFFA5664A95E86627C28DEC8C0CF754827588` | Software checks passed; not yet flashed or drive-tested |
+| r21 Basic multi-ROM UB3, no JiffyDOS | `onerom-1541HUD-Control-UB3-fire-24-g-basic-no-jiffydos-r21.bin` | 917,504 bytes | `4A8D2477B1C250111D846FBBF51CFFA5664A95E86627C28DEC8C0CF754827588` | Flashed and owner-tested: Commodore DOS, SpeedDOS, DolphinDOS 2.0, IEC address control, and write-protect status/override; see [test record](R21_BASIC_HARDWARE_TEST_2026-11-16.md) |
 
 The stock image has the OneROM bootloader and stock 1541 DOS 2.6. It was
 tested in a 1541: DOS boot, directory read and game load, saving IEC address
@@ -45,8 +45,10 @@ use the stock two-ROM image for that wiring.
 JiffyDOS and S-JiffyDOS drive ROMs, C64 KERNALs, and runtime helper are not
 included in r21. The same four-profile manifest is available at
 [`r21-basic-no-jiffydos-compose.json`](../releases/r21-basic-no-jiffydos-compose.json)
-and uses public ROM assets. **The image still needs the listed hardware test
-before it can be called drive-qualified.**
+and uses public ROM assets. The owner reports successful drive tests for
+Commodore DOS, SpeedDOS, DolphinDOS 2.0, IEC address control, and write-protect
+status/override. See the [r21 hardware test record](R21_BASIC_HARDWARE_TEST_2026-11-16.md)
+for the reported test scope.
 
 ## Other repository images
 
@@ -97,10 +99,10 @@ it (replace `<SERIAL>` and `<IMAGE.bin>`):
 For the r21 GitHub release asset, download the `.bin` first and use its local
 path for `<IMAGE.bin>`; r21 is not checked into the repository. Reboot and
 check USB enumeration. On UB3, test IEC 8/9, reset, write protect, ROM selection,
-directory reads, and a game load. For r21, test the four profiles individually.
-SpeedDOS parallel transfer was not qualified in r21; begin with its parallel
-fast path disabled over IEC if necessary. Test UB4 only after UB3 is confirmed
-healthy, using the Monitor-specific wiring in the
+directory reads, and a game load. For r21, consult its test record for confirmed
+profiles and controls. SpeedDOS parallel transfer was not qualified in r21;
+begin with its parallel fast path disabled over IEC if necessary. Test UB4
+only after UB3 is confirmed healthy, using the Monitor-specific wiring in the
 [verified wiring guide](FIRE24G-VERIFIED-WIRING.md).
 
 For V53 Apply Only, a 1541-only power cycle restores the saved address only if

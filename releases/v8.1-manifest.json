@@ -97,7 +97,7 @@
           "DolphinDOS 2.0"
         ],
         "hidden_unused_slots": [5, 6, 7, 8, 9, 10],
-        "status": "downloaded and independently inspected offline; hardware test pending"
+        "status": "flashed and owner-reported drive test passed for Commodore DOS, SpeedDOS, DolphinDOS 2.0, IEC address control, and write-protect status/override; see docs/R21_BASIC_HARDWARE_TEST_2026-11-16.md"
       }
     ]
   }
