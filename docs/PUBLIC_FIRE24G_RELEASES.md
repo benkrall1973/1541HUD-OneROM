@@ -10,7 +10,7 @@ All images target OneROM **Fire-24G** hardware only.
 | Image | Download name | Size | SHA-256 | Status |
 | --- | --- | ---: | --- | --- |
 | Stock DOS 2.6 two-ROM UB3 | `onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0.8.1.bin` | 262,144 bytes | `A066F70C1B9636714C0D0A0694D4B981641DF3E1DDD024D0E210097697BCBAFD` | Flashed and drive-tested |
-| r21 Basic multi-ROM UB3, no JiffyDOS | `onerom-1541HUD-Control-UB3-fire-24-g-basic-no-jiffydos-r21.bin` | 917,504 bytes | `4A8D2477B1C250111D846FBBF51CFFA5664A95E86627C28DEC8C0CF754827588` | Flashed and owner-tested: Commodore DOS, SpeedDOS, DolphinDOS 2.0, IEC address control, and write-protect status/override; see [test record](R21_BASIC_HARDWARE_TEST_2026-11-16.md) |
+| r21 Basic multi-ROM UB3, no JiffyDOS | `onerom-1541HUD-Control-UB3-fire-24-g-basic-no-jiffydos-r21.bin` | 917,504 bytes | `4A8D2477B1C250111D846FBBF51CFFA5664A95E86627C28DEC8C0CF754827588` | Flashed and owner-tested: Commodore DOS, SpeedDOS, DolphinDOS 2.0, parallel cable, IEC address control, and write-protect status/override; see [test record](R21_BASIC_HARDWARE_TEST_2026-11-16.md) |
 
 The stock image has the OneROM bootloader and stock 1541 DOS 2.6. It was
 tested in a 1541: DOS boot, directory read and game load, saving IEC address
