@@ -5,6 +5,19 @@ $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 Set-Location $root
 function Check-Exit { if ($LASTEXITCODE -ne 0) { throw "Command failed with exit code $LASTEXITCODE" } }
+function Get-LfTextSha256Hex {
+    param([Parameter(Mandatory)][string]$Path)
+    $text = [System.IO.File]::ReadAllText($Path, [System.Text.Encoding]::UTF8)
+    $text = $text.Replace("`r`n", "`n").Replace("`r", "`n")
+    $bytes = [System.Text.UTF8Encoding]::new($false).GetBytes($text)
+    $sha256 = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        return ([System.BitConverter]::ToString($sha256.ComputeHash($bytes))).Replace('-', '')
+    }
+    finally {
+        $sha256.Dispose()
+    }
+}
 $core = Join-Path $root '.buildtools/windows-cli-core'
 New-Item -ItemType Directory -Force -Path $core, $OutputDirectory | Out-Null
 $output = (Resolve-Path $OutputDirectory).Path
@@ -46,8 +59,8 @@ $record = [ordered]@{
     # Retain the originating tested overlay hash; current exports already
     # contain those changes and additionally record their supported-source pin.
     overlay_sha256 = (Get-FileHash overlays/host-dependencies-v0.8.1.patch -Algorithm SHA256).Hash
-    source_hardening_sha256 = (Get-FileHash (Join-Path $core '1541HUD-SOURCE.json') -Algorithm SHA256).Hash
-    lock_sha256 = (Get-FileHash (Join-Path $core 'rust/Cargo.lock') -Algorithm SHA256).Hash
+    source_hardening_sha256 = Get-LfTextSha256Hex (Join-Path $core '1541HUD-SOURCE.json')
+    lock_sha256 = Get-LfTextSha256Hex (Join-Path $core 'rust/Cargo.lock')
     file = (Split-Path $exe -Leaf); bytes = (Get-Item $exe).Length
     sha256 = (Get-FileHash $exe -Algorithm SHA256).Hash
     scope = 'Windows release build, native CLI/ZIP regressions and offline inspection of all three checked-in Fire-24G images; no hardware programmed.'
