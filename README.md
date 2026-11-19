@@ -7,6 +7,80 @@ and sets LED behavior. The optional **UB4 Monitor** board passively reports
 motor and track activity, RPM, disk density, SYNC, and validated disk-header
 activity; it does not control the drive.
 
+1541HUD is the Windows dashboard for those boards. It combines live drive
+telemetry with direct Control-board actions, so it can show what the drive is
+doing while giving you a place to change its supported settings. The Monitor
+is optional: ROM serving and Control functions run on UB3 without UB4.
+
+## What 1541HUD does
+
+### Monitor the drive
+
+With a correctly wired **UB4 Monitor**, 1541HUD can display and log activity
+captured from the drive while it runs:
+
+- **Motor and rotation:** motor state and measured RPM, with RPM derived from
+  physical SYNC edges over complete revolutions.
+- **Head position:** stepper phase and half-track movement, with the DOS track
+  state used as the home reference.
+- **Disk format activity:** the drive's selected density zone (D0–D3), plus
+  checksum-validated disk-header activity when it is observed.
+- **Drive state:** SYNC activity and the write-protect state reported through
+  DOS RAM telemetry.
+- **Activity log:** review the events received by the HUD. Log filters control
+  which events are shown; they do not disable Monitor capture.
+
+The Monitor is **passive telemetry**. UB4 does not serve drive ROMs, reset the
+drive, drive the write-protect circuit, or issue commands on the 1541 bus. Its
+telemetry requires the four UB4 capture connections documented in the
+[wiring guide](docs/FIRE24G-VERIFIED-WIRING.md#ub4-monitor-connections). It is
+not a general-purpose disk analyzer and should not be read as a guarantee that
+every disk operation or header was captured.
+
+### Control the drive
+
+The **UB3 Control** board provides the drive-facing functions in 1541HUD:
+
+- **Select a drive ROM profile.** The HUD presents the profile names defined
+  by the installed ROM image. The image determines their order; hidden profile
+  labels stay hidden without changing the underlying slot selection.
+- **Set the IEC device address.** On the documented Fire-24G wiring, the
+  supported choices are device 8 and 9. **Apply Only** changes the live
+  address without saving it; **Apply and Save** stores the setting for later
+  startup. Apply Only requires Control USB plugin 0.8.1.17 or newer.
+- **Reset the drive.** HUD confirms the action before pulsing the wired active-
+  low reset line. Reset does not change the ROM, IEC address, or write-protect
+  settings.
+- **Manage optional write protection.** If the documented transistor and
+  sense circuit is installed, HUD can show write-protect status and request a
+  writable override or restore normal protection. HUD verifies the requested
+  state before updating the card.
+- **Configure board LEDs.** Control and Monitor LED policies are managed
+  separately; supported boards can use automatic behavior or turn their
+  indicator lights off. Policies are saved on the corresponding OneROM board.
+- **Assign board roles.** HUD associates Control and optional Monitor roles
+  with USB serial identities, rather than relying on COM port numbers that can
+  change after reconnecting.
+
+The HUD also provides connection/status feedback for the selected boards and
+surfaces unavailable or unsupported controls when the connected firmware does
+not provide them. The exact actions shown depend on the board, installed
+firmware, and optional wiring. See [1541HUD setup and compatibility](1541hud/README.md)
+for version requirements and connection details.
+
+### How the parts fit together
+
+| Part | Role | What it does |
+| --- | --- | --- |
+| **UB3 Control** | Drive control and ROM serving | Serves the selected drive ROM, handles configured IEC address and reset functions, and supports optional write-protect control. |
+| **UB4 Monitor** | Passive capture | Samples documented drive signals and reports telemetry to the HUD; it does not control the drive. |
+| **1541HUD for Windows** | Dashboard | Displays Monitor data and sends supported settings/actions to the assigned Control or Monitor board over USB. |
+| **OneROM CLI** | Setup and maintenance | Scans for boards, inspects and programs firmware, and verifies flashed images. It is separate from the HUD application. |
+
+Control and Monitor firmware images are different board roles and are not
+interchangeable. See the [validation matrix](docs/VALIDATION_MATRIX.md) for
+what has been exercised on hardware and the boundaries of that evidence.
+
 ## Drive ROMs you can use
 
 The public [r21 Basic image](https://github.com/benkrall1973/1541HUD-OneROM/releases/tag/v8.1-fire24g-ub3-images-2026-11-16)
