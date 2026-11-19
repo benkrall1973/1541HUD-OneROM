@@ -21,9 +21,13 @@ The `speeddos-plus/` folder contains the original files supplied in
 `mr_z_-_speeddos+_roms.zip`, retaining their factory filenames in
 `source-images/`: `1541lower`, `1541upper_sd`, `1541both_sd`, and
 `kernal_en_sd`. The archive has prebuilt ROM images, not assembler source.
-The project maintainer confirmed that these SpeedDOS files may be published;
-the supplied archive has no separate license file, so this records that
-permission source without implying the repository's MIT license covers them.
+The [CSDb archive record](https://csdb.dk/release/?id=21767&show=summary)
+describes the supplied ROM files but gives no license or redistribution grant.
+It is an archive listing, not rights-holder authorization. The project
+maintainer confirmed separately that these SpeedDOS files may be published;
+that permission is not independently documented in this repository. No
+explicit SpeedDOS license was found in this online check (2026-11-19). The
+repository's MIT license does not cover these files.
 `1541both_sd` is exactly 16 KiB: its first 8 KiB matches `1541lower`, and its
 second 8 KiB matches `1541upper_sd`. For this profile, the A page is an exact
 copy of the upper/E page. The processed OneROM pages and C64 KERNAL are kept
@@ -32,8 +36,14 @@ assets; do not substitute the unrelated RAMBoard-II patch.
 
 ## DolphinDOS 2.0
 
-The `dolphindos-2/source/` files and Unlicense are from the
-[DolphinDOS 2 upstream repository](https://github.com/donnchawp/DolphinDOS2).
+The `dolphindos-2/source/` files and the upstream repository's
+[Unlicense](https://github.com/donnchawp/DolphinDOS2/blob/master/LICENSE) are
+from the [unofficial DolphinDOS2 repository](https://github.com/donnchawp/DolphinDOS2).
+Its README says it is not affiliated with the original developers and that
+version 1 retains the original DolphinDOS ROM files. The Unlicense is the
+license published by that repository, but I found no separate grant from the
+original DolphinDOS rights holders; the authority to relicense original ROM
+content is therefore not established by the available online material.
 The C64 KERNAL assembly and upstream Makefile are included. That Makefile
 builds only the 8 KiB C64 KERNAL. The drive `1541.asm` file is supplied as
 upstream reference material, but is a disassembly rather than a reproducible
@@ -41,9 +51,11 @@ drive-ROM build source. The original project's page provides a separate
 [drive-side firmware archive](https://e4aws.silverdr.com/resources/dolphindos2/2dosa_c.bin.zip).
 The included C/A/E pages are the user's hardware-tested working set. The
 32 KiB `reference/dd2_1541.rom` is a separate community/emulator reference;
-its 8 KiB chunks do not match the tested pages, so it is not their source and
-must not be naively split to replace them. DolphinDOS has a distinct A page;
-do not mirror E into A.
+its exact source and redistribution terms are not established here, and its
+8 KiB chunks do not match the tested pages. Do not treat the upstream
+repository's Unlicense as covering this separate file without confirming its
+origin, and do not naively split it to replace the tested pages. DolphinDOS
+has a distinct A page; do not mirror E into A.
 
 ## JiffyDOS and S-JiffyDOS
 
