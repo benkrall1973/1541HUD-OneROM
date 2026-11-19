@@ -121,8 +121,10 @@ that range while S-JiffyDOS is active can corrupt its running code. See the
 and [RAMBoard](roms/ramboard/README.md) notes.
 
 Browse the [ROM and KERNAL library](roms/README.md) for included pages, source,
-build notes, and checksums. C64 KERNALs are installed on the C64; the UB3
-images above contain drive-side ROM profiles, not a C64 KERNAL replacement.
+build notes, and checksums. Third-party ROM assets are not covered by this
+project's MIT license; review the [asset provenance and rights notes](roms/ASSETS.md)
+before reusing or redistributing them. C64 KERNALs are installed on the C64;
+the UB3 images above contain drive-side ROM profiles, not a C64 KERNAL replacement.
 
 ## Get started
 
@@ -137,22 +139,29 @@ images above contain drive-side ROM profiles, not a C64 KERNAL replacement.
    ./tools/onerom-v0.6.0-hud1.exe --unrecognised scan --board fire-24-g
    ```
 
-3. Confirm the serial, download the selected `.bin` from the
-   [release page](https://github.com/benkrall1973/1541HUD-OneROM/releases/tag/v8.1-fire24g-ub3-images-2026-11-16),
-   then flash it with `program --verify`:
+3. Confirm the serial and choose the image for that board. Download UB3 Control
+   images from the
+   [release page](https://github.com/benkrall1973/1541HUD-OneROM/releases/tag/v8.1-fire24g-ub3-images-2026-11-16).
+   The UB4 Monitor image is a
+   [separate repository file](releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.32.bin),
+   with its hash in the [release manifest](releases/v8.1-manifest.json). Then
+   flash the selected image with `program --verify`:
 
    ```powershell
    ./tools/onerom-v0.6.0-hud1.exe --serial <SERIAL> program `
      --firmware <PATH-TO-IMAGE.bin> --verify
    ```
 
-   Compare the image's SHA-256 with the value shown on the release page.
+   Compare the image's SHA-256 with the hash listed for that exact file in the
+   release page or manifest.
 4. Install and run the Windows HUD by following
-   [1541HUD setup](1541hud/README.md). HUD V0.8.0.58 supports the newer ROM
-   list and Apply Only flow; Apply Only needs UB3 Control USB 0.8.1.17 or newer
-   (the repository source is 0.8.1.18). For a USB-connected power cycle to reload the saved address, UB3
-   must lose power too: use a data cable that passes D+/D− and ground while
-   blocking host +5 V, or power-cycle UB3 separately.
+   [1541HUD setup](1541hud/README.md). V0.8.0.58 is the current public source
+   candidate; V0.8.0.51 remains the last hardware-qualified HUD baseline. The
+   public package includes Python source and launchers, not a standalone HUD
+   executable. Apply Only needs UB3 Control USB 0.8.1.17 or newer (the current
+   repository source is 0.8.1.18). For a USB-connected power cycle to reload
+   the saved address, UB3 must lose power too: use a data cable that passes
+   D+/D− and ground while blocking host +5 V, or power-cycle UB3 separately.
 
 ## Build or customize
 
