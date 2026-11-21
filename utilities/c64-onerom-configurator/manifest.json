@@ -1,0 +1,31 @@
+{
+  "product": "1541 OneROM Selector R20",
+  "version": "1.4.31",
+  "baseline_status": "public source baseline; exact V1.4.31 C64 interaction retest not recorded",
+  "license": "MIT; see repository root LICENSE",
+  "source": {
+    "file": "source/C64-OneROM-Configurator-r20-V1.4.31.bas",
+    "bytes": 40961,
+    "sha256": "5C7EBB766F54E150240E342D41FBBCF543BD4F6061D5EC61A5D4EA28AFBCC78F"
+  },
+  "tokenizer": {
+    "file": "source/scripts/tokenize_basic_v2.py",
+    "bytes": 3924,
+    "sha256": "5D6EBFECC2C783D74A541071223BB749F593D5676FC472B087046DD1F01D5F03"
+  },
+  "program": {
+    "file": "releases/C64-OneROM-Configurator-r20-V1.4.31.PRG",
+    "bytes": 29274,
+    "sha256": "EFB719BAC787B048625C1CCBFC6D4432ADDCB712649E7755416E7AE6B5A37687"
+  },
+  "build": {
+    "runtime": "Python 3; standard library only",
+    "command": "./Build-C64-OneROM-Configurator.ps1",
+    "reproducibility": "Build output is checked byte-for-byte by SHA-256 against the tracked PRG."
+  },
+  "redistribution": {
+    "rom_payloads_included": false,
+    "third_party_dos_images_included": false,
+    "notes": "The program communicates with OneROM firmware at runtime. It does not contain Commodore DOS, JiffyDOS, or C64 KERNAL ROM images."
+  }
+}

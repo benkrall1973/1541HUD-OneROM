@@ -7,6 +7,11 @@ build wrappers, and ROM-free templates for a Commodore 1541 installation using
 OneROM Fire-24G hardware. Those project-authored materials are licensed under
 the root [MIT License](LICENSE).
 
+The project-authored C64 OneROM configurator source, tokenizer, build wrapper,
+and documentation are also covered by the root MIT license. Its PRG is built
+from that source. The package contains no Commodore DOS, JiffyDOS, or C64
+KERNAL ROM payloads; the root license grants no rights to third-party ROMs.
+
 ## OneROM upstream snapshot
 
 `source/one-rom-v0.8.1/` is the supported source derived from Piers Finlayson's

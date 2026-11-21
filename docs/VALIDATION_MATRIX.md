@@ -20,7 +20,7 @@ sets and modifications require their own qualification.
 | Standard two-page C/E layouts | Supported build path | Builder supplies lawful 8 KiB ROM pages and matching socket wiring. |
 | Three-page C/A/E layout | Supported build path | Requires documented 74LS138 decode wiring and builder-supplied pages. |
 | SpeedDOS, JiffyDOS, DolphinDOS 2.0 layouts | Builder-supplied/private | No ROM payloads are distributed; hardware and legal input responsibility remain with the builder. |
-| C64 configurator | Deferred | Not part of this public release. |
+| C64 OneROM configurator R20 V1.4.31 | Reproducible public baseline; exact release UI retest pending | Tracked BASIC source, tokenizer, build wrapper, PRG, and SHA-256 manifest reproduce the release artifact byte-for-byte. The owner previously reported V1.4.24 discovered all six programmed ROM sets; that report does not qualify the final V1.4.31 screen redraw. |
 | S-JiffyDOS 1541 | Documentation and project-authored bootstrap source included; generated ROM excluded | The private build was user-tested in the drive. Public users need their own licensed JiffyDOS inputs and must follow the RAMBoard shadow-memory warning. No public generated S-JiffyDOS image or complete recipe is included. |
 | Other 1541 board revisions | Not qualified | Require independent electrical review and acceptance testing. |
 
