@@ -44,6 +44,13 @@ function Get-LfTextSha256Hex {
     }
 }
 
+function Get-LfTextByteLength {
+    param([Parameter(Mandatory)][string]$Path)
+    $text = [System.IO.File]::ReadAllText($Path, [System.Text.Encoding]::UTF8)
+    $text = $text.Replace("`r`n", "`n").Replace("`r", "`n")
+    return [System.Text.UTF8Encoding]::new($false).GetByteCount($text)
+}
+
 $required = @(
     'README.md',
     '1541hud/README.md',
@@ -209,10 +216,9 @@ $badPaths = Get-ChildItem -LiteralPath $PackageRoot -Recurse -Force -File |
         $relative = $_.FullName.Substring($PackageRoot.Length + 1).Replace('\', '/')
         # The configurator build wrapper writes this ignored local artifact;
         # exported Git packages never contain it.
-        $relative -notmatch '^C64 Configurator/build/' -and
         # These are synthetic fixtures shipped in the pinned upstream source,
         # not commercial 1541/C64 ROM images. Keep the allowlist exact.
-        $relative -notmatch '^(source/one-rom-v0\.8\.1/images/test/(stub-(system|user)-plugin\.bin|0_63_(2048|4096|8192)\.rom|ff8192\.rom|rand_(0\.5KB|1KB|2KB|4KB|8KB|16KB|32KB|48KB|64KB|128KB|256KB|512KB|512KB_alt)\.rom|zero(3|8192)\.rom)|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0\.8\.1\.bin|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0\.8\.1\.17\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.32\.bin|tools/onerom-v0\.6\.0-hud1\.exe|firmware-monitor/inputs/(1541-OneROM-Bootloader-Universal-v1\.1\.0|1541-c000\.325302-01)\.bin|roms/ramboard/original-cld/ramboard\.d64|C64 Configurator/releases/C64-OneROM-Configurator-r20-V1\.4\.31\.prg)$' -and
+        $relative -notmatch '^(source/one-rom-v0\.8\.1/images/test/(stub-(system|user)-plugin\.bin|0_63_(2048|4096|8192)\.rom|ff8192\.rom|rand_(0\.5KB|1KB|2KB|4KB|8KB|16KB|32KB|48KB|64KB|128KB|256KB|512KB|512KB_alt)\.rom|zero(3|8192)\.rom)|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0\.8\.1\.bin|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0\.8\.1\.17\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.32\.bin|tools/onerom-v0\.6\.0-hud1\.exe|firmware-monitor/inputs/(1541-OneROM-Bootloader-Universal-v1\.1\.0|1541-c000\.325302-01)\.bin|roms/ramboard/original-cld/ramboard\.d64|C64 Configurator/releases/C64-OneROM-Configurator-r20-V1\.4\.31\.prg|C64 Configurator/build/C64-OneROM-Configurator-r20-V1\.4\.31\.prg)$' -and
         $relative -notmatch '^roms/(stock-dos-2\.6|speeddos-plus|dolphindos-2)/.*\.(bin|rom)$' -and
         $relative -match $forbiddenPath
     }
@@ -288,9 +294,28 @@ foreach ($artifact in $configuratorArtifacts) {
         throw "Configurator manifest names an unexpected artifact: $($artifact.Record.file)"
     }
     $artifactPath = Join-Path (Join-Path $PackageRoot 'C64 Configurator') $artifact.ExpectedPath
-    if ((Get-Item -LiteralPath $artifactPath).Length -ne $artifact.Record.bytes -or
-        (Get-Sha256Hex -Path $artifactPath) -ne $artifact.Record.sha256.ToUpperInvariant()) {
+    $isText = $artifact.ExpectedPath -like 'source/*'
+    $actualBytes = if ($isText) { Get-LfTextByteLength -Path $artifactPath } else { (Get-Item -LiteralPath $artifactPath).Length }
+    $actualHash = if ($isText) { Get-LfTextSha256Hex -Path $artifactPath } else { Get-Sha256Hex -Path $artifactPath }
+    if ($actualBytes -ne $artifact.Record.bytes -or $actualHash -ne $artifact.Record.sha256.ToUpperInvariant()) {
         throw "Configurator artifact size/hash mismatch: $($artifact.ExpectedPath)"
+    }
+}
+
+$configuratorBuildDirectory = Join-Path $PackageRoot 'C64 Configurator/build'
+if (Test-Path -LiteralPath $configuratorBuildDirectory) {
+    $buildFiles = @(Get-ChildItem -LiteralPath $configuratorBuildDirectory -Recurse -Force -File)
+    $expectedBuildFile = 'C64-OneROM-Configurator-r20-V1.4.31.PRG'
+    $unexpectedBuildFiles = @($buildFiles | Where-Object { $_.FullName.Substring($configuratorBuildDirectory.Length + 1) -ne $expectedBuildFile })
+    if ($unexpectedBuildFiles.Count -gt 0) {
+        throw "Unexpected file(s) under the configurator build directory:`n$($unexpectedBuildFiles.FullName -join "`n")"
+    }
+    if ($buildFiles.Count -gt 0) {
+        $builtProgram = $buildFiles[0].FullName
+        if ((Get-Item -LiteralPath $builtProgram).Length -ne $configurator.program.bytes -or
+            (Get-Sha256Hex -Path $builtProgram) -ne $configurator.program.sha256.ToUpperInvariant()) {
+            throw 'Ignored configurator build output differs from the tracked release PRG.'
+        }
     }
 }
 

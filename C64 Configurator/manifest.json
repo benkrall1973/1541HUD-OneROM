@@ -5,13 +5,13 @@
   "license": "MIT; see repository root LICENSE",
   "source": {
     "file": "source/C64-OneROM-Configurator-r20-V1.4.31.bas",
-    "bytes": 40961,
-    "sha256": "5C7EBB766F54E150240E342D41FBBCF543BD4F6061D5EC61A5D4EA28AFBCC78F"
+    "bytes": 40453,
+    "sha256": "0205F31DBD4C731D2CBC5E433ED1123C92174EED377A7C73A1F1F9735ADB40D7"
   },
   "tokenizer": {
     "file": "source/scripts/tokenize_basic_v2.py",
-    "bytes": 3924,
-    "sha256": "5D6EBFECC2C783D74A541071223BB749F593D5676FC472B087046DD1F01D5F03"
+    "bytes": 3848,
+    "sha256": "F831F86FD31A35E4825F2489283BCF94950D896BE6686F2B0507F322EB4BC500"
   },
   "program": {
     "file": "releases/C64-OneROM-Configurator-r20-V1.4.31.PRG",

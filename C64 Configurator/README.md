@@ -21,7 +21,8 @@ Requirements: Windows PowerShell and Python 3. From the repository root, run:
 The script creates an ignored `build/` directory, tokenizes the tracked BASIC
 source, and checks the output hash and size against `manifest.json` and the
 tracked PRG. It does not modify the published release file. The tokenizer uses
-only the Python standard library.
+only the Python standard library. Source and tokenizer checksums use LF-normalized
+UTF-8 text, so Git checkout line endings do not change the recorded hashes.
 
 The project-authored BASIC source, tokenizer, build wrapper, and documentation
 are covered by the repository-root MIT license. No DOS ROM, C64 KERNAL,

@@ -120,7 +120,8 @@ falls back to `python`. The tokenizer is checked in at
 and has no third-party Python dependencies. Build output goes to the ignored
 package-local `build/` folder. The wrapper verifies source, tokenizer, and PRG
 hashes against the tracked manifest and fails if a rebuilt PRG differs from
-the published artifact.
+the published artifact. Text checksums and byte counts use LF-normalized UTF-8,
+so a Windows checkout with CRLF line endings produces the same manifest values.
 
 The public package includes:
 
