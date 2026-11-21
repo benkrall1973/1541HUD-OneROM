@@ -4,7 +4,7 @@
 
 The tracked public baseline is **1541 OneROM Selector R20 V1.4.31**. The
 source and PRG are recorded in
-[`utilities/c64-onerom-configurator/manifest.json`](../utilities/c64-onerom-configurator/manifest.json),
+[`manifest.json`](manifest.json),
 and the repository build wrapper reproduces the PRG byte-for-byte.
 
 The owner previously reported that the V1.4.24 service scan displayed all six
@@ -47,8 +47,8 @@ OneROM firmware image and its wiring.
   rights to Commodore, JiffyDOS, or other ROM contents.
 
 For supported Fire-24G wiring and board roles, see the
-[verified wiring guide](FIRE24G-VERIFIED-WIRING.md) and
-[validation matrix](VALIDATION_MATRIX.md). For firmware image composition,
+[verified wiring guide](../docs/FIRE24G-VERIFIED-WIRING.md) and
+[validation matrix](../docs/VALIDATION_MATRIX.md). For firmware image composition,
 see the [ROM-free composition guide](../roms/configs/README.md).
 
 ## Startup and discovery sequence
@@ -111,12 +111,12 @@ hardware property; the selector cannot make an unwired address respond.
 From the repository root, run:
 
 ```powershell
-./utilities/c64-onerom-configurator/Build-C64-OneROM-Configurator.ps1
+& "./C64 Configurator/Build-C64-OneROM-Configurator.ps1"
 ```
 
 The wrapper uses `py -3` when the Windows Python launcher is installed and
 falls back to `python`. The tokenizer is checked in at
-[`source/scripts/tokenize_basic_v2.py`](../utilities/c64-onerom-configurator/source/scripts/tokenize_basic_v2.py)
+[`source/scripts/tokenize_basic_v2.py`](source/scripts/tokenize_basic_v2.py)
 and has no third-party Python dependencies. Build output goes to the ignored
 package-local `build/` folder. The wrapper verifies source, tokenizer, and PRG
 hashes against the tracked manifest and fails if a rebuilt PRG differs from
@@ -124,11 +124,11 @@ the published artifact.
 
 The public package includes:
 
-- [ASCII BASIC source](../utilities/c64-onerom-configurator/source/C64-OneROM-Configurator-r20-V1.4.31.bas)
-- [Tokenizer](../utilities/c64-onerom-configurator/source/scripts/tokenize_basic_v2.py)
-- [Build wrapper](../utilities/c64-onerom-configurator/Build-C64-OneROM-Configurator.ps1)
-- [V1.4.31 PRG](../utilities/c64-onerom-configurator/releases/C64-OneROM-Configurator-r20-V1.4.31.PRG)
-- [SHA-256 and size manifest](../utilities/c64-onerom-configurator/manifest.json)
+- [ASCII BASIC source](source/C64-OneROM-Configurator-r20-V1.4.31.bas)
+- [Tokenizer](source/scripts/tokenize_basic_v2.py)
+- [Build wrapper](Build-C64-OneROM-Configurator.ps1)
+- [V1.4.31 PRG](releases/C64-OneROM-Configurator-r20-V1.4.31.PRG)
+- [SHA-256 and size manifest](manifest.json)
 
 ## Troubleshooting
 

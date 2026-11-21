@@ -86,7 +86,7 @@ what has been exercised on hardware and the boundaries of that evidence.
 The repository also includes the **1541 OneROM Selector R20 V1.4.31** for
 selecting a catalogued drive-ROM profile and IEC address from a Commodore 64.
 Its BASIC source, tokenizer, reproducible build wrapper, PRG, checksums, and
-technical guide are in [the configurator package](utilities/c64-onerom-configurator/README.md).
+technical guide are in [the configurator package](<C64 Configurator/README.md>).
 The V1.4.31 PRG rebuilds byte-for-byte from the tracked source; its final
 screen interaction has not yet been separately confirmed on hardware.
 
@@ -191,7 +191,7 @@ the UB3 images above contain drive-side ROM profiles, not a C64 KERNAL replaceme
 | `firmware-control/` | UB3 Control firmware and plugins |
 | `firmware-monitor/` | UB4 passive Monitor firmware and plugins |
 | `roms/` | DOS ROM pages, KERNALs, references, and ROM-free config examples |
-| `utilities/c64-onerom-configurator/` | C64 selector source, build tools, release PRG, and checksums |
+| `C64 Configurator/` | C64 selector source, build tools, release PRG, and checksums |
 | `docs/` | Wiring, build, flashing, and verification guides |
 | `source/` | Supported OneROM source snapshot and provenance |
 

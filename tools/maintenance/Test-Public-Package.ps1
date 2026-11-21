@@ -132,13 +132,13 @@ $required = @(
     'releases/r21-basic-no-jiffydos-compose.json',
     '1541hud/tests/test_onerom_usb.py',
     'utilities/rom-pages/Split-1541-RomPages.ps1',
-    'utilities/c64-onerom-configurator/README.md',
-    'utilities/c64-onerom-configurator/Build-C64-OneROM-Configurator.ps1',
-    'utilities/c64-onerom-configurator/manifest.json',
-    'utilities/c64-onerom-configurator/source/C64-OneROM-Configurator-r20-V1.4.31.bas',
-    'utilities/c64-onerom-configurator/source/scripts/tokenize_basic_v2.py',
-    'utilities/c64-onerom-configurator/releases/C64-OneROM-Configurator-r20-V1.4.31.PRG',
-    'docs/C64_ONEROM_CONFIGURATOR.md',
+    'C64 Configurator/README.md',
+    'C64 Configurator/Build-C64-OneROM-Configurator.ps1',
+    'C64 Configurator/manifest.json',
+    'C64 Configurator/source/C64-OneROM-Configurator-r20-V1.4.31.bas',
+    'C64 Configurator/source/scripts/tokenize_basic_v2.py',
+    'C64 Configurator/releases/C64-OneROM-Configurator-r20-V1.4.31.PRG',
+    'C64 Configurator/Technical Guide.md',
     'tools/onerom-v0.6.0-hud1.exe',
     'tools/windows-cli-manifest.json',
     'tools/windows-cli-dependencies.json',
@@ -209,10 +209,10 @@ $badPaths = Get-ChildItem -LiteralPath $PackageRoot -Recurse -Force -File |
         $relative = $_.FullName.Substring($PackageRoot.Length + 1).Replace('\', '/')
         # The configurator build wrapper writes this ignored local artifact;
         # exported Git packages never contain it.
-        $relative -notmatch '^utilities/c64-onerom-configurator/build/' -and
+        $relative -notmatch '^C64 Configurator/build/' -and
         # These are synthetic fixtures shipped in the pinned upstream source,
         # not commercial 1541/C64 ROM images. Keep the allowlist exact.
-        $relative -notmatch '^(source/one-rom-v0\.8\.1/images/test/(stub-(system|user)-plugin\.bin|0_63_(2048|4096|8192)\.rom|ff8192\.rom|rand_(0\.5KB|1KB|2KB|4KB|8KB|16KB|32KB|48KB|64KB|128KB|256KB|512KB|512KB_alt)\.rom|zero(3|8192)\.rom)|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0\.8\.1\.bin|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0\.8\.1\.17\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.32\.bin|tools/onerom-v0\.6\.0-hud1\.exe|firmware-monitor/inputs/(1541-OneROM-Bootloader-Universal-v1\.1\.0|1541-c000\.325302-01)\.bin|roms/ramboard/original-cld/ramboard\.d64|utilities/c64-onerom-configurator/releases/C64-OneROM-Configurator-r20-V1\.4\.31\.prg)$' -and
+        $relative -notmatch '^(source/one-rom-v0\.8\.1/images/test/(stub-(system|user)-plugin\.bin|0_63_(2048|4096|8192)\.rom|ff8192\.rom|rand_(0\.5KB|1KB|2KB|4KB|8KB|16KB|32KB|48KB|64KB|128KB|256KB|512KB|512KB_alt)\.rom|zero(3|8192)\.rom)|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0\.8\.1\.bin|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0\.8\.1\.17\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.32\.bin|tools/onerom-v0\.6\.0-hud1\.exe|firmware-monitor/inputs/(1541-OneROM-Bootloader-Universal-v1\.1\.0|1541-c000\.325302-01)\.bin|roms/ramboard/original-cld/ramboard\.d64|C64 Configurator/releases/C64-OneROM-Configurator-r20-V1\.4\.31\.prg)$' -and
         $relative -notmatch '^roms/(stock-dos-2\.6|speeddos-plus|dolphindos-2)/.*\.(bin|rom)$' -and
         $relative -match $forbiddenPath
     }
@@ -276,7 +276,7 @@ $textHits = foreach ($file in Get-ChildItem -LiteralPath $PackageRoot -Recurse -
 }
 if ($textHits) { throw "Private path or serial-like data in public package:`n$($textHits -join "`n")" }
 
-$configuratorManifestPath = Join-Path $PackageRoot 'utilities/c64-onerom-configurator/manifest.json'
+$configuratorManifestPath = Join-Path $PackageRoot 'C64 Configurator/manifest.json'
 $configurator = Get-Content -LiteralPath $configuratorManifestPath -Raw | ConvertFrom-Json
 $configuratorArtifacts = @(
     @{ Record = $configurator.source; ExpectedPath = 'source/C64-OneROM-Configurator-r20-V1.4.31.bas' },
@@ -287,7 +287,7 @@ foreach ($artifact in $configuratorArtifacts) {
     if ($artifact.Record.file -ne $artifact.ExpectedPath) {
         throw "Configurator manifest names an unexpected artifact: $($artifact.Record.file)"
     }
-    $artifactPath = Join-Path (Join-Path $PackageRoot 'utilities/c64-onerom-configurator') $artifact.ExpectedPath
+    $artifactPath = Join-Path (Join-Path $PackageRoot 'C64 Configurator') $artifact.ExpectedPath
     if ((Get-Item -LiteralPath $artifactPath).Length -ne $artifact.Record.bytes -or
         (Get-Sha256Hex -Path $artifactPath) -ne $artifact.Record.sha256.ToUpperInvariant()) {
         throw "Configurator artifact size/hash mismatch: $($artifact.ExpectedPath)"

@@ -10,7 +10,7 @@ future repository and not a substitute for the build or wiring guides.
 | --- | --- |
 | `roms/` and `roms/configs/` | Curated drive ROM/KERNAL assets, source references, RAMBoard docs, and ROM-free composition examples. JiffyDOS/S-JiffyDOS folders contain documentation and project-authored source only, without licensed payloads. See `roms/ASSETS.md` for provenance limits. |
 | `utilities/rom-pages/` and `tools/maintenance/` | ROM page utility, validator, and public-boundary records. |
-| `utilities/c64-onerom-configurator/` | R20 V1.4.31 BASIC selector source, standard-library tokenizer, PowerShell build wrapper, tracked PRG, checksum manifest, and technical documentation. The PRG is the only newly permitted `.PRG` payload; no DOS ROM or C64 KERNAL payload is included. |
+| `C64 Configurator/` | R20 V1.4.31 BASIC selector source, standard-library tokenizer, PowerShell build wrapper, tracked PRG, checksum manifest, and technical documentation. The PRG is the only newly permitted `.PRG` payload; no DOS ROM or C64 KERNAL payload is included. |
 | `source/one-rom-v0.8.1` | Supported source derived from official `v0.8.1`, with checked-in host fixes, source provenance and unsupported GUI trees excluded. |
 | `overlays/host-dependencies-v0.8.1.*` and host dependency helpers/tests | Historical checksummed host patch and helpers. Current exports verify the incorporated fixes; the original snapshot is preserved in history/private backups. |
 | Active `1541HUD-USB-v0.8.1` and `1541HUD-Host-Control-v0.8.1` source | UB3 integration source. USB plugin 0.8.1.18 is the current source and supports the 10 selectable ROM slots used by the r21 image. The wrapper builds both plugins against the official pinned core in an ignored work tree. |
@@ -28,7 +28,7 @@ future repository and not a substitute for the build or wiring guides.
 | `roms/private/` and arbitrary ROM payloads | `roms/private/` is ignored by Git and excluded from public packages. Only exact asset files listed in `roms/ASSETS.sha256` are permitted. |
 | Any composed firmware `.bin` except the three named Fire-24G images | Custom OneROM firmware images must not be added. ROM-library inputs are not composed firmware images. |
 | `firmware-*/releases/`, historical EXEs, `outputs/`, `work/`, and build kits | Generated artifacts, old candidates, or third-party material not yet cleared for public redistribution. |
-| Any unlisted `.PRG` file, including custom ROM/configuration payloads | Only `utilities/c64-onerom-configurator/releases/C64-OneROM-Configurator-r20-V1.4.31.PRG` is allowed by the package validator. |
+| Any unlisted `.PRG` file, including custom ROM/configuration payloads | Only `C64 Configurator/releases/C64-OneROM-Configurator-r20-V1.4.31.PRG` is allowed by the package validator. |
 | Licensed JiffyDOS ROMs and C64 KERNALs; S-JiffyDOS generated images/pages | JiffyDOS is commercial software. Public folders contain documentation and project-authored source only; builders supply licensed inputs. |
 | USB serial numbers, local paths, SSH helpers, and local diagnostics | Operator/machine-specific information. |
 

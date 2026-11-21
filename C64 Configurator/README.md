@@ -6,16 +6,16 @@ produce the PRG, and the reproducible release artifact. The utility reads the
 catalog already installed on OneROM; it does not contain or install drive-ROM
 images.
 
-See the full [technical guide](../../docs/C64_ONEROM_CONFIGURATOR.md) for
+See the full [technical guide](<Technical Guide.md>) for
 startup, controls, socket discovery, IEC address behavior, compatibility,
 troubleshooting, and validation limits.
 
 ## Build and verify
 
-Requirements: Windows PowerShell and Python 3. Run from any directory:
+Requirements: Windows PowerShell and Python 3. From the repository root, run:
 
 ```powershell
-./utilities/c64-onerom-configurator/Build-C64-OneROM-Configurator.ps1
+& "./C64 Configurator/Build-C64-OneROM-Configurator.ps1"
 ```
 
 The script creates an ignored `build/` directory, tokenizes the tracked BASIC
