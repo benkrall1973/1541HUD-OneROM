@@ -54,6 +54,18 @@ for the reported test scope.
 
 ## Other repository images
 
+## 1541HUD Windows application
+
+The owner confirmed HUD V0.8.0.58 working on the configured drive setup. The
+standalone Windows x64 application is
+[`1541HUD-V0.8.0.58-win-x64.exe`](../1541hud/releases/v0.8.0.58/1541HUD-V0.8.0.58-win-x64.exe).
+Use its adjacent `BUILD-INFO.json` to verify the SHA-256 and inspect source and
+toolchain provenance. It was built and launch-smoke-tested from the public
+checkout; testing this packaged executable on the owner's drive remains
+pending. It is unsigned, so Windows may display a SmartScreen or antivirus
+warning. Python is not needed to run it. Third-party license notices are
+included alongside the binary.
+
 | Board | File | Size | SHA-256 | Notes |
 | --- | --- | ---: | --- | --- |
 | UB4 passive Monitor | `releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0.8.1.32.bin` | 229,376 bytes | `475EB25252ADB9435BD7569297C6C16E72DD7830980B88DA9268EAEFC9BF43BD` | Flash only to the passive UB4 Monitor board; do not use on UB3. |

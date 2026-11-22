@@ -16,6 +16,13 @@ so later maintainers can identify the exact published configuration.
 - [ ] Run `python tools/maintenance/Check-Documentation.py`.
 - [ ] Confirm the README prerequisites and launch instructions work from a
   fresh Python installation, including the documented pyserial dependency.
+- [ ] For a 1541HUD executable release, build from the clean public checkout
+  with Python 3.12 and the pinned `1541hud/requirements-build.txt`; confirm
+  the EXE, build record, and third-party notices are present and the recorded
+  SHA-256 matches the binary.
+- [ ] Launch the packaged HUD executable on clean Windows x64. Record this
+  separately from drive hardware qualification; an application launch does
+  not prove USB or IEC behavior.
 
 ## Build and inspect
 
@@ -57,6 +64,8 @@ so later maintainers can identify the exact published configuration.
 - [ ] Confirm board-role assignment by serial, not COM port number.
 - [ ] Confirm Control cards, Monitor cards, scrolling/navigation, and LED
   controls behave correctly after reconnect and refresh.
+- [ ] Test the exact packaged EXE on the target Fire-24G / 1541 setup before
+  claiming that executable has been hardware-qualified.
 
 ## Publish
 

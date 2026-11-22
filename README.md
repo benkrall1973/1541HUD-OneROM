@@ -184,10 +184,12 @@ the UB3 images above contain drive-side ROM profiles, not a C64 KERNAL replaceme
    Compare the image's SHA-256 with the hash listed for that exact file in the
    release page or manifest.
 4. Install and run the Windows HUD by following
-   [1541HUD setup](1541hud/README.md). V0.8.0.58 is the current public source
-   candidate; V0.8.0.51 remains the last hardware-qualified HUD baseline. The
-   public package includes Python source and launchers, not a standalone HUD
-   executable. Apply Only needs UB3 Control USB 0.8.1.17 or newer (the current
+   [1541HUD setup](1541hud/README.md). V0.8.0.58 is the current HUD version
+   and is owner-confirmed working on the configured drive setup. Download the
+   [Windows x64 HUD executable](1541hud/releases/v0.8.0.58/1541HUD-V0.8.0.58-win-x64.exe)
+   and verify it against the adjacent build record. The packaged EXE has been
+   launch-smoke-tested here; its owner drive test is pending. Apply Only needs
+   UB3 Control USB 0.8.1.17 or newer (the current
    repository source is 0.8.1.18). See the USB power and saved-address note
    near the top of this README for the Apply Only power-cycle behavior.
 

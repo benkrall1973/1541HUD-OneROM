@@ -1,0 +1,16 @@
+{
+  "product": "1541HUD",
+  "version": "V0.8.0.58",
+  "artifact": "1541HUD-V0.8.0.58-win-x64.exe",
+  "platform": "Windows x64",
+  "bytes": 9116160,
+  "sha256": "72F7C6CF232A066B181D3BC2B72A7E2B248C6EBB06AC3C323FFF63108EC7BFCE",
+  "source_revision": "cacac87d13703e07a3135478298027f66bb7dfcb",
+  "source_sha256": "AED23702EB8FA751F3DF91316AB095A0BAA709D431EFE04C1F0185389F53D2C7",
+  "python": "Python 3.12.10",
+  "nuitka": "4.3.5",
+  "pyserial": "3.5",
+  "build_mode": "Nuitka onefile; console disabled",
+  "signed": false,
+  "hardware_tested": false
+}

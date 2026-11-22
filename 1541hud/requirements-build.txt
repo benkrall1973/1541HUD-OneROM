@@ -1,0 +1,2 @@
+# Pinned compiler used to build the standalone Windows HUD executable.
+Nuitka==4.3.5

@@ -1,7 +1,7 @@
 # 1541HUD Windows application
 
-V0.8.0.58 is the current public HUD source candidate. V0.8.0.51 remains the
-last hardware-qualified application baseline. V58 includes the V53 runtime-only
+V0.8.0.58 is the current public HUD version and has been confirmed working on
+the owner's configured drive setup. V58 includes the V53 runtime-only
 IEC address behavior and UI updates; Apply Only requires UB3 Control USB
 plugin 0.8.1.17 or newer. The current public source is 0.8.1.18. The HUD version is independent of OneROM firmware
 v0.8.1.
@@ -27,14 +27,21 @@ normal UB3 power source; the VBUS note describes saved-address behavior, not a
 need to remove USB power during ordinary use. The older v0.8.1.16 stock image
 is the V51 baseline; Apply Only needs USB 0.8.1.17 or newer.
 
-The public package includes Python source, launchers, and the optional build
-script, not a prebuilt standalone HUD EXE. `tools/onerom-v0.6.0-hud1.exe` is
-the separate OneROM CLI.
+The public package includes Python source, launchers, and a standalone Windows
+x64 executable at
+[`releases/v0.8.0.58/1541HUD-V0.8.0.58-win-x64.exe`](releases/v0.8.0.58/1541HUD-V0.8.0.58-win-x64.exe).
+Its exact SHA-256 and build provenance are in the adjacent `BUILD-INFO.json`.
+The executable was built from the public repository and launch-smoke-tested;
+the new packaged executable still needs the owner's drive test. `tools/onerom-v0.6.0-hud1.exe`
+is the separate OneROM CLI.
 
 ## Install and launch
 
-Install Python 3.12 or newer for Windows with pip, Tcl/Tk and the Python launcher. The
-automated HUD regression job uses Python 3.12. From the repository root:
+To run the prebuilt application, download the EXE above and launch it on
+Windows x64; Python is not required. Windows may show a SmartScreen or
+antivirus warning because the EXE is unsigned. Verify its SHA-256 against
+`BUILD-INFO.json` before running it. For source use or to rebuild, install
+Python 3.12 with pip, Tcl/Tk, and the Python launcher. From the repository root:
 
 ```powershell
 py -3 -m pip install -r ./1541hud/requirements.txt
@@ -76,8 +83,16 @@ the drive and capture wiring. See the [qualification boundary](../docs/VALIDATIO
 py -3 -m unittest discover -s ./1541hud/tests -v
 ```
 
-The optional `Build-1541HUD-V0.8.0.58.ps1` script packages a standalone EXE
-with Nuitka. That developer workflow additionally requires Nuitka and its
-supported Windows C/C++ compiler toolchain; neither is required to run the
-Python source. Install the runtime requirements first. This documentation
-update does not publish a newly qualified standalone HUD executable.
+The build script uses the pinned dependencies in
+`1541hud/requirements-build.txt` and Nuitka's supported Windows compiler
+toolchain. Create a Python 3.12 environment, install both requirements files,
+then run:
+
+```powershell
+py -3.12 -m pip install -r ./1541hud/requirements.txt -r ./1541hud/requirements-build.txt
+./1541hud/Build-1541HUD-V0.8.0.58.ps1
+```
+
+The script writes the EXE and `BUILD-INFO.json` under
+`1541hud/releases/v0.8.0.58/`. The bundled Python, Tcl/Tk, and pyserial
+notices are included in `THIRD-PARTY-NOTICES.txt`.

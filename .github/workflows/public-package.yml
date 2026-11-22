@@ -33,6 +33,23 @@ jobs:
         shell: pwsh
         run: python -m unittest discover -s 1541hud/tests -v
 
+      - name: Install pinned HUD build dependencies
+        shell: pwsh
+        run: python -m pip install -r 1541hud/requirements.txt -r 1541hud/requirements-build.txt
+
+      - name: Build standalone HUD executable
+        shell: pwsh
+        run: ./1541hud/Build-1541HUD-V0.8.0.58.ps1 -Python python -OutputDirectory "$env:RUNNER_TEMP/hud-v0.8.0.58"
+
+      - name: Launch smoke test standalone HUD
+        shell: pwsh
+        run: |
+          $exe = Join-Path $env:RUNNER_TEMP 'hud-v0.8.0.58/1541HUD-V0.8.0.58-win-x64.exe'
+          $process = Start-Process -FilePath $exe -PassThru
+          Start-Sleep -Seconds 8
+          if ($process.HasExited) { throw "HUD executable exited during launch smoke test (exit $($process.ExitCode))." }
+          Stop-Process -Id $process.Id -Force
+
   firmware-host-tests:
     name: Firmware protocol and cooperative wait checks
     runs-on: ubuntu-latest

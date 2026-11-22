@@ -14,6 +14,11 @@
 !firmware-monitor/inputs/*.bin
 !roms/stock-dos-2.6/drive-1541/E000-FFFF-901229-06AA.bin
 !tools/onerom-v0.6.0-hud1.exe
+!1541hud/releases/v0.8.0.58/1541HUD-V0.8.0.58-win-x64.exe
+1541hud/releases/v0.8.0.58/onerom_drive_bindings.json
+1541hud/releases/v0.8.0.58/*.build/
+1541hud/releases/v0.8.0.58/*.dist/
+1541hud/releases/v0.8.0.58/*.onefile-build/
 !C64 Configurator/releases/C64-OneROM-Configurator-r20-V1.4.31.PRG
 # Recreated Control core and local consolidation probes.
 /firmware-control/.work/

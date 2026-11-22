@@ -15,7 +15,7 @@ sets and modifications require their own qualification.
 | IEC device 8/9 | Verified configuration | SEL_A wiring required. Apply+Save was tested with USB-powered OneROM. Apply Only changes runtime SEL_A without NV2 writes; drive-only power cycle does not restore saved address if USB VBUS keeps UB3 powered. |
 | Active-low reset | Verified configuration | SEL_B through 1 kOhm to C46-positive/CR7-anode reset node. |
 | Write-protect sense/override | Verified configuration | Optional circuit; transistor and divider are mandatory where described. |
-| 1541HUD Windows operation | Supported | Assign roles by USB serial; close HUD before flashing. |
+| 1541HUD V0.8.0.58 Windows operation | Owner-confirmed working/tested on configured drive | The owner reported the application, ROM selection, and IEC address workflows working. The public x64 EXE is built from this source and launch-smoke-tested; owner testing of that packaged EXE remains pending. Assign roles by USB serial; close HUD before flashing. |
 | UB4 telemetry | Verified configuration | Requires all four documented passive capture wires. |
 | Standard two-page C/E layouts | Supported build path | Builder supplies lawful 8 KiB ROM pages and matching socket wiring. |
 | Three-page C/A/E layout | Supported build path | Requires documented 74LS138 decode wiring and builder-supplied pages. |

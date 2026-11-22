@@ -135,6 +135,10 @@ $required = @(
     '1541hud/source/1541HUD_V0.8.0.58.py',
     '1541hud/source/Run-1541HUD-V0.8.0.58.cmd',
     '1541hud/Build-1541HUD-V0.8.0.58.ps1',
+    '1541hud/requirements-build.txt',
+    '1541hud/releases/v0.8.0.58/1541HUD-V0.8.0.58-win-x64.exe',
+    '1541hud/releases/v0.8.0.58/BUILD-INFO.json',
+    '1541hud/releases/v0.8.0.58/THIRD-PARTY-NOTICES.txt',
     'releases/stock-2rom-apply-only-compose.json',
     'releases/r21-basic-no-jiffydos-compose.json',
     '1541hud/tests/test_onerom_usb.py',
@@ -161,6 +165,26 @@ $required = @(
 
 $missing = $required | Where-Object { -not (Test-Path -LiteralPath (Join-Path $PackageRoot $_)) }
 if ($missing) { throw "Public package is incomplete:`n$($missing -join "`n")" }
+
+$hudArtifactRelative = '1541hud/releases/v0.8.0.58/1541HUD-V0.8.0.58-win-x64.exe'
+$hudArtifact = Join-Path $PackageRoot $hudArtifactRelative
+$hudBuildInfo = Get-Content -Raw -LiteralPath (Join-Path $PackageRoot '1541hud/releases/v0.8.0.58/BUILD-INFO.json') | ConvertFrom-Json
+$hudBuildRequirements = Get-Content -Raw -LiteralPath (Join-Path $PackageRoot '1541hud/requirements-build.txt')
+if ($hudBuildInfo.product -ne '1541HUD' -or
+    $hudBuildInfo.version -ne 'V0.8.0.58' -or
+    $hudBuildInfo.artifact -ne [System.IO.Path]::GetFileName($hudArtifact) -or
+    $hudBuildInfo.platform -ne 'Windows x64' -or
+    $hudBuildInfo.bytes -ne (Get-Item -LiteralPath $hudArtifact).Length -or
+    $hudBuildInfo.sha256 -ne (Get-Sha256Hex -Path $hudArtifact) -or
+    $hudBuildInfo.source_revision -notmatch '^(?:[0-9a-fA-F]{40}|uncommitted-source)$' -or
+    $hudBuildInfo.source_sha256 -ne (Get-Sha256Hex -Path (Join-Path $PackageRoot '1541hud/source/1541HUD_V0.8.0.58.py')) -or
+    $hudBuildInfo.nuitka -ne '4.3.5' -or
+    $hudBuildInfo.pyserial -ne '3.5' -or
+    $hudBuildInfo.signed -ne $false -or
+    $hudBuildInfo.hardware_tested -ne $false -or
+    $hudBuildRequirements -notmatch '(?m)^Nuitka==4\.3\.5\s*$') {
+    throw '1541HUD executable, build provenance, or pinned build dependency record is inconsistent.'
+}
 
 $forbiddenDirectories = @('roms/private', 'archives', 'c64-onerom-configurator', 'outputs', 'work', 'build-kits')
 foreach ($name in $forbiddenDirectories) {
@@ -214,9 +238,11 @@ foreach ($relative in $romAssetEntries.Keys) {
 $badPaths = Get-ChildItem -LiteralPath $PackageRoot -Recurse -Force -File |
     Where-Object {
         $relative = $_.FullName.Substring($PackageRoot.Length + 1).Replace('\', '/')
+        if ($relative -match '^\.buildtools/') { return $false }
+        if ($relative -match '^1541hud/releases/v0\.8\.0\.58/1541HUD_V0\.8\.0\.58\.(?:build|dist|onefile-build)/') { return $false }
         # These are synthetic fixtures shipped in the pinned upstream source,
         # not commercial 1541/C64 ROM images. Keep the allowlist exact.
-        $relative -notmatch '^(source/one-rom-v0\.8\.1/images/test/(stub-(system|user)-plugin\.bin|0_63_(2048|4096|8192)\.rom|ff8192\.rom|rand_(0\.5KB|1KB|2KB|4KB|8KB|16KB|32KB|48KB|64KB|128KB|256KB|512KB|512KB_alt)\.rom|zero(3|8192)\.rom)|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0\.8\.1\.bin|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0\.8\.1\.17\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.32\.bin|tools/onerom-v0\.6\.0-hud1\.exe|firmware-monitor/inputs/(1541-OneROM-Bootloader-Universal-v1\.1\.0|1541-c000\.325302-01)\.bin|roms/ramboard/original-cld/ramboard\.d64|C64 Configurator/releases/C64-OneROM-Configurator-r20-V1\.4\.31\.prg|C64 Configurator/build/C64-OneROM-Configurator-r20-V1\.4\.31\.prg)$' -and
+        $relative -notmatch '^(source/one-rom-v0\.8\.1/images/test/(stub-(system|user)-plugin\.bin|0_63_(2048|4096|8192)\.rom|ff8192\.rom|rand_(0\.5KB|1KB|2KB|4KB|8KB|16KB|32KB|48KB|64KB|128KB|256KB|512KB|512KB_alt)\.rom|zero(3|8192)\.rom)|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-v0\.8\.1\.bin|releases/onerom-1541HUD-Control-UB3-fire-24-g-stock-2rom-apply-only-v0\.8\.1\.17\.bin|releases/onerom-1541HUD-Monitor-UB4-fire-24-g-v0\.8\.1\.32\.bin|tools/onerom-v0\.6\.0-hud1\.exe|1541hud/releases/v0\.8\.0\.58/1541HUD-V0\.8\.0\.58-win-x64\.exe|firmware-monitor/inputs/(1541-OneROM-Bootloader-Universal-v1\.1\.0|1541-c000\.325302-01)\.bin|roms/ramboard/original-cld/ramboard\.d64|C64 Configurator/releases/C64-OneROM-Configurator-r20-V1\.4\.31\.prg|C64 Configurator/build/C64-OneROM-Configurator-r20-V1\.4\.31\.prg)$' -and
         $relative -notmatch '^roms/(stock-dos-2\.6|speeddos-plus|dolphindos-2)/.*\.(bin|rom)$' -and
         $relative -match $forbiddenPath
     }
@@ -272,6 +298,8 @@ $textExtensions = @('.md', '.ps1', '.cmd', '.json', '.py', '.h', '.c', '.txt', '
 $forbiddenText = '(?i)(C:\\Users\\A[d]min\\|/Users/A[d]min/|8FAEB3DEC304ADCF|77920CCCA13D0FC9)'
 $textHits = foreach ($file in Get-ChildItem -LiteralPath $PackageRoot -Recurse -Force -File) {
     $relative = $file.FullName.Substring($PackageRoot.Length + 1).Replace('\', '/')
+    if ($relative -match '^\.buildtools/') { continue }
+    if ($relative -match '^1541hud/releases/v0\.8\.0\.58/1541HUD_V0\.8\.0\.58\.(?:build|dist|onefile-build)/') { continue }
     if ($relative -eq 'tools/maintenance/Test-Public-Package.ps1') { continue }
     if ($textExtensions -notcontains $file.Extension) { continue }
     Select-String -LiteralPath $file.FullName -Pattern $forbiddenText | ForEach-Object {
