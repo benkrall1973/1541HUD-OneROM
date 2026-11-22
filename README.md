@@ -12,6 +12,17 @@ telemetry with direct Control-board actions, so it can show what the drive is
 doing while giving you a place to change its supported settings. The Monitor
 is optional: ROM serving and Control functions run on UB3 without UB4.
 
+> **USB power and saved IEC address:** USB host +5 V at the Fire-24G USB port
+> is a normal way to power UB3; that voltage alone is not a fault or a hazard
+> to the 1541. It can, however, keep UB3 powered while the drive is switched
+> off. After **Apply Only**, a 1541-only power cycle therefore may leave the
+> temporary IEC address in effect instead of reloading the saved address. To
+> reload the saved address while keeping USB data connected, either power-cycle
+> UB3 too, or use a data cable/adapter that passes D+/D− and ground but blocks
+> host VBUS (+5 V). **Apply and Save** stores the address in NV2 and performs a
+> controlled OneROM reboot. This is a power-state behavior, not a requirement
+> to remove USB power during normal use.
+
 ## What 1541HUD does
 
 ### Monitor the drive
@@ -124,9 +135,18 @@ You can make private images from ROMs and tools you are licensed to use. The
 public repository includes preparation notes and project-authored material,
 but **does not include licensed JiffyDOS ROMs or a ready-made JiffyDOS image**.
 JiffyDOS fast serial transfers need the matching licensed JiffyDOS C64 KERNAL.
-S-JiffyDOS uses RAMBoard shadow RAM at `$8000–$9FFF`; software that writes to
-that range while S-JiffyDOS is active can corrupt its running code. See the
-[JiffyDOS](roms/jiffydos/README.md), [S-JiffyDOS](roms/s-jiffydos/README.md),
+S-JiffyDOS uses an 8 KiB RAMBoard shadow window at `$8000–$9FFF`; OneROM does
+not provide this drive-side RAM. The documented S-JiffyDOS setup targets the
+original CLD RAMBoard design. The
+[original schematic](https://web.archive.org/web/20240522013822/http://d81.de/CLD-RAMBOard/RAMBOard-41.shtml)
+and [installation manual](roms/ramboard/original-cld/RAMBOard-1541-Installation-1.1.pdf)
+are preserved for reference, and a [retailer listing](https://www.protovision.games/shop/product_info.php?products_id=198)
+separates 1541/1541C and 1541-II variants. Check the listed
+model, availability, and compatibility with your exact drive before buying;
+the installation can require invasive board work. RAMBoard ][ is a separate
+1541-II-oriented design and is not assumed compatible. Software that writes
+to `$8000–$9FFF` while S-JiffyDOS is active can corrupt its running code. See
+the [JiffyDOS](roms/jiffydos/README.md), [S-JiffyDOS](roms/s-jiffydos/README.md),
 and [RAMBoard](roms/ramboard/README.md) notes.
 
 Browse the [ROM and KERNAL library](roms/README.md) for included pages, source,
@@ -168,9 +188,8 @@ the UB3 images above contain drive-side ROM profiles, not a C64 KERNAL replaceme
    candidate; V0.8.0.51 remains the last hardware-qualified HUD baseline. The
    public package includes Python source and launchers, not a standalone HUD
    executable. Apply Only needs UB3 Control USB 0.8.1.17 or newer (the current
-   repository source is 0.8.1.18). For a USB-connected power cycle to reload
-   the saved address, UB3 must lose power too: use a data cable that passes
-   D+/D− and ground while blocking host +5 V, or power-cycle UB3 separately.
+   repository source is 0.8.1.18). See the USB power and saved-address note
+   near the top of this README for the Apply Only power-cycle behavior.
 
 ## Build or customize
 
@@ -199,5 +218,6 @@ The supported base is the official OneROM v0.8.1 release. See the
 [source provenance](source/one-rom-v0.8.1/1541HUD-SOURCE.json),
 [contribution guide](CONTRIBUTING.md), and [safety notes](SECURITY.md).
 
-Disconnect power before changing wiring. Do not connect 5 V drive signals
-directly to 3.3 V OneROM GPIO. Verify the board role and serial before flashing.
+Disconnect drive power before changing wiring. Do not connect 5 V drive
+signals directly to 3.3 V OneROM GPIO. Verify the board role and serial before
+flashing.

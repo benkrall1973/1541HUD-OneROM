@@ -16,6 +16,21 @@ The original documents identify CLD copyright. They are kept with their
 original filenames and attribution; this repository's MIT license does not
 relicense them.
 
+## Finding a compatible board
+
+The [Protovision RAMBoard listing](https://www.protovision.games/shop/product_info.php?products_id=198)
+is a possible retail source. It lists separate variants for 1541/1541C and
+1541-II drives; check the current stock and select a variant for the exact
+drive and board revision. The 1541C installation may require professional
+electronics work. The archived [original CLD reference](https://web.archive.org/web/20240522013822/http://d81.de/CLD-RAMBOard/RAMBOard-41.shtml)
+and PDFs above help identify the original design, but are historical documents,
+not a confirmation that any current listing or installation fits your drive.
+
+The [RAMBoard ][ project](https://github.com/ytmytm/1541-RAMBOardII) is a
+separate 1541-II-oriented DIY design, not a drop-in compatibility substitute
+for the original CLD board or a qualified S-JiffyDOS setup. See the revision
+warning below before considering it.
+
 The manual describes the test command as `LOAD"RAMBOARD TEST",8,1` followed
 by `RUN`. Run it only with a compatible original CLD RAMBoard and a known-safe
 DOS profile. **Do not run RAMBoard utilities while the S-JiffyDOS shadow

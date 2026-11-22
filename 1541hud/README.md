@@ -22,8 +22,10 @@ Apply Only changes the temporary IEC address through `ROMIEC_NOW` without
 writing NV2. The temporary address remains while UB3 stays powered. If a
 1541-only power cycle must also restart UB3 and reload the saved address while
 USB data stays connected, use a data-capable cable with host VBUS +5 V blocked,
-or power-cycle UB3 explicitly. The older v0.8.1.16 stock image is the V51
-baseline; Apply Only needs USB 0.8.1.17 or newer.
+or power-cycle UB3 explicitly. USB host +5 V at the Fire-24G USB port is a
+normal UB3 power source; the VBUS note describes saved-address behavior, not a
+need to remove USB power during ordinary use. The older v0.8.1.16 stock image
+is the V51 baseline; Apply Only needs USB 0.8.1.17 or newer.
 
 The public package includes Python source, launchers, and the optional build
 script, not a prebuilt standalone HUD EXE. `tools/onerom-v0.6.0-hud1.exe` is
