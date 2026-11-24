@@ -2,16 +2,16 @@
   "name": "1541HUD Windows CLI",
   "upstream_cli": "0.6.0",
   "distribution": "hud1",
-  "source_commit": "f209f61f29f990c474d9db1de91012b854e46ef1",
+  "source_commit": "c01640a9e2cb717e4387af6c1474192c527c9c16",
   "upstream": "1b189260d85a5feced19e969399986f5f1d1cabe",
   "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)",
   "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)",
   "target": "x86_64-pc-windows-msvc",
   "overlay_sha256": "1C57B31237E2EEC2A1DEB78D18D677559464FE038906897641E272D95C379F1A",
-  "source_hardening_sha256": "48737B7726114F4C3C5C9DF34003A25600B506DCFAFA482A2A3ECAB8A456D5BF",
-  "lock_sha256": "745B99CB850984B9D0C4BDCB74E6948997D3D453F5AA6A7AB4C47D158D5315FC",
+  "source_hardening_sha256": "AD252142E295458CBE59224386708DDCB041FE2FA1454C8DE4EAD6217D61FA45",
+  "lock_sha256": "D64765DF47EB4613500300F32765FD320552630B7873F3E947C0384ED173257C",
   "file": "onerom-v0.6.0-hud1.exe",
-  "bytes": 7900672,
-  "sha256": "1F10BE6F6C7BE4AF628D29376CB5E0C19E28C7C57193135CEDECB0F578DA2DAD",
-  "scope": "Windows release build, native CLI/ZIP regressions and offline inspection of all three checked-in Fire-24G images; no hardware programmed."
+  "bytes": 7899136,
+  "sha256": "74CBA3C19188E6E2AC6B92DD4012E1DA9B561BE00DF16FB785A81C066D4BF3BE",
+  "scope": "Windows MSVC release build from the supported source with Rust/Cargo 1.99.0. Compile only; no local regression suites or hardware programming performed."
 }
