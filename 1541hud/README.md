@@ -1,10 +1,9 @@
 # 1541HUD Windows application
 
-V0.8.0.58 is the current public HUD version and has been confirmed working on
-the owner's configured drive setup. V58 includes the V53 runtime-only
+V0.8.0.58 is the current public HUD version. V58 includes the V53 runtime-only
 IEC address behavior and UI updates; Apply Only requires UB3 Control USB
-plugin 0.8.1.17 or newer. The current public source is 0.8.1.18. The HUD version is independent of OneROM firmware
-v0.8.1.
+plugin 0.8.1.17 or newer. The current public source is 0.8.1.18. The HUD
+version is independent of OneROM firmware v0.8.1.
 
 The startup ROM picker shows profile names without slot numbers while
 preserving the underlying slot index for Save and Apply. The ROM image defines

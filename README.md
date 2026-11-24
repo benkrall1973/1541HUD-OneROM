@@ -184,12 +184,14 @@ the UB3 images above contain drive-side ROM profiles, not a C64 KERNAL replaceme
    Compare the image's SHA-256 with the hash listed for that exact file in the
    release page or manifest.
 4. Install and run the Windows HUD by following
-   [1541HUD setup](1541hud/README.md). V0.8.0.58 is the current HUD version
-   and is owner-confirmed working on the configured drive setup. Download the
+   [1541HUD setup](1541hud/README.md). V0.8.0.58 is the current HUD version.
+   The owner confirmed the packaged EXE starts, its menus are navigable, and
+   ROM/IEC changes return applied/saved feedback on a loose Fire-24G OneROM.
+   Drive-mounted behavior and media operations on this exact EXE remain
+   untested. Download the
    [Windows x64 HUD executable](1541hud/releases/v0.8.0.58/1541HUD-V0.8.0.58-win-x64.exe)
-   and verify it against the adjacent build record. The packaged EXE has been
-   launch-smoke-tested, and the owner confirmed the packaged EXE starts and
-   its menus are navigable; its drive-control test is pending. Apply Only needs
+   and verify it against the adjacent build record. CI also launch-smoke-tests
+   the packaged EXE. Apply Only needs
    UB3 Control USB 0.8.1.17 or newer (the current
    repository source is 0.8.1.18). See the USB power and saved-address note
    near the top of this README for the Apply Only power-cycle behavior.
