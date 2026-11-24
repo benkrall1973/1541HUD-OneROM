@@ -15,7 +15,7 @@ sets and modifications require their own qualification.
 | IEC device 8/9 | Verified configuration | SEL_A wiring required. Apply+Save was tested with USB-powered OneROM. Apply Only changes runtime SEL_A without NV2 writes; drive-only power cycle does not restore saved address if USB VBUS keeps UB3 powered. |
 | Active-low reset | Verified configuration | SEL_B through 1 kOhm to C46-positive/CR7-anode reset node. |
 | Write-protect sense/override | Verified configuration | Optional circuit; transistor and divider are mandatory where described. |
-| 1541HUD V0.8.0.58 Windows operation | Owner-confirmed working/tested on configured drive | The owner confirmed the packaged x64 EXE starts and its menus are navigable. ROM-selection and IEC workflows were reported working on the source app; testing those drive-control workflows on this exact packaged EXE remains pending. Assign roles by USB serial; close HUD before flashing. |
+| 1541HUD V0.8.0.58 Windows operation | Owner-confirmed app and OneROM control test; drive integration pending | The owner confirmed the packaged x64 EXE starts, its menus are navigable, and ROM/IEC changes return applied/saved feedback on a loose Fire-24G OneROM. Drive-mounted behavior and media operations on this exact EXE remain untested. Assign roles by USB serial; close HUD before flashing. |
 | UB4 telemetry | Verified configuration | Requires all four documented passive capture wires. |
 | Standard two-page C/E layouts | Supported build path | Builder supplies lawful 8 KiB ROM pages and matching socket wiring. |
 | Three-page C/A/E layout | Supported build path | Requires documented 74LS138 decode wiring and builder-supplied pages. |

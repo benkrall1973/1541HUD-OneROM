@@ -31,9 +31,12 @@ The public package includes Python source, launchers, and a standalone Windows
 x64 executable at
 [`releases/v0.8.0.58/1541HUD-V0.8.0.58-win-x64.exe`](releases/v0.8.0.58/1541HUD-V0.8.0.58-win-x64.exe).
 Its exact SHA-256 and build provenance are in the adjacent `BUILD-INFO.json`.
-The executable was built from the public repository and launch-smoke-tested;
-the new packaged executable still needs the owner's drive test. `tools/onerom-v0.6.0-hud1.exe`
-is the separate OneROM CLI.
+The executable was built from the public repository. The owner confirmed that
+it launches, its menus are navigable, and ROM/IEC changes return applied/saved
+feedback on a loose Fire-24G OneROM. Drive-mounted behavior and media operations
+remain untested on this exact packaged executable. The build record's
+`hardware_tested` field therefore remains false for full drive qualification.
+`tools/onerom-v0.6.0-hud1.exe` is the separate OneROM CLI.
 
 ## Install and launch
 
