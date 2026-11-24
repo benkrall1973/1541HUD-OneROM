@@ -188,7 +188,8 @@ the UB3 images above contain drive-side ROM profiles, not a C64 KERNAL replaceme
    and is owner-confirmed working on the configured drive setup. Download the
    [Windows x64 HUD executable](1541hud/releases/v0.8.0.58/1541HUD-V0.8.0.58-win-x64.exe)
    and verify it against the adjacent build record. The packaged EXE has been
-   launch-smoke-tested here; its owner drive test is pending. Apply Only needs
+   launch-smoke-tested, and the owner confirmed the packaged EXE starts and
+   its menus are navigable; its drive-control test is pending. Apply Only needs
    UB3 Control USB 0.8.1.17 or newer (the current
    repository source is 0.8.1.18). See the USB power and saved-address note
    near the top of this README for the Apply Only power-cycle behavior.

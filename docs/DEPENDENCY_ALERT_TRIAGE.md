@@ -1,6 +1,6 @@
 # Dependency-alert triage
 
-The active source package now includes the supported host security fixes. The complete original upstream snapshot is recoverable from the historical tag/private backup; unsupported Studio and Studio v2 prototype build trees are excluded from the current package. This fixes or removes affected dependency paths rather than dismissing alerts.
+The active source package includes the supported host security fixes. The complete original upstream snapshot is recoverable from the historical tag/private backup; unsupported Studio and Studio v2 prototype build trees are excluded from the current package. This fixes or removes affected dependency paths rather than dismissing alerts.
 
 ## Pre-cleanup GitHub inventory
 
@@ -14,7 +14,7 @@ The four critical ZIP entries describe the same advisory in four dependency file
 
 ## Validation and scope
 
-The active lock was pruned without adding or changing retained package versions at the time of the November 10 cleanup. On November 12, a newly issued rustix unsoundness advisory affected the pinned 1.1.4; the supported lock and bundled Windows CLI were updated to patched rustix 1.1.6. CI run [#52](https://github.com/benkrall1973/1541HUD-OneROM/actions/runs/43277779018) passed all five jobs, including the audit, source verification, Windows CLI regressions, firmware checks and ARM builds. The audit rejects every vulnerability, yanked package and unsoundness record across that workspace. It does not suppress alerts or use an advisory ignore list. Four unmaintained-package warnings remain outside the CLI normal/build graph; maintenance warnings are not a guarantee of future support.
+The active lock was pruned without adding or changing retained package versions at the time of the November 10 cleanup. On November 12, a rustix unsoundness advisory affected the pinned 1.1.4; the supported lock and bundled Windows CLI were updated to patched rustix 1.1.6. CI run [#52](https://github.com/benkrall1973/1541HUD-OneROM/actions/runs/43277779018) passed all five jobs at that point. On November 24, RUSTSEC-2026-0592 affected `url` 2.5.8, so the supported lock was advanced to `url` 2.5.9 and `form_urlencoded` 1.2.3. The audit scans the complete lock, reports all findings, and fails on vulnerabilities, yanked packages, or unsoundness in the supported CLI normal/build graph. Findings outside that graph remain visible in the report but do not fail this host-only gate. No advisory ignore list is used. Maintenance warnings are not a guarantee of future support.
 
 The RP2350 firmware does not embed the Rust ZIP/TLS libraries. That separation does not justify ignoring an affected build tool or distributing a vulnerable host executable.
 
@@ -25,7 +25,7 @@ Use the current supported source and documented wrappers, trusted ROM/configurat
 1. Record the advisory, affected version and dependency path.
 2. Determine whether it affects firmware runtime, supported host builds, or excluded material.
 3. Update the actual active manifests/lockfile or remove an unused unsupported build tree while preserving its provenance.
-4. Run dependency audit, source verification, relevant regressions and full role builds.
+4. Run the dependency audit, source verification, relevant regressions and full role builds; confirm the advisory is absent from the supported target graph.
 5. Confirm GitHub's refreshed dependency graph and keep historical release status explicit.
 
 See [host-source security policy](HOST_DEPENDENCY_OVERLAY.md) and [source provenance](../source/one-rom-v0.8.1/1541HUD-SOURCE.json).

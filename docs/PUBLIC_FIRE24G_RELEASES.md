@@ -61,7 +61,8 @@ standalone Windows x64 application is
 [`1541HUD-V0.8.0.58-win-x64.exe`](../1541hud/releases/v0.8.0.58/1541HUD-V0.8.0.58-win-x64.exe).
 Use its adjacent `BUILD-INFO.json` to verify the SHA-256 and inspect source and
 toolchain provenance. It was built and launch-smoke-tested from the public
-checkout; testing this packaged executable on the owner's drive remains
+checkout. The owner confirmed the packaged EXE starts and its menus are
+navigable; testing its drive-control workflows on the owner's hardware remains
 pending. It is unsigned, so Windows may display a SmartScreen or antivirus
 warning. Python is not needed to run it. Third-party license notices are
 included alongside the binary.
