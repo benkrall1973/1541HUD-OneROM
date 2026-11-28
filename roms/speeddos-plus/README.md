@@ -9,6 +9,19 @@ parallel cable. With IEC only, the drive may still operate, but that does not
 exercise the parallel fast path. The original host KERNAL is included as
 `source-images/kernal_en_sd`.
 
+## VIA compatibility test
+
+On a standard longboard 1541 (250446 PCB, Alps mechanism) using the matching
+SpeedDOS+ 2.7 35-track drive ROM and C64 KERNAL with Sven's parallel adapter,
+Bruce Lee loaded in about 30 seconds with the original 6522 VIA installed.
+The WDC `W65C22N6TPG-14` did not work in that same SpeedDOS setup; replacing it
+with the original 6522 restored successful parallel loading. Use the original
+6522 for this tested configuration rather than the W65C22N6TPG-14. This is a
+setup-specific hardware result, not a universal claim about every W65C22N or
+every 1541 adapter. Because the chip swap also reseats the adapter connection,
+the result implicates the replacement VIA or its contact but does not isolate
+the electrical mechanism.
+
 ## Build the OneROM page set
 
 The four original, prebuilt files from the supplied SpeedDOS+ archive are
